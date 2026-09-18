@@ -10,7 +10,9 @@ def get_logger(name:str):
         )
         
         name = name.join("-logger")
-        logger = 
+        logger = logging.getLogger(name)
+        
+        return logger
     
     except ValueError as e:
         print (f"Value error in {name}: {e}")
