@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from httpx import AsyncClient
 from configs.logger import get_logger
 from schema.job_category import JobCategory
+from schema.job_summary import JobSummary
 from sources.jobsource import JobSource
 
 logger = get_logger("top-job-source")
@@ -135,7 +136,24 @@ class TopJobSource(JobSource):
                     "html.parser"
                 )
                 
-                print(soup.prettify())
+            jobs:list[JobSummary] = []
+            
+            for row in soup.select("tr[onclick^='createAlert']"):
+                
+                columns = row.find_all("td")
+                
+                if len(columns) < 7:
+                    continue
+                
+                title_element = columns[2].find("h1")
+                company_elemt = columns[2].find("h1")
+                
+                if not title_element or not company_elemt:
+                    continue
+                
+                
+                
+                
                 
 
         except Exception:

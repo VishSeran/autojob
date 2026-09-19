@@ -7,7 +7,10 @@ from sources.topjob_source import TopJobSource
 async def main():
     
     topjob = TopJobSource()
-    await topjob.search_job("software engineer","sri lanka","IT-SWare/DB/QA/Web/Graphics/GIS",)
+    response = await topjob.search_job("Network engineer","sri lanka","IT-HWare/Networks/Systems")
+    
+    with open("job_details", "w") as file:
+        file.write(response)
     
 if __name__ == "__main__":
     
