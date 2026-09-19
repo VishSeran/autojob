@@ -39,8 +39,21 @@ class MCPServer:
                 """
             )
             
+            self.register_tools()
+            
         except Exception:
             logger.exception("Error in mcp server initialize")
+            raise
+        
+        
+    def register_tools(self):
+        
+        try:
+            
+            pass
+            
+        except Exception:
+            logger.exception('Error in regiter tools')
             raise
     
     
