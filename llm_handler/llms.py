@@ -48,4 +48,25 @@ class LLMHandler:
     def get_llm(self):
         
         return self.llm
+    
+    async def get_llm_response(self, query):
+        
+        
+        try:
+            
+            if not query:
+                raise ValueError("Query is missing")
+            
+            response = await self.llm.ainvoke(query)
+            logger.info("Response is fetched successfully")
+            
+            return response
+            
+        except ValueError:
+            logger.exception("Value error in get llm response")
+            raise
+        
+        except Exception:
+            logger.exception("Error in get llm response")
+            raise
             
