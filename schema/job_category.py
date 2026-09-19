@@ -1,9 +1,8 @@
 from typing import Literal
 from pydantic import BaseModel
 
-class JobCategory(BaseModel):
-    
-    JobCategory = Literal[
+
+JobCategory = Literal[
             "IT-SWare/DB/QA/Web/Graphics/GIS",
             "IT-HWare/Networks/Systems",
             "Accounting/Auditing/Finance",
@@ -35,5 +34,8 @@ class JobCategory(BaseModel):
             "International Development",
             "KPO/BPO",
             "Imports/Exports",
-            "All Vacancies",
-]
+            "All Vacancies",]
+            
+class JobCategory(BaseModel):
+    
+    category: JobCategory

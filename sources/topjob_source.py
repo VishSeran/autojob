@@ -1,20 +1,23 @@
 from bs4 import BeautifulSoup
-
+from httpx import AsyncClient
 from configs.logger import get_logger
 from schema.job_category import JobCategory
+from schema.job_summary import JobSummary
 from sources.jobsource import JobSource
 
 logger = get_logger("top-job-source")
 
 class TopJobSource(JobSource):
     
-    async def search_job(self, keyword, location, category:JobCategory, limit = 10):
+    async def search_job(self, keyword:str, location, category:JobCategory, limit:int | None = 10):
         
         try:
             params = {
                 "FA": None,
                 "jst": "OPEN"
             }
+            
+            topjob_url = "https://www.topjobs.lk/applicant/vacancybyfunctionalarea.jsp"
             
             match category:
                 
@@ -115,11 +118,98 @@ class TopJobSource(JobSource):
                     params['FA'] = None
             
             
+            async with AsyncClient(
+                follow_redirects=True,
+                timeout=20,
+            ) as client:
+                
+                response = await client.get(topjob_url, params=params)
+                response.raise_for_status()
+                
+                logger.info(
+                    "Fetching TopJobs URL: %s",
+                    response.request.url
+                )
+                
+                soup = BeautifulSoup(
+                    response.text,
+                    "html.parser"
+                )
+                
+            jobs:list[JobSummary] = []
             
-            
-            
+            for row in soup.select("tr[onclick^='createAlert']"):
+                
+                columns = row.find_all("td")
+                
+                if len(columns) < 7:
+                    continue
+                
+                title_element = columns[2].find("h1")
+                company_element = columns[2].find("h1")
+                
+                if not title_element or not company_element:
+                    continue
+                
+                title = title_element.get_text(
+                    " ",
+                    strip=True
+                )
+                
+                company_name = company_element.get_text(
+                    " ",
+                    strip=True
+                )
+                
+                starting_date = columns[4].get_text(
+                    " ",
+                    strip=True
+                )
+                
+                closing_date = columns[5].get_text(
+                    " ",
+                    strip=True
+                )
+                
+                job_location = columns[6].get_text(
+                    " ",
+                    strip=True
+                )
+                
+                image_id = columns[2].find_all("span")[0].get_text(
+                    " ",
+                    strip=True
+                )
+                
+                if keyword.lower() not in title.lower():
+                    continue
+                
+                if job_location.lower() not in location.lower():
+                    continue
+                
+                
+                job = JobSummary(
+                    job_title=title,
+                    company_name=company_name,
+                    image_number=image_id,
+                    starting_date=starting_date,
+                    closing_date=closing_date,
+                    location=job_location
+                )
+                
+                jobs.append(job)
+                logger.info("Job has appended to the Jobs list successfully")
+                
+                
+                if limit and len(jobs) >= limit:
+                    break
+                
+                return jobs
 
         except Exception:
             logger.exception('Error in serach job in top job')
             raise
             
+            
+    async def get_job_details(self, job_url):
+        pass
