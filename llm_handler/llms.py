@@ -54,6 +54,14 @@ class LLMHandler:
         
         try:
             
+            if not query:
+                raise ValueError("Query is missing")
+            
+            response = await self.llm.ainvoke(query)
+            logger.info("Response is fetched successfully")
+            
+            return response
+            
         except ValueError:
             logger.exception("Value error in get llm response")
             raise
