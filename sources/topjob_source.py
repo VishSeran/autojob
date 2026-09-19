@@ -9,7 +9,7 @@ logger = get_logger("top-job-source")
 
 class TopJobSource(JobSource):
     
-    async def search_job(self, keyword, location, category:JobCategory, limit = 10):
+    async def search_job(self, keyword:str, location, category:JobCategory, limit = 10):
         
         try:
             params = {
@@ -146,10 +146,62 @@ class TopJobSource(JobSource):
                     continue
                 
                 title_element = columns[2].find("h1")
-                company_elemt = columns[2].find("h1")
+                company_element = columns[2].find("h1")
                 
-                if not title_element or not company_elemt:
+                if not title_element or not company_element:
                     continue
+                
+                title = title_element.get_text(
+                    " ",
+                    strip=True
+                )
+                
+                company_name = company_element.get_text(
+                    " ",
+                    strip=True
+                )
+                
+                starting_date = columns[4].get_text(
+                    " ",
+                    strip=True
+                )
+                
+                closing_date = columns[5].get_text(
+                    " ",
+                    strip=True
+                )
+                
+                job_location = columns[6].get_text(
+                    " ",
+                    strip=True
+                )
+                
+                image_id = columns[2].find_all("span")[0].get_text(
+                    " ",
+                    strip=True
+                )
+                
+                if keyword.lower() not in title.lower():
+                    continue
+                
+                if job_location.lower() not in location.lower():
+                    continue
+                
+                
+                job = JobSummary(
+                    job_title=title,
+                    company_name=company_name,
+                    image_number=image_id,
+                    starting_date=starting_date,
+                    closing_date=closing_date,
+                    location=job_location
+                )
+                
+                jobs.append(job)
+                logger.info("Job has appended to the Jobs list successfully")
+                
+                
+                
                 
                 
                 
