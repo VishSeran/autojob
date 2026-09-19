@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-
+from httpx import AsyncClient
 from configs.logger import get_logger
 from schema.job_category import JobCategory
 from sources.jobsource import JobSource
@@ -15,6 +15,8 @@ class TopJobSource(JobSource):
                 "FA": None,
                 "jst": "OPEN"
             }
+            
+            topjob_url = "https://www.topjobs.lk/applicant/vacancybyfunctionalarea.jsp"
             
             match category:
                 
@@ -115,11 +117,31 @@ class TopJobSource(JobSource):
                     params['FA'] = None
             
             
-            
-            
-            
+            async with AsyncClient(
+                follow_redirects=True,
+                timeout=20,
+            ) as client:
+                
+                response = await client.get(topjob_url, params=params)
+                response.raise_for_status()
+                
+                logger.info(
+                    "Fetching TopJobs URL: %s",
+                    response.request.url
+                )
+                
+                soup = BeautifulSoup(
+                    response.text,
+                    "html.parser"
+                )
+                
+                print(soup.prettify())
+                
 
         except Exception:
             logger.exception('Error in serach job in top job')
             raise
             
+            
+    async def get_job_details(self, job_url):
+        pass
