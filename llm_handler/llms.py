@@ -48,4 +48,17 @@ class LLMHandler:
     def get_llm(self):
         
         return self.llm
+    
+    async def get_llm_response(self, query):
+        
+        
+        try:
+            
+        except ValueError:
+            logger.exception("Value error in get llm response")
+            raise
+        
+        except Exception:
+            logger.exception("Error in get llm response")
+            raise
             
