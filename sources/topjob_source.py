@@ -9,7 +9,7 @@ logger = get_logger("top-job-source")
 
 class TopJobSource(JobSource):
     
-    async def search_job(self, keyword:str, location, category:JobCategory, limit = 10):
+    async def search_job(self, keyword:str, location, category:JobCategory, limit:int | None = 10):
         
         try:
             params = {
@@ -201,12 +201,10 @@ class TopJobSource(JobSource):
                 logger.info("Job has appended to the Jobs list successfully")
                 
                 
+                if limit and len(jobs) >= limit:
+                    break
                 
-                
-                
-                
-                
-                
+                return jobs
 
         except Exception:
             logger.exception('Error in serach job in top job')
