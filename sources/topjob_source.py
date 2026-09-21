@@ -211,5 +211,10 @@ class TopJobSource(JobSource):
             raise
             
             
-    async def get_job_details(self, job_url):
-        pass
+    async def get_job_details(self, job_img_no):
+        
+        try:
+            
+        except Exception:
+            logger.exception("Error in get job details")
+            raise
