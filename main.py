@@ -1,5 +1,5 @@
 import asyncio
-
+import json
 from sources.topjob_source import TopJobSource
 
 
@@ -7,10 +7,10 @@ from sources.topjob_source import TopJobSource
 async def main():
     
     topjob = TopJobSource()
-    response = await topjob.search_job("Network engineer","sri lanka","IT-HWare/Networks/Systems")
+    response = await topjob.search_job("software engineer","IT-SWare/DB/QA/Web/Graphics/GIS")
     
-    with open("job_details", "w") as file:
-        file.write(response)
+    
+        
     
 if __name__ == "__main__":
     
