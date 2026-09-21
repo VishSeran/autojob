@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 from httpx import AsyncClient
+from configs.helper_functions import normalize_text
 from configs.logger import get_logger
+
 from schema.job_category import JobCategory
 from schema.job_summary import JobSummary
 from sources.jobsource import JobSource
@@ -9,7 +11,7 @@ logger = get_logger("top-job-source")
 
 class TopJobSource(JobSource):
     
-    async def search_job(self, keyword:str, location, category:JobCategory, limit:int | None = 10):
+    async def search_job(self, keyword:str, category:JobCategory,location = None, limit:int | None = 10):
         
         try:
             params = {
@@ -114,7 +116,7 @@ class TopJobSource(JobSource):
                 case "Imports/Exports":
                     params['FA'] = "IME"
                     
-                case "All Vacancies":
+                case "All_Vacancies":
                     params['FA'] = None
             
             
@@ -138,14 +140,23 @@ class TopJobSource(JobSource):
                 
             jobs:list[JobSummary] = []
             
-            for row in soup.select("tr[onclick^='createAlert']"):
+            table = soup.find("table",id="table")
+            
+            if not table:
+                logger.warning("Jobs table not found")
+                return []
+            
+            rows = table.select("tbody > tr")
+            logger.info("Found %d job rows", len(rows))
+            
+            for row in rows:
                 
                 columns = row.find_all("td")
                 
                 if len(columns) < 7:
                     continue
                 
-                title_element = columns[2].find("h1")
+                title_element = columns[2].find("h2")
                 company_element = columns[2].find("h1")
                 
                 if not title_element or not company_element:
@@ -181,10 +192,13 @@ class TopJobSource(JobSource):
                     strip=True
                 )
                 
-                if keyword.lower() not in title.lower():
+                normalized_keyword = normalize_text(keyword)
+                normalized_title = normalize_text(title)
+                
+                if normalized_keyword not in normalized_title:
                     continue
                 
-                if job_location.lower() not in location.lower():
+                if location and (job_location.lower() not in location.lower()):
                     continue
                 
                 
@@ -201,10 +215,10 @@ class TopJobSource(JobSource):
                 logger.info("Job has appended to the Jobs list successfully")
                 
                 
-                if limit and len(jobs) >= limit:
+                if limit and (len(jobs) >= limit):
                     break
                 
-                return jobs
+            return jobs
 
         except Exception:
             logger.exception('Error in serach job in top job')
@@ -214,6 +228,9 @@ class TopJobSource(JobSource):
     async def get_job_details(self, job_img_no):
         
         try:
+            
+            #job_url = 
+            pass
             
         except Exception:
             logger.exception("Error in get job details")
