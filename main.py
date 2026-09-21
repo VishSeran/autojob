@@ -7,12 +7,10 @@ from sources.topjob_source import TopJobSource
 async def main():
     
     topjob = TopJobSource()
-    response = await topjob.search_job("full stack","All_Vacancies")
+    response = await topjob.search_job("software engineer","IT-SWare/DB/QA/Web/Graphics/GIS")
     
     
-    for job in response:
-        with open("job_details", "w") as file:
-            file.write(json.dumps(job.model_dump()))
+        
     
 if __name__ == "__main__":
     

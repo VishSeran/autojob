@@ -140,16 +140,16 @@ class TopJobSource(JobSource):
                 
             jobs:list[JobSummary] = []
             
-            table = soup.find("table",id="table")
+            # table = soup.find("table",id="table")
             
-            if not table:
-                logger.warning("Jobs table not found")
-                return []
+            # if not table:
+            #     logger.warning("Jobs table not found")
+            #     return []
             
-            rows = table.select("tbody > tr")
-            logger.info("Found %d job rows", len(rows))
+            # rows = table.select("tbody > tr")
+            # logger.info("Found %d job rows", len(rows))
             
-            for row in rows:
+            for row in soup.select("tr[onclick^='createAlert']"):
                 
                 columns = row.find_all("td")
                 
@@ -206,9 +206,9 @@ class TopJobSource(JobSource):
                     job_title=title,
                     company_name=company_name,
                     image_number=image_id,
-                    starting_date=starting_date,
-                    closing_date=closing_date,
-                    location=job_location
+                    starting_date=starting_date if starting_date else "Not Mentioned",
+                    closing_date=closing_date if closing_date else "Not Mentioned",
+                    location=job_location if job_location else "Not Mentioned"
                 )
                 
                 jobs.append(job)
@@ -218,6 +218,34 @@ class TopJobSource(JobSource):
                 if limit and (len(jobs) >= limit):
                     break
                 
+            text = "\n\n"    
+            for job in jobs:
+                
+                job = job.model_dump()
+                
+                job_title: str = job.get("job_title", "") 
+                company_name: str = job.get("company_name", "")
+                image_number: int = job.get("image_number", "")
+                
+                starting_date: str = job.get("starting_date", "")
+                closing_date: str = job.get("closing_date", "")
+                location: str = job.get("location", "")
+                
+                
+                job_text = f"""
+                    job_title: {job_title}
+                    company_name: {company_name}
+                    image_number: {image_number}
+                    starting_date: {starting_date}
+                    closing_date: {closing_date}
+                    location: {location}
+                """
+                
+                text += job_text
+                
+            with open("job_details.txt", "w") as file:
+                file.write(text)
+            
             return jobs
 
         except Exception:
