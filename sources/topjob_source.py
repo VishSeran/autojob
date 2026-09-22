@@ -135,10 +135,10 @@ class TopJobSource(JobSource):
                     response.request.url
                 )
                 
-                soup = BeautifulSoup(
-                    response.text,
-                    "html.parser"
-                )
+            soup = BeautifulSoup(
+                response.text,
+                "html.parser"
+            )
                 
             jobs:list[TopJobSummary] = []
             
@@ -289,6 +289,8 @@ class TopJobSource(JobSource):
             
             if not jobs:
                 raise ValueError("Jobs are missing")
+            
+            total_images_urls:dict = {}
         
             for job in jobs:
                 job = job.model_dump()
@@ -300,9 +302,63 @@ class TopJobSource(JobSource):
                 jc_param: str = job.get("jc","")
                 ec_param: str = job.get("ec", "")
                 
-                if not 
+                if not rid_param or not ac_param or not jc_param or not ec_param:
+                    continue
                 
+                params = {
+                    "rid": rid_param,
+                    "ac": ac_param,
+                    "jc": jc_param,
+                    "ec": ec_param
+                }
+                
+                async with AsyncClient(
+                    follow_redirects=True,
+                    timeout=20
+                ) as client:
+                    
+                    response = await client.get(
+                        url=image_url,
+                        params=params
+                    )
+                    
+                    response.raise_for_status()
+                    logger.info(
+                        "Fetching TopJobs Image URL: %s",
+                        response.request.url
+                    )
+                    
+                soup = BeautifulSoup(
+                    response.text,
+                    "html.parser"
+                )
+                
+                remark_div = soup.find("div", id="remark")
+                
+                if not remark_div:
+                    logger.warning(f"Job image not found: {response.request.url}")
+                    continue
+                
+                job_imge_urls:list[str] = []
+                
+                images = remark_div.find_all("img")
+                
+                for img in images:
+
+                    img_base_url = "https://www.topjobs.lk/"
+                    img_url = img_base_url + img.get("src", "")
+                    
+                    job_imge_urls.append(img_url)
+                    logger.info(f"image url {img_url} has extracted successfully")
+                    
+
+                total_images_urls[job.get("job_title")] = job_imge_urls
             
+            print(f"total_images_url: {total_images_urls}")
+            return total_images_urls
+                    
+                
+
         except Exception:
             logger.exception("Error in get job details")
             raise
