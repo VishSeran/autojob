@@ -1,3 +1,5 @@
+import re
+import json
 from bs4 import BeautifulSoup
 from httpx import AsyncClient
 from configs.helper_functions import normalize_text
@@ -11,7 +13,7 @@ logger = get_logger("top-job-source")
 
 class TopJobSource(JobSource):
     
-    async def search_job(self, keyword:str, category:JobCategory,location = None, limit:int | None = 10):
+    async def search_job(self, keyword:str, category:JobCategory, location = None, limit:int | None = 10):
         
         try:
             params = {
@@ -152,6 +154,10 @@ class TopJobSource(JobSource):
             for row in soup.select("tr[onclick^='createAlert']"):
                 
                 columns = row.find_all("td")
+                onclick = row.get("onclick")
+                
+                if not onclick:
+                    continue
                 
                 if len(columns) < 7:
                     continue
@@ -201,14 +207,28 @@ class TopJobSource(JobSource):
                 if location and (job_location.lower() not in location.lower()):
                     continue
                 
+                onclick_match = re.search(r"createAlert\((.*?)\)", onclick)
+                onclick_params = onclick_match.group(1).split(",")
                 
+                onclick_params = [param.strip("'") for param in onclick_params]
+                
+                print(onclick_params)
+                
+                rid, ac, jc, ec, token = onclick_params
+
                 job = JobSummary(
                     job_title=title,
                     company_name=company_name,
                     image_number=image_id,
                     starting_date=starting_date if starting_date else "Not Mentioned",
                     closing_date=closing_date if closing_date else "Not Mentioned",
-                    location=job_location if job_location else "Not Mentioned"
+                    location=job_location if job_location else "Not Mentioned",
+                    rid = int(rid),
+                    ac=ac,
+                    jc=jc,
+                    ec=ec,
+                    token=token
+                    
                 )
                 
                 jobs.append(job)
@@ -230,6 +250,11 @@ class TopJobSource(JobSource):
                 starting_date: str = job.get("starting_date", "")
                 closing_date: str = job.get("closing_date", "")
                 location: str = job.get("location", "")
+                rid = job.get("rid", "")
+                ac= job.get("ac", "")
+                jc= job.get("jc", "")
+                ec= job.get("ec", "")
+                token= job.get("token", "")
                 
                 
                 job_text = f"""
@@ -239,6 +264,11 @@ class TopJobSource(JobSource):
                     starting_date: {starting_date}
                     closing_date: {closing_date}
                     location: {location}
+                    rid: {rid}
+                    ac: {ac}
+                    jc: {jc}
+                    ec: {ec}
+                    token: {token}
                 """
                 
                 text += job_text

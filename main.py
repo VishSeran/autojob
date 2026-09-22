@@ -7,9 +7,9 @@ from sources.topjob_source import TopJobSource
 async def main():
     
     topjob = TopJobSource()
-    response = await topjob.search_job("software engineer","IT-SWare/DB/QA/Web/Graphics/GIS")
+    response = await topjob.search_job("software","IT-SWare/DB/QA/Web/Graphics/GIS")
     
-    
+   
         
     
 if __name__ == "__main__":
