@@ -28,7 +28,16 @@ class VisionLLmHandler:
                 verbose=True
             )
             
-            
+            logger.info("vision model has initialized")
+        
+        except ValueError:
+            logger.exception("Value error in vision llm hanlder")
+            raise
+           
         except Exception:
             logger.exception("Error in vision llm handler initialization")
             raise
+        
+        
+    def get_vision_llm(self):
+        return self.vision_llm
