@@ -5,8 +5,8 @@ from httpx import AsyncClient
 from configs.helper_functions import normalize_text
 from configs.logger import get_logger
 
-from schema.job_category import JobCategory
-from schema.job_summary import JobSummary
+from schema.topjob_category import JobCategory
+from schema.topjob_summary import JobSummary
 from sources.jobsource import JobSource
 
 logger = get_logger("top-job-source")
