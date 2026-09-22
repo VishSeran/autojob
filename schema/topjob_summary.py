@@ -9,3 +9,8 @@ class JobSummary(BaseModel):
     starting_date: str
     closing_date: str
     location: str
+    rid: int 
+    ac: str
+    jc: str
+    ec: str
+    token: str
