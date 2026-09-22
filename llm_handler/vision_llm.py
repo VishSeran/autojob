@@ -24,8 +24,8 @@ class VisionLLmHandler:
                 model=vision_model,
                 temperature=0.2,
                 cache=True,
-                api_key=
-                
+                api_key=groq_api_key,
+                verbose=True
             )
             
             
