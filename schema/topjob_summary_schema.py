@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-class JobSummary(BaseModel):
+class TopJobSummary(BaseModel):
     
     job_title: str
     company_name: str

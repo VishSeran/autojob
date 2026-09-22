@@ -36,6 +36,6 @@ JobCategories = Literal[
             "Imports/Exports",
             "All_Vacancies",]
             
-class JobCategory(BaseModel):
+class TopJobCategory(BaseModel):
     
     category: JobCategories

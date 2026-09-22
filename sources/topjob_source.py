@@ -5,15 +5,15 @@ from httpx import AsyncClient
 from configs.helper_functions import normalize_text
 from configs.logger import get_logger
 
-from schema.topjob_category_schema import JobCategory
-from schema.topjob_summary_schema import JobSummary
+from schema.topjob_category_schema import TopJobCategory
+from schema.topjob_summary_schema import TopJobSummary
 from sources.jobsource import JobSource
 
 logger = get_logger("top-job-source")
 
 class TopJobSource(JobSource):
     
-    async def search_job(self, keyword:str, category:JobCategory, location = None, limit:int | None = 10):
+    async def search_job(self, keyword:str, category:TopJobCategory, location = None, limit:int | None = 10):
         
         try:
             params = {
@@ -140,7 +140,7 @@ class TopJobSource(JobSource):
                     "html.parser"
                 )
                 
-            jobs:list[JobSummary] = []
+            jobs:list[TopJobSummary] = []
             
             # table = soup.find("table",id="table")
             
@@ -216,7 +216,7 @@ class TopJobSource(JobSource):
                 
                 rid, ac, jc, ec, token = onclick_params
 
-                job = JobSummary(
+                job = TopJobSummary(
                     job_title=title,
                     company_name=company_name,
                     image_number=image_id,
@@ -283,12 +283,25 @@ class TopJobSource(JobSource):
             raise
             
             
-    async def get_job_details(self, job_img_no):
+    async def get_job_details(self, jobs:list[TopJobSummary]):
         
         try:
             
-            #job_url = 
-            pass
+            if not jobs:
+                raise ValueError("Jobs are missing")
+        
+            for job in jobs:
+                job = job.model_dump()
+                
+                image_url = "https://www.topjobs.lk/employer/JobAdvertismentServlet?rid=7&ac=DEFZZZ&jc=0001549007&ec=DEFZZZ&pg=applicant/vacancybyfunctionalarea.jsp"        
+
+                rid_param: int = job.get("rid", 0)
+                ac_param: str = job.get("ac", "")
+                jc_param: str = job.get("jc","")
+                ec_param: str = job.get("ec", "")
+                
+                if not 
+                
             
         except Exception:
             logger.exception("Error in get job details")
