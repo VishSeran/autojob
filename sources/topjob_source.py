@@ -135,10 +135,10 @@ class TopJobSource(JobSource):
                     response.request.url
                 )
                 
-                soup = BeautifulSoup(
-                    response.text,
-                    "html.parser"
-                )
+            soup = BeautifulSoup(
+                response.text,
+                "html.parser"
+            )
                 
             jobs:list[TopJobSummary] = []
             
@@ -300,9 +300,48 @@ class TopJobSource(JobSource):
                 jc_param: str = job.get("jc","")
                 ec_param: str = job.get("ec", "")
                 
-                if not 
+                if not rid_param or not ac_param or not jc_param or ec_param:
+                    continue
                 
-            
+                params = {
+                    "rid": rid_param,
+                    "ac": ac_param,
+                    "jc": jc_param,
+                    "ec": ec_param
+                }
+                
+                async with AsyncClient(
+                    follow_redirects=True,
+                    timeout=20
+                ) as client:
+                    
+                    response = await client.get(
+                        url=image_url,
+                        params=params
+                    )
+                    
+                    response.raise_for_status()
+                    logger.info(
+                        "Fetching TopJobs Image URL: %s",
+                        response.request.url
+                    )
+                    
+                soup = BeautifulSoup(
+                    response.text,
+                    "html.parser"
+                )
+                
+                remark_div = soup.find("div", id="remark")
+                
+                if not remark_div:
+                    logger.warning(f"Job image not found: {response.request.url}")
+                    continue
+                
+                images = remark_div.find_all("img")
+                
+                for img in images:
+                    print(img.get("src"))
+
         except Exception:
             logger.exception("Error in get job details")
             raise
