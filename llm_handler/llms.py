@@ -32,8 +32,6 @@ class LLMHandler:
                 temperature=temperature,
             )
             
-            self.checkpointer = InMemorySaver()
-            
             logger.info("LLM is initialized success")
             
         except ValueError:
