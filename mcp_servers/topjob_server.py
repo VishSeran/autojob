@@ -2,6 +2,7 @@ from fastmcp import FastMCP
 from fastmcp import Context
 from configs.logger import get_logger
 from schema.topjob_category_schema import TopJobCategory
+from schema.topjob_summary_schema import TopJobSummary
 from sources.topjob_source import TopJobSource
 
 
@@ -87,10 +88,23 @@ class TopJobMcpServer:
                     raise
             
             
-            
+            @self.topjob_server.tool()
             async def get_job_details(ctx:Context, jobs:list[TopJobSummary]):
-                
+                """Retrieve vacancy-detail images for the provided TopJobs.lk jobs.
+
+                Returns:
+                    A dictionary where each key is the job title and the corresponding
+                    value is a list of image URLs containing the detailed job vacancy
+                    information.
+                """
                 try:
+                    
+                    response = await self.topjob_source.get_job_detail_images(jobs)
+                    await ctx.info("Job images URLs are fetched successfully")
+                    logger.info("Job images URLs are fetched successfully")
+                    
+                    
+                    return response
                     
                     
                 except Exception as e:
