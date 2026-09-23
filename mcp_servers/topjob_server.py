@@ -50,7 +50,7 @@ class TopJobMcpServer:
             raise
         
         
-    async def register_tools(self):
+    def register_tools(self):
         
         try:
             
@@ -110,6 +110,7 @@ class TopJobMcpServer:
                 except Exception as e:
                     await ctx.error(f"Unexpected error in get job details in topjob mcp server: {e}")
                     logger.error(f"Unexpected error in get job details in topjob mcp server: {e}")
+                    raise
             
         except Exception:
             logger.exception('Error in regiter tools')
