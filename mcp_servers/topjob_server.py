@@ -1,5 +1,8 @@
 from fastmcp import FastMCP
+from fastmcp import Context
 from configs.logger import get_logger
+from schema.topjob_category_schema import TopJobCategory
+from sources.topjob_source import TopJobSource
 
 
 logger = get_logger("mcp-server")
@@ -36,17 +39,44 @@ class TopJobMcpServer:
                     represent unavailable or missing information.
                     """
             )
-            
+            self.topjob_source = TopJobSource()
             self.register_tools()
+            
+            logger.info("Top Job Mcp Server uped with tools")
             
         except Exception:
             logger.exception("Error in mcp server initialize")
             raise
         
         
-    def register_tools(self):
+    async def register_tools(self):
         
         try:
+            
+            @self.topjob_server.tool()
+            async def search_jobs(ctx:Context,
+                                  keyword:str, 
+                                  category:TopJobCategory, 
+                                  location = None, 
+                                  limit:int | None = 10,):
+                
+                """
+                Search and retrieve job vacancies from TopJobs.lk based on
+                keyword, functional category, and optional location.
+
+                Returns structured job information including job title, company,
+                location, dates, and source identifiers for further retrieval.
+                """
+                
+                response = await self.topjob_source.search_job(
+                    keyword,
+                    category,
+                    location,
+                    limit
+                )
+                
+                await ctx.info(f"{keyword} jobs searched results are fetched")
+                return response
             
             
             

@@ -13,6 +13,9 @@ logger = get_logger("top-job-source")
 
 class TopJobSource(JobSource):
     
+    def __init__(self):
+        super().__init__()
+    
     async def search_job(self, keyword:str, category:TopJobCategory, location = None, limit:int | None = 10):
         
         try:
