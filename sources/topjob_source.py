@@ -13,6 +13,9 @@ logger = get_logger("top-job-source")
 
 class TopJobSource(JobSource):
     
+    def __init__(self):
+        super().__init__()
+    
     async def search_job(self, keyword:str, category:TopJobCategory, location = None, limit:int | None = 10):
         
         try:
@@ -204,7 +207,7 @@ class TopJobSource(JobSource):
                 if normalized_keyword not in normalized_title:
                     continue
                 
-                if location and (job_location.lower() not in location.lower()):
+                if location and (location.lower() not in job_location.lower()):
                     continue
                 
                 onclick_match = re.search(r"createAlert\((.*?)\)", onclick)
@@ -283,7 +286,7 @@ class TopJobSource(JobSource):
             raise
             
             
-    async def get_job_details(self, jobs:list[TopJobSummary]):
+    async def get_job_detail_images(self, jobs:list[TopJobSummary]):
         
         try:
             
@@ -356,8 +359,6 @@ class TopJobSource(JobSource):
             
             print(f"total_images_url: {total_images_urls}")
             return total_images_urls
-                    
-                
 
         except Exception:
             logger.exception("Error in get job details")
