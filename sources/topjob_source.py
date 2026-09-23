@@ -283,7 +283,7 @@ class TopJobSource(JobSource):
             raise
             
             
-    async def get_job_details(self, jobs:list[TopJobSummary]):
+    async def get_job_detail_images(self, jobs:list[TopJobSummary]):
         
         try:
             
@@ -356,8 +356,6 @@ class TopJobSource(JobSource):
             
             print(f"total_images_url: {total_images_urls}")
             return total_images_urls
-                    
-                
 
         except Exception:
             logger.exception("Error in get job details")
