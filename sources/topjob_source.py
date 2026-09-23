@@ -207,7 +207,7 @@ class TopJobSource(JobSource):
                 if normalized_keyword not in normalized_title:
                     continue
                 
-                if location and (job_location.lower() not in location.lower()):
+                if location and (location.lower() not in job_location.lower()):
                     continue
                 
                 onclick_match = re.search(r"createAlert\((.*?)\)", onclick)

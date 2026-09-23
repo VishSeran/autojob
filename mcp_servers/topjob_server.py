@@ -68,17 +68,34 @@ class TopJobMcpServer:
                 location, dates, and source identifiers for further retrieval.
                 """
                 
-                response = await self.topjob_source.search_job(
-                    keyword,
-                    category,
-                    location,
-                    limit
-                )
+                try:
                 
-                await ctx.info(f"{keyword} jobs searched results are fetched")
-                return response
+                    response = await self.topjob_source.search_job(
+                        keyword,
+                        category,
+                        location,
+                        limit
+                    )
+                    
+                    await ctx.info(f"{keyword} jobs searched results are fetched")
+                    logger.info(f"{keyword} jobs searched results are fetched")
+                    return response
+                
+                except Exception as e:
+                    await ctx.error(f"Unexpected error in search job in topjob mcp server: {e}")
+                    logger.error(f"Unexpected error in search job in topjob mcp server: {e}")
+                    raise
             
             
+            
+            async def get_job_details(ctx:Context, jobs:list[TopJobSummary]):
+                
+                try:
+                    
+                    
+                except Exception as e:
+                    await ctx.error(f"Unexpected error in get job details in topjob mcp server: {e}")
+                    logger.error(f"Unexpected error in get job details in topjob mcp server: {e}")
             
         except Exception:
             logger.exception('Error in regiter tools')
