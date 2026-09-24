@@ -1,4 +1,5 @@
 from contextlib import AsyncExitStack
+from mcp import ClientSession
 
 from configs.logger import get_logger
 
@@ -28,4 +29,17 @@ class MCPClient:
             
         except Exception:
             logger.exception("Unexpected error in mcp client init")
+            raise
+        
+    async def init_connection(self):
+        
+        try:
+            if self.session:
+                raise RuntimeError("Session is already running")
+            
+            
+            
+            
+        except Exception:
+            logger.exception("Unexpected error in connecting to server")
             raise
