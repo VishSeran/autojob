@@ -1,5 +1,5 @@
+
 from pydantic import BaseModel
-from typing import Optional
 
 
 class Job(BaseModel):
@@ -10,11 +10,11 @@ class Job(BaseModel):
     title: str
     company: str
     
-    description: Optional[str] = None
-    responsibilities: Optional[str] = None
-    requirments: Optional[str] = None
+    description: str | None = None
+    responsibilities: str | None = None
+    requirments: str | None = None
     
-    location: Optional[str] = None
-    salary: Optional[str] = None
-    closing_date: Optional[str] = None
+    location: str | None = None
+    salary: str | None = None
+    closing_date: str | None = None
     
