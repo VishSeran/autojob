@@ -1,5 +1,5 @@
 
-from logging.handlers import QueueHandler
+
 
 from langgraph.graph import StateGraph
 
@@ -77,4 +77,5 @@ class AgentWorkflow:
         
         
     async def job_search_node(self):
+        pass
         
