@@ -35,8 +35,20 @@ class AgentWorkflow:
         
         try:
             
+            query = state.get("query", "")
             
-            
+            if query is None:
+                final_answer = "It seems like you have no questions my friend."
+                
+                return {
+                    "final_response" : final_answer
+                }
+                
+
+        except ValueError
+            logger.exception("Unexpected value error in query handler node")
+            raise    
+        
         except Exception
             logger.exception("Unexpected error in query handler node")
             raise
