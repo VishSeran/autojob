@@ -1,3 +1,4 @@
+from langchain_core.prompts import ChatPromptTemplate
 
 from configs.logger import get_logger
 from llm_handler.llms import LLMHandler
@@ -15,7 +16,8 @@ class QueryHandlerAgent:
             
             logger.info("LLM is initialized")
             
-            self.prompt = self.prompt = """
+            self.prompt = self.prompt = ChatPromptTemplate.from_messages(
+                """
                 Analyze the user's job search query and extract the following information:
 
                 - keyword: Job title, skill, or search keyword.
@@ -28,6 +30,7 @@ class QueryHandlerAgent:
                 User Query:
                 {query}
                 """
+            ) 
                 
             self.query_chain = self.prompt | self.llm
             logger.info("query chain has created")
@@ -43,6 +46,13 @@ class QueryHandlerAgent:
             
             if not query:
                 raise ValueError("User query is missing")
+            
+            response = await self.query_chain.ainvoke({
+                "query": query
+            })
+            
+            logger.info("Response has fetched by query handler successfully")
+            return response
             
         except ValueError:
             logger.exception("Unexpected value error in query handler get response")
