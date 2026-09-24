@@ -40,6 +40,7 @@ class TopJobMcpServer:
                     represent unavailable or missing information.
                     """
             )
+            
             self.topjob_source = TopJobSource()
             self.register_tools()
             
@@ -59,7 +60,7 @@ class TopJobMcpServer:
                                   keyword:str, 
                                   category:TopJobCategory, 
                                   location = None, 
-                                  limit:int | None = 10,):
+                                  limit:int | None = 10):
                 
                 """
                 Search and retrieve job vacancies from TopJobs.lk based on
