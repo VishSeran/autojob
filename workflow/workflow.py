@@ -74,3 +74,7 @@ class AgentWorkflow:
         except Exception:
             logger.exception("Unexpected error in query handler node")
             raise
+        
+        
+    async def job_search_node(self):
+        
