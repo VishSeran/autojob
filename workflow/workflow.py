@@ -42,7 +42,7 @@ class AgentWorkflow:
             
             query = state.get("query", "")
             
-            if query is None:
+            if not query:
                 final_answer = "It seems like you have no questions my friend."
                 
                 return {
@@ -52,17 +52,11 @@ class AgentWorkflow:
             response: QuerySchema = await self.query_handler.get_response(query)
             logger.info("query response is fetched")
             
-            keyword = response.keyword
-            location = response.location
-            field = response.field
-            no_of_jobs = response.number_of_jobs
-            
-            
             return {
-                "keyword": keyword,
-                "location": location,
-                "job_field": field,
-                "no_of_jobs": no_of_jobs
+                "keyword": response.keyword,
+                "location": response.location,
+                "job_field": response.field,
+                "no_of_jobs": response.number_of_jobs
             }
                 
 
