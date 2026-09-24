@@ -21,6 +21,8 @@ class MCPClient:
             self.server_url = server_url
             self.session = None
             
+            self.init_connection()
+            
         except ValueError:
             logger.exception("Value error in mcp initizlization")
             raise
