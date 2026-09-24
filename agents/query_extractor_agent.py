@@ -2,7 +2,6 @@
 from configs.logger import get_logger
 from llm_handler.llms import LLMHandler
 
-
 logger = get_logger("query-handler-agent")
 
 class QueryHandlerAgent:

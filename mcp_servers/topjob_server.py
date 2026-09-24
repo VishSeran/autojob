@@ -1,10 +1,9 @@
-from fastmcp import FastMCP
-from fastmcp import Context
+from fastmcp import Context, FastMCP
+
 from configs.logger import get_logger
 from schema.topjob_category_schema import TopJobCategory
 from schema.topjob_summary_schema import TopJobSummary
 from sources.topjob_source import TopJobSource
-
 
 logger = get_logger("mcp-server")
 

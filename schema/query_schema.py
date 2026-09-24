@@ -1,5 +1,6 @@
-from typing import Optional
+
 from pydantic import BaseModel, Field
+
 
 class QuerySchema(BaseModel):
 
@@ -7,14 +8,14 @@ class QuerySchema(BaseModel):
         description="Job title, skill, or keyword to search for."
     )
 
-    location: Optional[str] = Field(
+    location: str | None = Field(
         description="Preferred job location, such as a city, district, or country."
     )
 
-    field: Optional[str] = Field(
+    field: str | None = Field(
         description="Industry or job category, such as IT, Finance, or Engineering."
     )
 
-    number_of_jobs: Optional[int] = Field(
+    number_of_jobs: int | None = Field(
         description="Maximum number of job listings to retrieve."
     )

@@ -4,7 +4,6 @@ from langgraph.graph import StateGraph
 from configs.logger import get_logger
 from workflow.workflow_state import WorkflowState
 
-
 logger = get_logger("agent-workflow")
 
 class AgentWorkflow:
@@ -13,6 +12,7 @@ class AgentWorkflow:
         
         try:
             
+            self.graph = None
             self.build_workflow()
             
         except Exception:
@@ -24,7 +24,7 @@ class AgentWorkflow:
         
         try:
             
-            graph = StateGraph(WorkflowState)
+            self.graph = StateGraph(WorkflowState)
             
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -45,10 +45,10 @@ class AgentWorkflow:
                 }
                 
 
-        except ValueError
+        except ValueError:
             logger.exception("Unexpected value error in query handler node")
             raise    
         
-        except Exception
+        except Exception:
             logger.exception("Unexpected error in query handler node")
             raise
