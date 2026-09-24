@@ -1,6 +1,9 @@
 
+from logging.handlers import QueueHandler
+
 from langgraph.graph import StateGraph
 
+from agents.query_extractor_agent import QueryHandlerAgent
 from configs.logger import get_logger
 from workflow.workflow_state import WorkflowState
 
@@ -13,6 +16,7 @@ class AgentWorkflow:
         try:
             
             self.graph = None
+            self.query_handler = QueryHandlerAgent()
             self.build_workflow()
             
         except Exception:
@@ -31,7 +35,7 @@ class AgentWorkflow:
             raise
         
         
-    async def query_handler_node(state:WorkflowState):
+    async def query_handler_node(self, state:WorkflowState):
         
         try:
             
@@ -43,6 +47,13 @@ class AgentWorkflow:
                 return {
                     "final_response" : final_answer
                 }
+                
+            response = await self.query_handler.get_response(query)
+            logger.info("query response is fetched")
+            
+            return {
+                
+            }
                 
 
         except ValueError:
