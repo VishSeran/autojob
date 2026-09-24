@@ -16,9 +16,12 @@ class AgentWorkflow:
         
         try:
             
-            self.graph = None
+            self.workflow = None
             self.query_handler = QueryHandlerAgent()
+            
+            logger.info("Agents are initialized")
             self.build_workflow()
+            logger.info("Workflow build is completed")
             
         except Exception:
             logger.exception("Unexpected error in agent workflow")
@@ -29,7 +32,11 @@ class AgentWorkflow:
         
         try:
             
-            self.graph = StateGraph(WorkflowState)
+            if self.workflow is not None:
+                raise RuntimeError("Workflow is already running") 
+            
+            graph = StateGraph(WorkflowState)
+            graph.add_node("query_handler_node", self.query_handler_node)
             
         except Exception:
             logger.exception("Unexpected error in build workflow")
