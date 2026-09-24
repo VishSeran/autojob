@@ -11,6 +11,7 @@ class WorkflowState(TypedDict):
     keyword: str
     location: str
     job_field: str
+    no_of_jobs: int
     
     topjob_summary: list[TopJobSummary]
     topjob_images_urls: dict
