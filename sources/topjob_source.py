@@ -1,10 +1,12 @@
+
 import re
-import json
+
+import aiofiles
 from bs4 import BeautifulSoup
 from httpx import AsyncClient
+
 from configs.helper_functions import normalize_text
 from configs.logger import get_logger
-
 from schema.topjob_category_schema import TopJobCategory
 from schema.topjob_summary_schema import TopJobSummary
 from sources.jobsource import JobSource
@@ -16,7 +18,7 @@ class TopJobSource(JobSource):
     def __init__(self):
         super().__init__()
     
-    async def search_job(self, keyword:str, category:TopJobCategory, location = None, limit:int | None = 10):
+    async def search_job(self, keyword:str, category:TopJobCategory = "All_Vacancies", location = None, limit:int | None = 10):
         
         try:
             params = {
@@ -276,8 +278,8 @@ class TopJobSource(JobSource):
                 
                 text += job_text
                 
-            with open("job_details.txt", "w") as file:
-                file.write(text)
+            async with aiofiles.open("job_details.txt", "w", encoding="utf-8") as file:
+                await file.write(text)
             
             return jobs
 

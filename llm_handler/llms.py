@@ -1,13 +1,11 @@
 import os
+
 import dotenv
-
-from pydantic import SecretStr
 from langchain_groq import ChatGroq
-from langgraph.checkpoint.memory import InMemorySaver
+from pydantic import SecretStr
 
-from configs.configurations import BASE_CACHE, GROQ_MODEL
+from configs.configurations import GROQ_MODEL
 from configs.logger import get_logger
-
 
 logger = get_logger("llm-handler")
 

@@ -6,6 +6,8 @@ from schema.topjob_summary_schema import TopJobSummary
 
 class WorkflowState(TypedDict):
     
+    query: str
+    
     keyword: str
     location: str
     job_field: str

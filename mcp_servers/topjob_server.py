@@ -1,10 +1,9 @@
-from fastmcp import FastMCP
-from fastmcp import Context
+from fastmcp import Context, FastMCP
+
 from configs.logger import get_logger
 from schema.topjob_category_schema import TopJobCategory
 from schema.topjob_summary_schema import TopJobSummary
 from sources.topjob_source import TopJobSource
-
 
 logger = get_logger("mcp-server")
 
@@ -40,6 +39,7 @@ class TopJobMcpServer:
                     represent unavailable or missing information.
                     """
             )
+            
             self.topjob_source = TopJobSource()
             self.register_tools()
             
@@ -59,7 +59,7 @@ class TopJobMcpServer:
                                   keyword:str, 
                                   category:TopJobCategory, 
                                   location = None, 
-                                  limit:int | None = 10,):
+                                  limit:int | None = 10):
                 
                 """
                 Search and retrieve job vacancies from TopJobs.lk based on
