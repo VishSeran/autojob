@@ -69,6 +69,12 @@ class MCPClient:
         
         try:
             
+            if not tool_name:
+                raise ValueError("Tool name is missing")
+            
+            if not arguments:
+                raise ValueError("argumrnts are missing")
+            
             if self.session is None or not self.connected:
                 raise RuntimeError("MCP client is not connected")
             
@@ -81,7 +87,9 @@ class MCPClient:
             logger.info("Tool results is fetched")
             return results
              
-            
+        except ValueError:
+            logger.exception("Unexpected value error in tool calling")
+            raise    
         
         except Exception:
             logger.exception("Unexpected error in tool calling")
