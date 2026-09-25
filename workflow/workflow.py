@@ -9,6 +9,7 @@ from client_server_sources.topjob_client_server import TopJobClientServerSource
 from configs.configurations import TOPJOB_SERVER_URL
 from configs.logger import get_logger
 from mcp_client.client import MCPClient
+from schema.job_image_schema import JobImageDetails
 from schema.query_schema import QuerySchema
 from workflow.workflow_state import WorkflowState
 
@@ -137,7 +138,35 @@ class AgentWorkflow:
     async def image_data_handler_node(self, state: WorkflowState):
         
         try:
+            job_images_urls = state.get("topjob_images_urls", {})
             
+            results = {}
+            
+            for job_title, image_urls in job_images_urls.items():
+                
+                try:
+                    
+                
+                logger.info(f"Extracting {job_title}...")
+                
+                if not image_urls:
+                    results[job_title] = JobImageDetails()
+                    continue
+              
+                images = [
+                    
+                    {
+                        "type": "image_url",
+                        "image_url": img_url
+                    }
+                    
+                    for img_url in image_urls
+                ]
+                
+                response  = await self.image_handler_agent.get_vision_response(images)
+                logger.info("Image data response is fetched")
+                
+                results[job_title] = response
             
         except Exception:
             logger.exception("Unexpected error in image data handler node")
