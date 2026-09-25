@@ -21,8 +21,6 @@ class MCPClient:
             self.server_url = server_url
             self.session = None
             
-            self.init_connection()
-            
         except ValueError:
             logger.exception("Value error in mcp initizlization")
             raise
@@ -42,7 +40,7 @@ class MCPClient:
                 raise RuntimeError("Session is already running")
             
             
-            read, write, s_id = await self.exit_stack.enter_async_context(
+            read, write, _ = await self.exit_stack.enter_async_context(
                 
                 streamable_http_client(self.server_url)
                 
@@ -70,6 +68,9 @@ class MCPClient:
     async def close(self):
         
         try:
+            
+            if self.connected:
+                await self.exit_stack.aclose()
             
             self.session = None
             self.connected = False
