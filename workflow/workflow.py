@@ -147,26 +147,33 @@ class AgentWorkflow:
                 try:
                     
                 
-                logger.info(f"Extracting {job_title}...")
-                
-                if not image_urls:
-                    results[job_title] = JobImageDetails()
-                    continue
-              
-                images = [
+                    logger.info(f"Extracting {job_title}...")
                     
-                    {
-                        "type": "image_url",
-                        "image_url": img_url
-                    }
+                    if not image_urls:
+                        results[job_title] = JobImageDetails().model_dump()
+                        continue
+                
+                    images = [
+                        
+                        {
+                            "type": "image_url",
+                            "image_url": img_url
+                        }
+                        
+                        for img_url in image_urls
+                    ]
                     
-                    for img_url in image_urls
-                ]
-                
-                response  = await self.image_handler_agent.get_vision_response(images)
-                logger.info("Image data response is fetched")
-                
-                results[job_title] = response
+                    response  = await self.image_handler_agent.get_vision_response(images)
+                    logger.info("Image data response is fetched")
+                    
+                    results[job_title] = response.model_dump()
+                    
+                except Exception:
+                    logger.exception("Failed to extract image data for job: %s", job_title)
+                    results[job_title] = JobImageDetails().model_dump()
+            
+            logger.info("Job images final details are fetched")                    
+            return results
             
         except Exception:
             logger.exception("Unexpected error in image data handler node")
