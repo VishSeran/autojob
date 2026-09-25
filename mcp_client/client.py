@@ -65,6 +65,15 @@ class MCPClient:
             raise
         
         
+    async def call_tool(self):
+        
+        try:
+            
+        
+        except Exception:
+            logger.exception("Unexpected error in tool calling")
+            raise
+        
     async def close(self):
         
         try:

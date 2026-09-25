@@ -1,8 +1,9 @@
 
 
+from configs.logger import get_logger
 from mcp_client.client import MCPClient
 
-
+logger = get_logger("topjob-client-server-source")
 class TopJobClientServerSource:
     
     def __init__(self, mcp_client: MCPClient):
@@ -19,6 +20,8 @@ class TopJobClientServerSource:
         
         try:
             
+            response = await self.mcp_client.
             
         except Exception:
-            logger.ex
+            logger.exception("Unexpected error in searc jobs")
+            raise
