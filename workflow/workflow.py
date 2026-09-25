@@ -33,7 +33,7 @@ class AgentWorkflow:
             raise
         
         
-    async def initialized(self):
+    async def initialize(self):
         
         try:
             await self.topjob_mcp_client.init_connection()
