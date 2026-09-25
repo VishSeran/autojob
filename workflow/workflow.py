@@ -3,6 +3,7 @@
 
 from langgraph.graph import StateGraph
 
+from agents.image_data_extractor_agent import ImageDataExtractorAgent
 from agents.query_extractor_agent import QueryHandlerAgent
 from client_server_sources.topjob_client_server import TopJobClientServerSource
 from configs.configurations import TOPJOB_SERVER_URL
@@ -22,7 +23,8 @@ class AgentWorkflow:
             self.workflow = None
             self.topjob_mcp_client = MCPClient(TOPJOB_SERVER_URL)
             self.topjob_client_server_Source = None
-            self.query_handler = QueryHandlerAgent()
+            self.query_handler_agent = QueryHandlerAgent()
+            self.image_handler_agent = ImageDataExtractorAgent()
             
             logger.info("Agents are initialized")
             self.build_workflow()
@@ -79,7 +81,7 @@ class AgentWorkflow:
                     "final_response" : final_answer
                 }
                 
-            response: QuerySchema = await self.query_handler.get_response(query)
+            response: QuerySchema = await self.query_handler_agent.get_response(query)
             logger.info("query response is fetched")
             
             return {
@@ -129,4 +131,14 @@ class AgentWorkflow:
             
         except Exception:
             logger.exception("Unexpected error in job search node")
+            raise
+    
+        
+    async def image_data_handler_node(self, state: WorkflowState):
+        
+        try:
+            
+            
+        except Exception:
+            logger.exception("Unexpected error in image data handler node")
             raise
