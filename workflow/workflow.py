@@ -3,11 +3,13 @@
 
 from langgraph.graph import StateGraph
 
+from agents.image_data_extractor_agent import ImageDataExtractorAgent
 from agents.query_extractor_agent import QueryHandlerAgent
 from client_server_sources.topjob_client_server import TopJobClientServerSource
 from configs.configurations import TOPJOB_SERVER_URL
 from configs.logger import get_logger
 from mcp_client.client import MCPClient
+from schema.job_image_schema import JobImageDetails
 from schema.query_schema import QuerySchema
 from workflow.workflow_state import WorkflowState
 
@@ -22,7 +24,8 @@ class AgentWorkflow:
             self.workflow = None
             self.topjob_mcp_client = MCPClient(TOPJOB_SERVER_URL)
             self.topjob_client_server_Source = None
-            self.query_handler = QueryHandlerAgent()
+            self.query_handler_agent = QueryHandlerAgent()
+            self.image_handler_agent = ImageDataExtractorAgent()
             
             logger.info("Agents are initialized")
             self.build_workflow()
@@ -79,7 +82,7 @@ class AgentWorkflow:
                     "final_response" : final_answer
                 }
                 
-            response: QuerySchema = await self.query_handler.get_response(query)
+            response: QuerySchema = await self.query_handler_agent.get_response(query)
             logger.info("query response is fetched")
             
             return {
@@ -129,4 +132,54 @@ class AgentWorkflow:
             
         except Exception:
             logger.exception("Unexpected error in job search node")
+            raise
+    
+        
+    async def image_data_handler_node(self, state: WorkflowState):
+        
+        try:
+            job_images_urls = state.get("topjob_images_urls", {})
+            
+            results = {}
+            
+            for job_title, image_urls in job_images_urls.items():
+                
+                try:
+                    
+                
+                    logger.info(f"Extracting {job_title}...")
+                    
+                    if not image_urls:
+                        results[job_title] = JobImageDetails().model_dump()
+                        continue
+                
+                    images = [
+                        
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": img_url
+                            }
+                        }
+                        
+                        for img_url in image_urls
+                    ]
+                    
+                    response  = await self.image_handler_agent.get_vision_response(images)
+                    logger.info("Image data response is fetched")
+                    
+                    results[job_title] = response.model_dump()
+                    
+                except Exception:
+                    logger.exception("Failed to extract image data for job: %s", job_title)
+                    results[job_title] = JobImageDetails().model_dump()
+            
+            logger.info("Job images final details are fetched")    
+                            
+            return {
+                "topjob_images_details": results
+            }
+            
+        except Exception:
+            logger.exception("Unexpected error in image data handler node")
             raise
