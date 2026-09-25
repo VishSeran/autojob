@@ -65,9 +65,22 @@ class MCPClient:
             raise
         
         
-    async def call_tool(self):
+    async def call_tool(self, tool_name: str, arguments: dict):
         
         try:
+            
+            if self.session is None or not self.connected:
+                raise RuntimeError("MCP client is not connected")
+            
+            
+            results = await self.session.call_tool(
+                tool_name,
+                arguments
+            )
+            
+            logger.info("Tool results is fetched")
+            return results
+             
             
         
         except Exception:
