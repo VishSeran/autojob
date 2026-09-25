@@ -62,6 +62,12 @@ class ImageDataExtractorAgent:
         
         try:
             
+            response = await self.chain.ainvoke({
+                "images": images
+            })
+            logger.info("Vision response is fetched")
+            
+            return response
         
         except ValueError:
             logger.exception("Unexpected value error in get vision respponse")

@@ -16,7 +16,7 @@ class QueryHandlerAgent:
             
             logger.info("LLM is initialized")
             
-            self.prompt = self.prompt = ChatPromptTemplate.from_messages(
+            self.prompt = ChatPromptTemplate.from_messages(
                 [
                     (
                         "system",
