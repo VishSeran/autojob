@@ -1,10 +1,10 @@
-import dotenv
 import os
+
+import dotenv
 from langchain_groq import ChatGroq
 
 from configs.configurations import VISION_MODEL
 from configs.logger import get_logger
-
 
 dotenv.load_dotenv()
 logger = get_logger("vision-llm-handler")

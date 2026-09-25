@@ -1,8 +1,8 @@
+from langchain_core.prompts import ChatPromptTemplate
 
 from configs.logger import get_logger
 from llm_handler.vision_llm import VisionLLmHandler
 from schema.job_image_schema import JobImageDetails
-
 
 logger = get_logger("image-data-extractor-agent")
 
@@ -16,6 +16,38 @@ class ImageDataExtractorAgent:
             vision_llm_handler = VisionLLmHandler
             self.vision_llm = vision_llm_handler.get_vision_llm().with_structured_output(
                 JobImageDetails
+            )
+            
+            self.prompt = ChatPromptTemplate.from_messages(
+                [
+                    (
+                        "system",
+                         """
+                        You are a job advertisement image extraction agent.
+
+                        The provided images contain information from a job vacancy
+                        advertisement.
+
+                        Extract only information that is visibly available in the
+                        provided images.
+
+                        Extract:
+                        - description: Job description or overview
+                        - responsibilities: Duties and responsibilities
+                        - requirements: Qualifications, skills, experience, education,
+                        and other candidate requirements
+
+                        Do not invent, infer, or fabricate information that is not
+                        visible in the images.
+
+                        If a particular category is not available, return null.
+                    """
+                    ),
+                    (
+                        "human",
+                        "{images}"
+                    )
+                ]
             )
             
         except Exception:

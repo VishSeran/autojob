@@ -1,6 +1,10 @@
 from fastmcp import Context, FastMCP
 
-from configs.configurations import BASE_DIR, TOPJOB_MCP_SERVER_HOST, TOPJOB_MCP_SERVER_PORT
+from configs.configurations import (
+    BASE_DIR,
+    TOPJOB_MCP_SERVER_HOST,
+    TOPJOB_MCP_SERVER_PORT,
+)
 from configs.logger import get_logger
 from schema.topjob_category_schema import TopJobCategory
 from schema.topjob_summary_schema import TopJobSummary
