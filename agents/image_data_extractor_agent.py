@@ -50,7 +50,24 @@ class ImageDataExtractorAgent:
                 ]
             )
             
+            self.chain = self.prompt | self.vision_llm
+            logger.info("Image data ectractor agent is created")
+            
         except Exception:
             logger.exception("Unexpected error in init")
+            raise
+        
+        
+    async def get_vision_response(self, images):
+        
+        try:
+            
+        
+        except ValueError:
+            logger.exception("Unexpected value error in get vision respponse")
+            raise
+            
+        except Exception:
+            logger.exception("Unexpected error in get vision respponse")
             raise
     
