@@ -1,9 +1,8 @@
-
-from typing import Optional
 from pydantic import BaseModel
 
-class JobImageDetails:
+
+class JobImageDetails(BaseModel):
     
-    description: Optional[str] = None
-    responsibilities: Optional[str] = None
-    requirments: Optional[str] = None
+    description: str | None = None
+    responsibilities: str | None = None
+    requirements: str | None = None

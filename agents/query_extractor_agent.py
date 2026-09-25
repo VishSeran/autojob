@@ -16,20 +16,31 @@ class QueryHandlerAgent:
             
             logger.info("LLM is initialized")
             
-            self.prompt = self.prompt = ChatPromptTemplate.from_messages(
-                """
-                Analyze the user's job search query and extract the following information:
+            self.prompt = ChatPromptTemplate.from_messages(
+                [
+                    (
+                        "system",
+                        """
+                        You are a job search query extraction agent.
 
-                - keyword: Job title, skill, or search keyword.
-                - location: Preferred job location, if specified.
-                - field: Industry or job category, if specified.
-                - number_of_jobs: Number of jobs requested, if specified.
+                        Analyze the user's job search query and extract the following:
 
-                If a field is not mentioned in the user's query, return null for that field.
+                        - keyword: Job title, skill, or search keyword.
+                        - location: Preferred job location, if specified.
+                        - field: Industry or job category, if specified.
+                        - number_of_jobs: Number of jobs requested, if specified.
 
-                User Query:
-                {query}
-                """
+                        If a field is not mentioned in the user's query,
+                        return null for that field.
+
+                        Do not invent information that is not present in the query.
+                        """
+                    ),
+                    (
+                        "human",
+                        "{query}"
+                    )
+                ]
             ) 
                 
             self.query_chain = self.prompt | self.llm

@@ -1,7 +1,6 @@
-
-
 from configs.logger import get_logger
 from mcp_client.client import MCPClient
+from schema.topjob_summary_schema import TopJobSummary
 
 logger = get_logger("topjob-client-server-source")
 class TopJobClientServerSource:
@@ -34,5 +33,26 @@ class TopJobClientServerSource:
             return response
             
         except Exception:
-            logger.exception("Unexpected error in searc jobs")
+            logger.exception("Unexpected error in search jobs")
+            raise
+        
+    async def get_jobs_details(
+        self,
+        jobs: list[TopJobSummary]
+    ):
+        
+        try:
+            
+            response = await self.mcp_client.call_tool(
+                "get_job_details",
+                {
+                    "jobs": jobs
+                }
+            )
+            
+            return response
+            
+        
+        except Exception:
+            logger.exception("Unexpected error in get_jobs_details")
             raise

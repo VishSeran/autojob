@@ -4,7 +4,10 @@
 from langgraph.graph import StateGraph
 
 from agents.query_extractor_agent import QueryHandlerAgent
+from client_server_sources.topjob_client_server import TopJobClientServerSource
+from configs.configurations import TOPJOB_SERVER_URL
 from configs.logger import get_logger
+from mcp_client.client import MCPClient
 from schema.query_schema import QuerySchema
 from workflow.workflow_state import WorkflowState
 
@@ -17,7 +20,8 @@ class AgentWorkflow:
         try:
             
             self.workflow = None
-            self.topjob_mcp_client = None
+            self.topjob_mcp_client = MCPClient(TOPJOB_SERVER_URL)
+            self.topjob_client_server_Source = None
             self.query_handler = QueryHandlerAgent()
             
             logger.info("Agents are initialized")
@@ -29,11 +33,16 @@ class AgentWorkflow:
             raise
         
         
-    def initialized(self):
+    async def initialize(self):
         
         try:
+            await self.topjob_mcp_client.init_connection()
+            logger.info("Topjob mcp client is connected")
             
-            self.topjob_mcp_client = Top
+            self.topjob_client_server_Source = TopJobClientServerSource(
+                self.topjob_mcp_client
+            )
+            
             
         except Exception:
             logger.exception('Unexpected error in worlflow initialize')
@@ -50,6 +59,7 @@ class AgentWorkflow:
             
             graph = StateGraph(WorkflowState)
             graph.add_node("query_handler_node", self.query_handler_node)
+            graph.add_node("topjob_search_node", self.topjob_search_node)
             
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -89,6 +99,34 @@ class AgentWorkflow:
             raise
         
         
-    async def job_search_node(self):
-        pass
-        
+    async def topjob_search_node(self, state: WorkflowState):
+
+        try:
+            
+            keyword = state.get("keyword", "")
+            location = state.get("location", "")
+            field = state.get("job_field", "")
+            limit = state.get("no_of_jobs")
+            
+            job_list = await self.topjob_client_server_Source.search_jobs(
+                keyword,
+                location,
+                field,
+                limit
+            )
+            
+            relavant_job_images = await self.topjob_client_server_Source.get_jobs_details(
+                job_list
+            )   
+            
+            logger.info("Relavant jobs extracted")
+            
+            return {
+                
+                "topjob_summary": job_list,
+                "topjob_images_urls": relavant_job_images
+            }         
+            
+        except Exception:
+            logger.exception("Unexpected error in job search node")
+            raise
