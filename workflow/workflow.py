@@ -59,6 +59,7 @@ class AgentWorkflow:
             
             graph = StateGraph(WorkflowState)
             graph.add_node("query_handler_node", self.query_handler_node)
+            graph.add_node("topjob_search_node", self.topjob_search_node)
             
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -98,6 +99,34 @@ class AgentWorkflow:
             raise
         
         
-    async def job_search_node(self):
-        pass
-        
+    async def topjob_search_node(self, state: WorkflowState):
+
+        try:
+            
+            keyword = state.get("keyword", "")
+            location = state.get("location", "")
+            field = state.get("job_field", "")
+            limit = state.get("no_of_jobs")
+            
+            job_list = await self.topjob_client_server_Source.search_jobs(
+                keyword,
+                location,
+                field,
+                limit
+            )
+            
+            relavant_job_images = await self.topjob_client_server_Source.get_jobs_details(
+                job_list
+            )   
+            
+            logger.info("Relavant jobs extracted")
+            
+            return {
+                
+                "topjob_summary": job_list,
+                "topjob_images_urls": relavant_job_images
+            }         
+            
+        except Exception:
+            logger.exception("Unexpected error in job search node")
+            raise

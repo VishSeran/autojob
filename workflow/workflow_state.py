@@ -18,6 +18,9 @@ class WorkflowState(TypedDict):
     topjob_images_details: dict
     topjob_complete_job_details: dict
     
+    job_summary: list[TopJobSummary]
+    job_complete_job_details: dict
+    
     current_resume: str
     job_relavance_score: float
     is_relavance: bool
