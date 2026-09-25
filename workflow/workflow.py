@@ -1,6 +1,3 @@
-
-
-
 from langgraph.graph import StateGraph
 
 from agents.image_data_extractor_agent import ImageDataExtractorAgent
@@ -63,6 +60,7 @@ class AgentWorkflow:
             graph = StateGraph(WorkflowState)
             graph.add_node("query_handler_node", self.query_handler_node)
             graph.add_node("topjob_search_node", self.topjob_search_node)
+            graph.add_node("image_data_handler_node", self.image_data_handler_node)
             
         except Exception:
             logger.exception("Unexpected error in build workflow")
