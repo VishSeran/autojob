@@ -157,7 +157,9 @@ class AgentWorkflow:
                         
                         {
                             "type": "image_url",
-                            "image_url": img_url
+                            "image_url": {
+                                "url": img_url
+                            }
                         }
                         
                         for img_url in image_urls
@@ -172,8 +174,11 @@ class AgentWorkflow:
                     logger.exception("Failed to extract image data for job: %s", job_title)
                     results[job_title] = JobImageDetails().model_dump()
             
-            logger.info("Job images final details are fetched")                    
-            return results
+            logger.info("Job images final details are fetched")    
+                            
+            return {
+                "topjob_images_details": results
+            }
             
         except Exception:
             logger.exception("Unexpected error in image data handler node")
