@@ -1,5 +1,6 @@
 from fastmcp import Context, FastMCP
 
+from configs.configurations import BASE_DIR
 from configs.logger import get_logger
 from schema.topjob_category_schema import TopJobCategory
 from schema.topjob_summary_schema import TopJobSummary
@@ -115,5 +116,22 @@ class TopJobMcpServer:
         except Exception:
             logger.exception('Error in regiter tools')
             raise
+        
     
+    async def run(self):
+        
+        try:
+            
+            logger.info("Starting HTTP MCP Server on http://127.0.0.1:8000")
+            logger.info(f"Workspace roots: {BASE_DIR}")
+            
+            self.topjob_server.run(
+                transport="http",
+                host = "127.0.0.1",
+                port = 8000
+            )
+            
+        except Exception:
+            logger.exception("Unexpected error in server run")
+            raise
     

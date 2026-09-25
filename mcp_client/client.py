@@ -40,7 +40,7 @@ class MCPClient:
                 raise RuntimeError("Session is already running")
             
             
-            read, write, s_id = await self.exit_stack.enter_async_context(
+            read, write, _ = await self.exit_stack.enter_async_context(
                 
                 streamable_http_client(self.server_url)
                 
@@ -62,4 +62,52 @@ class MCPClient:
             self.session = None
             self.connected = False
             self.exit_stack = AsyncExitStack()
+            raise
+        
+        
+    async def call_tool(self, tool_name: str, arguments: dict):
+        
+        try:
+            
+            if not tool_name:
+                raise ValueError("Tool name is missing")
+            
+            if not arguments:
+                raise ValueError("argumrnts are missing")
+            
+            if self.session is None or not self.connected:
+                raise RuntimeError("MCP client is not connected")
+            
+            
+            results = await self.session.call_tool(
+                tool_name,
+                arguments
+            )
+            
+            logger.info("Tool results is fetched")
+            return results
+             
+        except ValueError:
+            logger.exception("Unexpected value error in tool calling")
+            raise    
+        
+        except Exception:
+            logger.exception("Unexpected error in tool calling")
+            raise
+        
+    async def close(self):
+        
+        try:
+            
+            if self.connected:
+                await self.exit_stack.aclose()
+            
+            self.session = None
+            self.connected = False
+            self.exit_stack = AsyncExitStack()
+            
+            logger.info("Connection closed successfully")
+            
+        except Exception:
+            logger.exception("Unexpected error in close connection")
             raise

@@ -17,6 +17,7 @@ class AgentWorkflow:
         try:
             
             self.workflow = None
+            self.topjob_mcp_client = None
             self.query_handler = QueryHandlerAgent()
             
             logger.info("Agents are initialized")
@@ -26,6 +27,18 @@ class AgentWorkflow:
         except Exception:
             logger.exception("Unexpected error in agent workflow")
             raise
+        
+        
+    def initialized(self):
+        
+        try:
+            
+            self.topjob_mcp_client = Top
+            
+        except Exception:
+            logger.exception('Unexpected error in worlflow initialize')
+            raise
+        
         
         
     def build_workflow(self):
