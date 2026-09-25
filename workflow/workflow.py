@@ -1,6 +1,3 @@
-
-
-
 from langgraph.graph import StateGraph
 
 from agents.image_data_extractor_agent import ImageDataExtractorAgent
