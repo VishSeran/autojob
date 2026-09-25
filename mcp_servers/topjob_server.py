@@ -1,6 +1,6 @@
 from fastmcp import Context, FastMCP
 
-from configs.configurations import BASE_DIR
+from configs.configurations import BASE_DIR, TOPJOB_MCP_SERVER_HOST, TOPJOB_MCP_SERVER_PORT
 from configs.logger import get_logger
 from schema.topjob_category_schema import TopJobCategory
 from schema.topjob_summary_schema import TopJobSummary
@@ -122,13 +122,13 @@ class TopJobMcpServer:
         
         try:
             
-            logger.info("Starting HTTP MCP Server on http://127.0.0.1:8000")
+            logger.info(f"Starting HTTP MCP Server on http://{TOPJOB_MCP_SERVER_HOST}:{TOPJOB_MCP_SERVER_PORT}")
             logger.info(f"Workspace roots: {BASE_DIR}")
             
             self.topjob_server.run(
                 transport="http",
-                host = "127.0.0.1",
-                port = 8000
+                host = TOPJOB_MCP_SERVER_HOST,
+                port = TOPJOB_MCP_SERVER_PORT
             )
             
         except Exception:
