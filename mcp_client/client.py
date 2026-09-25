@@ -65,3 +65,18 @@ class MCPClient:
             self.connected = False
             self.exit_stack = AsyncExitStack()
             raise
+        
+        
+    async def close(self):
+        
+        try:
+            
+            self.session = None
+            self.connected = False
+            self.exit_stack = AsyncExitStack()
+            
+            logger.info("Connection closed successfully")
+            
+        except Exception:
+            logger.exception("Unexpected error in close connection")
+            raise
