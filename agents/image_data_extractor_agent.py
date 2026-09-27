@@ -2,7 +2,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 from configs.logger import get_logger
 from llm_handler.vision_llm import VisionLLmHandler
-from schema.job_image_schema import JobImageDetails
+from schema.job_image_schema import JobDetails
 
 logger = get_logger("image-data-extractor-agent")
 
@@ -15,7 +15,7 @@ class ImageDataExtractorAgent:
             
             vision_llm_handler = VisionLLmHandler
             self.vision_llm = vision_llm_handler.get_vision_llm().with_structured_output(
-                JobImageDetails
+                JobDetails
             )
             
             self.prompt = ChatPromptTemplate.from_messages(

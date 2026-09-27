@@ -6,7 +6,8 @@ from client_server_sources.topjob_client_server import TopJobClientServerSource
 from configs.configurations import TOPJOB_SERVER_URL
 from configs.logger import get_logger
 from mcp_client.client import MCPClient
-from schema.job_image_schema import JobImageDetails
+from schema.job_image_schema import JobDetails
+from schema.job_schema import Job
 from schema.query_schema import QuerySchema
 from workflow.workflow_state import WorkflowState
 
@@ -61,6 +62,7 @@ class AgentWorkflow:
             graph.add_node("query_handler_node", self.query_handler_node)
             graph.add_node("topjob_search_node", self.topjob_search_node)
             graph.add_node("image_data_handler_node", self.image_data_handler_node)
+            graph.add_node("get_full_job_summary_node", self.get_full_job_summary_node)
             
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -123,7 +125,7 @@ class AgentWorkflow:
             logger.info("Relavant jobs extracted")
             
             return {
-                
+                "source": "topjob",
                 "topjob_summary": job_list,
                 "topjob_images_urls": relavant_job_images
             }         
@@ -148,7 +150,7 @@ class AgentWorkflow:
                     logger.info(f"Extracting {job_title}...")
                     
                     if not image_urls:
-                        results[job_title] = JobImageDetails().model_dump()
+                        results[job_title] = JobDetails().model_dump()
                         continue
                 
                     images = [
@@ -170,7 +172,7 @@ class AgentWorkflow:
                     
                 except Exception:
                     logger.exception("Failed to extract image data for job: %s", job_title)
-                    results[job_title] = JobImageDetails().model_dump()
+                    results[job_title] = JobDetails().model_dump()
             
             logger.info("Job images final details are fetched")    
                             
@@ -180,4 +182,57 @@ class AgentWorkflow:
             
         except Exception:
             logger.exception("Unexpected error in image data handler node")
+            raise
+        
+        
+    async def get_full_job_summary_node(self, state: WorkflowState):
+        
+        try:
+            
+            source = state.get("source", "")
+            complete_job_details = []
+            
+            if source == "topjob":
+                job_list = state.get("topjob_summary")
+                topjob_image_details = state.get("topjob_images_details", {})
+                topjob_image_urls = state.get("topjob_images_urls", {})
+                
+                for job in job_list:
+                    
+                    job = job.model_dump()
+                    job_title = job.get("job_title")
+                    
+                    image_data = topjob_image_details.get(job_title)
+                    
+                    if not image_data:
+                        logger.warning(
+                            f"No image details found for job: {job_title}"
+                        )
+                        continue
+                        
+                            
+                    job_summary = Job(
+                        source= source,
+                        job_url= topjob_image_urls[job_title],
+                        company= job.get("company", ""),
+                        description= image_data["description"],
+                        responsibilities= image_data["responsibilities"],
+                        requirments= image_data["requirements"],
+                        location= job.get("location", ""),
+                        salary= image_data["salary"],
+                        starting_date= job.get("starting_date", ""),
+                        closing_date= job.get("closing_date", "")
+                    )
+                    
+                    complete_job_details.append(job_summary)
+                    logger.info(f"Topjob job is listed: {job_title}")
+ 
+                logger.info("Topjob- job listing is finished")
+                
+            return {
+                "complete_job_details": complete_job_details
+            }
+            
+        except Exception:
+            logger.exception("Unexpected error in get full job summary")
             raise
