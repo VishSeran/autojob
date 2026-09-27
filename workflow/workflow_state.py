@@ -16,10 +16,10 @@ class WorkflowState(TypedDict):
     no_of_jobs: int
     current_resume: str
     
-    topjob_summary: list[TopJobSummary]
-    topjob_images_urls: dict
-    topjob_images_details: dict
-    topjob_complete_job_details: dict
+    topjob_summary: list[TopJobSummary] 
+    topjob_images_urls: dict 
+    topjob_images_details: dict 
+    topjob_complete_job_details: dict 
     
     #job_summary: list[TopJobSummary]
     complete_job_details: list[Job]
