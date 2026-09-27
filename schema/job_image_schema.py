@@ -7,3 +7,4 @@ class JobDetails(BaseModel):
     description: str | None = None
     responsibilities: str | None = None
     requirements: str | None = None
+    salary: str | None = None

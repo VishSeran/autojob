@@ -189,6 +189,7 @@ class AgentWorkflow:
         try:
             
             source = state.get("source", "")
+            complete_job_details = []
             
             if source == "topjob":
                 job_list = state.get("topjob_summary")
@@ -200,18 +201,36 @@ class AgentWorkflow:
                     job = job.model_dump()
                     job_title = job.get("job_title")
                     
-                    for topjob_image_detail_job_title, data in topjob_image_details.items():
-                        topjob_title = topjob_image_detail_job_title
+                    image_data = topjob_image_details.get(job_title)
+                    
+                    if not image_data:
+                        logger.warning(
+                            f"No image details found for job: {job_title}"
+                        )
+                        continue
                         
-                        if job_title == topjob_title:
                             
-                            job_summary = Job(
-                                source= source,
-                                job_url= topjob_image_urls[job_title],
-                                company= job.get("company", ""),
-                                description= data[]
-                            )
+                    job_summary = Job(
+                        source= source,
+                        job_url= topjob_image_urls[job_title],
+                        company= job.get("company", ""),
+                        description= image_data["description"],
+                        responsibilities= image_data["responsibilities"],
+                        requirments= image_data["requirements"],
+                        location= job.get("location", ""),
+                        salary= image_data["salary"],
+                        starting_date= job.get("starting_date", ""),
+                        closing_date= job.get("closing_date", "")
+                    )
+                    
+                    complete_job_details.append(job_summary)
+                    logger.info(f"Topjob job is listed: {job_title}")
+ 
+                logger.info("Topjob- job listing is finished")
                 
+            return {
+                "complete_job_details": complete_job_details
+            }
             
         except Exception:
             logger.exception("Unexpected error in get full job summary")

@@ -22,7 +22,7 @@ class WorkflowState(TypedDict):
     topjob_complete_job_details: dict
     
     #job_summary: list[TopJobSummary]
-    job_complete_job_details: list[Job]
+    complete_job_details: list[Job]
  
     job_relavance_score: float
     is_relavance: bool
