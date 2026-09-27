@@ -62,6 +62,7 @@ class AgentWorkflow:
             graph.add_node("query_handler_node", self.query_handler_node)
             graph.add_node("topjob_search_node", self.topjob_search_node)
             graph.add_node("image_data_handler_node", self.image_data_handler_node)
+            graph.add_node("get_full_job_summary_node", self.get_full_job_summary_node)
             
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -184,7 +185,7 @@ class AgentWorkflow:
             raise
         
         
-    async def get_full_job_summary(self, state: WorkflowState):
+    async def get_full_job_summary_node(self, state: WorkflowState):
         
         try:
             
