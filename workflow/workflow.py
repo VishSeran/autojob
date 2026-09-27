@@ -9,6 +9,7 @@ from mcp_client.client import MCPClient
 from schema.job_image_schema import JobDetails
 from schema.job_schema import Job
 from schema.query_schema import QuerySchema
+from schema.topjob_summary_schema import TopJobSummary
 from workflow.workflow_state import WorkflowState
 
 logger = get_logger("agent-workflow")
@@ -118,9 +119,19 @@ class AgentWorkflow:
                 limit
             )
             
+            if not job_list:
+                logger.info("No relevant jobs found")
+
+                return {
+                    "source": "topjob",
+                    "topjob_summary": [],
+                    "topjob_images_urls": {}
+                }
+   
             relavant_job_images = await self.topjob_client_server_Source.get_jobs_details(
                 job_list
             )   
+            
             
             logger.info("Relavant jobs extracted")
             
@@ -138,43 +149,46 @@ class AgentWorkflow:
     async def image_data_handler_node(self, state: WorkflowState):
         
         try:
-            job_images_urls = state.get("topjob_images_urls", {})
             
+            source = state.get("source", "")
             results = {}
             
-            for job_title, image_urls in job_images_urls.items():
-                
-                try:
+            if source == "topjob":
+                job_images_urls = state.get("topjob_images_urls", {})
+
+                for job_title, image_urls in job_images_urls.items():
                     
-                
-                    logger.info(f"Extracting {job_title}...")
-                    
-                    if not image_urls:
-                        results[job_title] = JobDetails().model_dump()
-                        continue
-                
-                    images = [
+                    try:
                         
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": img_url
+                    
+                        logger.info(f"Extracting {job_title}...")
+                        
+                        if not image_urls:
+                            results[job_title] = JobDetails().model_dump()
+                            continue
+                    
+                        images = [
+                            
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": img_url
+                                }
                             }
-                        }
+                            
+                            for img_url in image_urls
+                        ]
                         
-                        for img_url in image_urls
-                    ]
+                        response  = await self.image_handler_agent.get_vision_response(images)
+                        logger.info("Image data response is fetched")
+                        
+                        results[job_title] = response.model_dump()
                     
-                    response  = await self.image_handler_agent.get_vision_response(images)
-                    logger.info("Image data response is fetched")
-                    
-                    results[job_title] = response.model_dump()
-                    
-                except Exception:
-                    logger.exception("Failed to extract image data for job: %s", job_title)
-                    results[job_title] = JobDetails().model_dump()
+                    except Exception:
+                        logger.exception("Failed to extract image data for job: %s", job_title)
+                        results[job_title] = JobDetails().model_dump()
             
-            logger.info("Job images final details are fetched")    
+                logger.info("TopJob job images final details are fetched")    
                             
             return {
                 "topjob_images_details": results
