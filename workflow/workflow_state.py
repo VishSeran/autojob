@@ -8,6 +8,7 @@ class WorkflowState(TypedDict):
     
     query: str
     
+    source: str
     keyword: str
     location: str
     job_field: str

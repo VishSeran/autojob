@@ -5,7 +5,6 @@ from pydantic import BaseModel
 class Job(BaseModel):
     
     source: str
-    job_id: str
     job_url: str
     title: str
     company: str
@@ -16,5 +15,6 @@ class Job(BaseModel):
     
     location: str | None = None
     salary: str | None = None
+    starting_date : str | None = None
     closing_date: str | None = None
     

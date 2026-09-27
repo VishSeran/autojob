@@ -123,7 +123,7 @@ class AgentWorkflow:
             logger.info("Relavant jobs extracted")
             
             return {
-                
+                "source": "topjob",
                 "topjob_summary": job_list,
                 "topjob_images_urls": relavant_job_images
             }         
@@ -186,6 +186,8 @@ class AgentWorkflow:
     async def get_full_job_summary(self, state: WorkflowState):
         
         try:
+            
+            
             
             
         except Exception:
