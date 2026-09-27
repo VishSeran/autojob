@@ -5,7 +5,7 @@ from pydantic import BaseModel
 class Job(BaseModel):
     
     source: str
-    job_url: str
+    job_url: list[str]
     title: str
     company: str
     

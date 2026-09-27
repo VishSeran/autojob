@@ -6,7 +6,8 @@ from client_server_sources.topjob_client_server import TopJobClientServerSource
 from configs.configurations import TOPJOB_SERVER_URL
 from configs.logger import get_logger
 from mcp_client.client import MCPClient
-from schema.job_image_schema import JobImageDetails
+from schema.job_image_schema import JobDetails
+from schema.job_schema import Job
 from schema.query_schema import QuerySchema
 from workflow.workflow_state import WorkflowState
 
@@ -148,7 +149,7 @@ class AgentWorkflow:
                     logger.info(f"Extracting {job_title}...")
                     
                     if not image_urls:
-                        results[job_title] = JobImageDetails().model_dump()
+                        results[job_title] = JobDetails().model_dump()
                         continue
                 
                     images = [
@@ -170,7 +171,7 @@ class AgentWorkflow:
                     
                 except Exception:
                     logger.exception("Failed to extract image data for job: %s", job_title)
-                    results[job_title] = JobImageDetails().model_dump()
+                    results[job_title] = JobDetails().model_dump()
             
             logger.info("Job images final details are fetched")    
                             
@@ -187,8 +188,30 @@ class AgentWorkflow:
         
         try:
             
+            source = state.get("source", "")
             
-            
+            if source == "topjob":
+                job_list = state.get("topjob_summary")
+                topjob_image_details = state.get("topjob_images_details", {})
+                topjob_image_urls = state.get("topjob_images_urls", {})
+                
+                for job in job_list:
+                    
+                    job = job.model_dump()
+                    job_title = job.get("job_title")
+                    
+                    for topjob_image_detail_job_title, data in topjob_image_details.items():
+                        topjob_title = topjob_image_detail_job_title
+                        
+                        if job_title == topjob_title:
+                            
+                            job_summary = Job(
+                                source= source,
+                                job_url= topjob_image_urls[job_title],
+                                company= job.get("company", ""),
+                                description= data[]
+                            )
+                
             
         except Exception:
             logger.exception("Unexpected error in get full job summary")
