@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class JobImageDetails(BaseModel):
+class JobDetails(BaseModel):
     
     description: str | None = None
     responsibilities: str | None = None

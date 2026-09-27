@@ -181,3 +181,13 @@ class AgentWorkflow:
         except Exception:
             logger.exception("Unexpected error in image data handler node")
             raise
+        
+        
+    async def get_full_job_summary(self, state: WorkflowState):
+        
+        try:
+            
+            
+        except Exception:
+            logger.exception("Unexpected error in get full job summary")
+            raise
