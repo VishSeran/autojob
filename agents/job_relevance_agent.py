@@ -147,6 +147,12 @@ class JobRelevanceAgent:
         
         try:
             
+            if not candidate_profile:
+                raise ValueError("candidate profile data is missing")
+            
+            if not job_details:
+                raise ValueError("job details are missing")
+            
             response = await self.chain.ainvoke({
                 "candidate_profile": candidate_profile,
                 "job": job_details
