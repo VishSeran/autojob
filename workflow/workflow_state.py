@@ -24,8 +24,8 @@ class WorkflowState(TypedDict):
     #job_summary: list[TopJobSummary]
     complete_job_details: list[Job]
  
-    job_relavance_score: float
-    is_relavance: bool
+    job_relevance_score: float
+    is_relevance: bool
     
     updated_resume: str
     cover_letter: str
