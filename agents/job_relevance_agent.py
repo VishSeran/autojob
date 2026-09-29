@@ -149,7 +149,14 @@ class JobRelevanceAgent:
         
         try:
             
-            pass
+            response = await self.chain.ainvoke({
+                "candidate_profile": candidate_profile,
+                "job": job_details
+            })
+            
+            logger.info("Response has fetched")
+            return response
+            
         except ValueError:
             logger.exception("Unexpected value error in get response")
             raise
