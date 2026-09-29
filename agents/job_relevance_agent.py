@@ -3,6 +3,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 from configs.logger import get_logger
 from llm_handler.llms import LLMHandler
+from schema.relavance_schema import RelevanceSchema
 
 
 logger = get_logger("job-relavance-agent")
@@ -14,7 +15,7 @@ class JobRelevanceAgent:
         try:
             
             self.llm_handler = LLMHandler()
-            self.llm = self.llm_handler.get_llm().with_structured_output()
+            self.llm = self.llm_handler.get_llm().with_structured_output(RelevanceSchema)
             self.prompt = ChatPromptTemplate.from_messages([
                 (
                     "system",
