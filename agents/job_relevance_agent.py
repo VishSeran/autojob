@@ -143,3 +143,19 @@ class JobRelevanceAgent:
         except Exception:
             logger.exception("Unexpected error in job relavance agent")
             raise
+        
+        
+    async def get_response(self, candidate_profile, job_details):
+        
+        try:
+            
+            pass
+        except ValueError:
+            logger.exception("Unexpected value error in get response")
+            raise
+            
+        except Exception:
+            logger.exception("Unexpected error in get response")
+            raise
+        
+        
