@@ -14,9 +14,7 @@ class JobRelavanceAgent:
         try:
             
             self.llm_handler = LLMHandler()
-            
             self.llm = self.llm_handler.get_llm().with_structured_output()
-            
             self.prompt = ChatPromptTemplate.from_messages([
                 (
                     "system",
@@ -137,6 +135,9 @@ class JobRelavanceAgent:
                     """
                 )
             ])
+            
+            self.chain = self.prompt | self.llm
+            logger.info("Job relavance agent chain is created")
             
         except Exception:
             logger.exception("Unexpected error in job relavance agent")
