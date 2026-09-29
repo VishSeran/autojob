@@ -7,7 +7,7 @@ from llm_handler.llms import LLMHandler
 
 logger = get_logger("job-relavance-agent")
 
-class JobRelavanceAgent:
+class JobRelevanceAgent:
     
     def __init__(self):
         
@@ -137,7 +137,7 @@ class JobRelavanceAgent:
             ])
             
             self.chain = self.prompt | self.llm
-            logger.info("Job relavance agent chain is created")
+            logger.info("Job relevance agent chain is created")
             
         except Exception:
             logger.exception("Unexpected error in job relavance agent")
