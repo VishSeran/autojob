@@ -149,6 +149,33 @@ class ProfileExtractorAgent:
             ])
             
             
+            self.chain = self.prompt | self.llm
+            logger.info("profile extractor chain is created")
+            
         except Exception:
             logger.exception("Unexpected error in profile extractor agent")
+            raise
+        
+        
+    async def get_response(self, resume):
+        
+        try:
+            
+            if not resume:
+                raise RuntimeError("resume is missing")
+            
+            response = await self.chain.ainvoke({
+                "resume_text": resume
+            })
+            
+            logger.info("Response is fetched")
+            return response
+            
+        
+        except Exception:
+            logger.exception("Unexpected value error in get response")
+            raise
+            
+        except Exception:
+            logger.exception("Unexpected error in get response")
             raise
