@@ -162,7 +162,7 @@ class ProfileExtractorAgent:
         try:
             
             if not resume:
-                raise RuntimeError("resume is missing")
+                raise ValueError("resume is missing")
             
             response = await self.chain.ainvoke({
                 "resume_text": resume
@@ -172,7 +172,7 @@ class ProfileExtractorAgent:
             return response
             
         
-        except Exception:
+        except ValueError:
             logger.exception("Unexpected value error in get response")
             raise
             
