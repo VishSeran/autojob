@@ -20,45 +20,31 @@ class ResumeDocumentHandler:
     def load(self, resume_path: str | None = None):
         
         try:
-            
+         
             if not resume_path:
-                self.current_resume_path = self.get_latest_resume()
-                logger.info(f"Proceeding with latest uploaded resume: {self.current_resume_path}")
-                
-            else:
-                self.current_resume_path = self.get_latest_resume()
-
-                logger.info(
-                    f"Proceeding with latest uploaded resume: "
-                    f"{self.current_resume_path}"
-                )
+                raise ValueError("Resume is not found") 
             
-            if not self.current_resume_path:
-                raise RuntimeError("Resume is not found") 
-            
-            if Path(self.current_resume_path).suffix.lower() == ".pdf":
+            if Path(resume_path).suffix.lower() == ".pdf":
                 
-                self.loader = PyPDFLoader(self.current_resume_path)
+                self.loader = PyPDFLoader(resume_path)
                 
-            elif Path(self.current_resume_path).suffix.lower() == ".docx":
+            elif Path(resume_path).suffix.lower() == ".docx":
                 
-                self.loader = Docx2txtLoader(self.current_resume_path)
+                self.loader = Docx2txtLoader(resume_path)
                 
             else:
                 raise RuntimeError("Uploaded document is not in support format")
             
             self.documents = self.loader.load()
             return self.documents
+        
+        except ValueError:
+            logger.exception("Unexpected value error in resume handler")
+            raise
       
         except Exception:
             logger.exception("Unexpected error in resume handler")
             raise
     
-    
-    def save_latest_resume(self, resume_path):
-        
-        pass
-        
-    def get_latest_resume(self):
         
         
