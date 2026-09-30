@@ -276,3 +276,13 @@ class AgentWorkflow:
         except Exception:
             logger.exception("Unexpected error in profile extractor")
             raise
+        
+        
+    async def relevancy_node(self, state: WorkflowState):
+        
+        try:
+            pass
+            
+        except Exception:
+            logger.exception("Unexpected error in relevancy node")
+            raise
