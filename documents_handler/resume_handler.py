@@ -1,3 +1,5 @@
+from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader
+
 
 from pathlib import Path
 
@@ -13,6 +15,8 @@ class ResumeDocumentHandler:
         
         self.resume = None
         self.current_resume_path = None
+        self.loader = None
+        self.documents = None
         
     def load(self, resume_path: str | None = None):
         
@@ -30,10 +34,19 @@ class ResumeDocumentHandler:
             if not self.current_resume_path:
                 raise RuntimeError("Resume is not found") 
             
-            if self.current_resume_path.            
+            if Path(self.current_resume_path).suffix.lower() == ".pdf":
                 
-        
+                self.loader = PyPDFLoader(self.current_resume_path)
+                self.documents = self.loader.load()
                 
+            elif Path(self.current_resume_path).suffix.lower() == ".docx":
+                
+                self.loader = Docx2txtLoader(self.current_resume_path)
+                self.documents = self.loader.load()
+                
+            else:
+                raise RuntimeError("Uploaded document is not in support format")
+      
         except Exception:
             logger.exception("Unexpected error in resume handler")
             raise
