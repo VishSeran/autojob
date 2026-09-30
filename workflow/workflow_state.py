@@ -4,7 +4,6 @@ from typing import TypedDict
 from langchain_core.documents import Document
 
 from schema.job_schema import Job
-from schema.relavance_schema import RelevanceSchema
 from schema.resume_schema import ResumeSchema
 from schema.topjob_summary_schema import TopJobSummary
 
@@ -29,8 +28,7 @@ class WorkflowState(TypedDict):
     
     complete_job_details: list[Job]
  
-    job_relevancy: list[dict[str, ResumeSchema]]
-    is_relevance: list[dict[str, bool]]
+    job_relevancy: list[dict[str, bool | ResumeSchema]]
     
     updated_resume: ResumeSchema
     cover_letter: str

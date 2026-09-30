@@ -6,14 +6,13 @@ from agents.job_relevance_agent import JobRelevanceAgent
 from agents.profile_extractor_agent import ProfileExtractorAgent
 from agents.query_extractor_agent import QueryHandlerAgent
 from client_server_sources.topjob_client_server import TopJobClientServerSource
-from configs.configurations import TOPJOB_SERVER_URL
+from configs.configurations import JOB_RELEVANCY_THRESHOLD, TOPJOB_SERVER_URL
 from configs.logger import get_logger
 from mcp_client.client import MCPClient
 from schema.job_image_schema import JobDetails
 from schema.job_schema import Job
 from schema.query_schema import QuerySchema
 from schema.resume_schema import ResumeSchema
-from schema.topjob_summary_schema import TopJobSummary
 from workflow.workflow_state import WorkflowState
 
 logger = get_logger("agent-workflow")
@@ -32,7 +31,7 @@ class AgentWorkflow:
             self.profile_extractor_agent = ProfileExtractorAgent()
             self.job_relevancy_agent = JobRelevanceAgent()
             
-            logger.info("Agents are initialized")
+            logger.info("workflow - Agents are initialized")
             self.build_workflow()
             logger.info("Workflow build is completed")
             
@@ -45,7 +44,7 @@ class AgentWorkflow:
         
         try:
             await self.topjob_mcp_client.init_connection()
-            logger.info("Topjob mcp client is connected")
+            logger.info("workflow - Topjob mcp client is connected")
             
             self.topjob_client_server_Source = TopJobClientServerSource(
                 self.topjob_mcp_client
@@ -90,7 +89,7 @@ class AgentWorkflow:
                 }
                 
             response: QuerySchema = await self.query_handler_agent.get_response(query)
-            logger.info("query response is fetched")
+            logger.info("workflow - query response is fetched")
             
             return {
                 "keyword": response.keyword,
@@ -139,7 +138,7 @@ class AgentWorkflow:
             )   
             
             
-            logger.info("Relavant jobs extracted")
+            logger.info("workflow - Relavant jobs extracted")
             
             return {
                 "source": "topjob",
@@ -194,7 +193,7 @@ class AgentWorkflow:
                         logger.exception("Failed to extract image data for job: %s", job_title)
                         results[job_title] = JobDetails().model_dump()
             
-                logger.info("TopJob job images final details are fetched")    
+                logger.info("workflow - TopJob job images final details are fetched")    
                             
             return {
                 "topjob_images_details": results
@@ -247,7 +246,7 @@ class AgentWorkflow:
                     complete_job_details.append(job_summary)
                     logger.info(f"Topjob job is listed: {job_title}")
  
-                logger.info("Topjob- job listing is finished")
+                logger.info("workflow - Topjob- job listing is finished")
                 
             return {
                 "complete_job_details": complete_job_details
@@ -269,7 +268,7 @@ class AgentWorkflow:
             )
             
             response = await self.profile_extractor_agent.get_response(resume_text)
-            logger.info("Response is fetched")
+            logger.info("workflow - Response is fetched")
             
             return {
                 "profile_data": response
@@ -286,6 +285,9 @@ class AgentWorkflow:
             
             profile = state.get("profile_data", ResumeSchema())
             jobs = state.get("complete_job_details", [])
+            
+            job_relevancy = []
+            is_relevant = False
             
             profile_data = profile.model_dump()
             profile_detail = f"""
@@ -313,7 +315,38 @@ class AgentWorkflow:
                 starting_date : {job.get("starting_date", "")}
                 closing_date: {job.get("closing_date", "")}
                 """
+                
+                relevancy_response = await self.job_relevancy_agent.get_response(
+                    candidate_profile=profile_detail,
+                    job_details= job_detail
+                )
+                
+                logger.info("workflow - Relevancy response is fetched")
+                
+                relevance_score = relevancy_response.model_dump().get("relevance_score", 10) 
+
+                if relevance_score >= JOB_RELEVANCY_THRESHOLD:
+                    is_relevant = True
+                    
+                else:
+                    is_relevant = False
+                
+                
+                per_job_relevancy_summary = {
+                    
+                    job.get("title", ""): relevancy_response,
+                    "is_relevant": is_relevant
+                }
+                
+                job_relevancy.append(per_job_relevancy_summary)
+                logger.info(f"workflow - relevancy results of {job.get('title', '')} is added")
+                
             
+            logger.info("workflow - Final job relevancy results have fetched")
+            return {
+                "job_relevancy": job_relevancy
+            }
+
         except Exception:
             logger.exception("Unexpected error in relevancy node")
             raise
