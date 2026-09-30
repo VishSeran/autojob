@@ -9,6 +9,7 @@ from mcp_client.client import MCPClient
 from schema.job_image_schema import JobDetails
 from schema.job_schema import Job
 from schema.query_schema import QuerySchema
+from schema.resume_schema import ResumeSchema
 from schema.topjob_summary_schema import TopJobSummary
 from workflow.workflow_state import WorkflowState
 
@@ -249,4 +250,18 @@ class AgentWorkflow:
             
         except Exception:
             logger.exception("Unexpected error in get full job summary")
+            raise
+        
+        
+    async def profile_extractor_node(self, state:WorkflowState):
+        
+        try:
+            current_resume = state.get("current_resume",ResumeSchema())
+            
+            
+            
+            
+            
+        except Exception:
+            logger.exception("Unexpected error in profile extractor")
             raise

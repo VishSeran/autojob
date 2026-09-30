@@ -1,7 +1,6 @@
-from langchain_community.document_loaders import PyPDFLoader, Docx2txtLoader
-
-
 from pathlib import Path
+
+from langchain_community.document_loaders import Docx2txtLoader, PyPDFLoader
 
 from configs.configurations import STORAGE_DIR
 from configs.logger import get_logger
@@ -44,7 +43,7 @@ class ResumeDocumentHandler:
       
         except Exception:
             logger.exception("Unexpected error in resume handler")
-            raise
+
     
         
         
