@@ -54,8 +54,7 @@ class AgentWorkflow:
             logger.exception('Unexpected error in worlflow initialize')
             raise
         
-        
-        
+ 
     def build_workflow(self):
         
         try:
@@ -68,6 +67,7 @@ class AgentWorkflow:
             graph.add_node("topjob_search_node", self.topjob_search_node)
             graph.add_node("image_data_handler_node", self.image_data_handler_node)
             graph.add_node("get_full_job_summary_node", self.get_full_job_summary_node)
+            graph.add_node("profile_extractor_node", self.profile_extractor_node)
             
         except Exception:
             logger.exception("Unexpected error in build workflow")
