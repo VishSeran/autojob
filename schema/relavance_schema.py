@@ -7,6 +7,8 @@ from pydantic import BaseModel, Field
 
 class RelevanceSchema(BaseModel):
     
+    job_title: str
+    
     relavance_assesment: Literal[
         "Highly relevant",
         "Relevant",

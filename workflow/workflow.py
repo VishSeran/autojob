@@ -2,6 +2,7 @@ from langchain_core.documents import Document
 from langgraph.graph import StateGraph
 
 from agents.image_data_extractor_agent import ImageDataExtractorAgent
+from agents.job_relevance_agent import JobRelevanceAgent
 from agents.profile_extractor_agent import ProfileExtractorAgent
 from agents.query_extractor_agent import QueryHandlerAgent
 from client_server_sources.topjob_client_server import TopJobClientServerSource
@@ -29,6 +30,7 @@ class AgentWorkflow:
             self.query_handler_agent = QueryHandlerAgent()
             self.image_handler_agent = ImageDataExtractorAgent()
             self.profile_extractor_agent = ProfileExtractorAgent()
+            self.job_relevancy_agent = JobRelevanceAgent()
             
             logger.info("Agents are initialized")
             self.build_workflow()
@@ -281,7 +283,36 @@ class AgentWorkflow:
     async def relevancy_node(self, state: WorkflowState):
         
         try:
-            pass
+            
+            profile = state.get("profile_data", ResumeSchema())
+            jobs = state.get("complete_job_details", [])
+            
+            profile_data = profile.model_dump()
+            profile_detail = f"""
+                personal_details: {profile_data.get("personal_details", [])}
+                education: {profile_data.get("education", [])}
+                skills: {profile_data.get("skills", [])}
+                experiences: {profile_data.get("experiences", [])} 
+                projects: {profile_data.get("projects", [])}
+                certifications: {profile_data.get("certifications", [])}
+                extra_curricular_activities: {profile_data.get("extra_curricular_activities", [])}
+            """
+            
+            for job in jobs:
+                
+                job = job.model_dump()
+                job_detail = f"""
+                
+                Job title: {job.get("title", "")}
+                company: {job.get("company", "")}
+                description: {job.get("description", "")}
+                responsibilities: {job.get("responsibilities", "")}
+                requirments: {job.get("requirments", "")}
+                location: {job.get("location", "")}
+                salary: {job.get("salary", "")}
+                starting_date : {job.get("starting_date", "")}
+                closing_date: {job.get("closing_date", "")}
+                """
             
         except Exception:
             logger.exception("Unexpected error in relevancy node")
