@@ -1,6 +1,8 @@
+from langchain_core.documents import Document
 from langgraph.graph import StateGraph
 
 from agents.image_data_extractor_agent import ImageDataExtractorAgent
+from agents.profile_extractor_agent import ProfileExtractorAgent
 from agents.query_extractor_agent import QueryHandlerAgent
 from client_server_sources.topjob_client_server import TopJobClientServerSource
 from configs.configurations import TOPJOB_SERVER_URL
@@ -26,6 +28,7 @@ class AgentWorkflow:
             self.topjob_client_server_Source = None
             self.query_handler_agent = QueryHandlerAgent()
             self.image_handler_agent = ImageDataExtractorAgent()
+            self.profile_extractor_agent = ProfileExtractorAgent()
             
             logger.info("Agents are initialized")
             self.build_workflow()
@@ -256,12 +259,20 @@ class AgentWorkflow:
     async def profile_extractor_node(self, state:WorkflowState):
         
         try:
-            current_resume = state.get("current_resume",ResumeSchema())
             
+            current_resume:list[Document] = state.get("current_resume", [])
             
+            resume_text = "\n".join(
+                doc.page_content for doc in current_resume
+            )
             
+            response = await self.profile_extractor_agent.get_response(resume_text)
+            logger.info("Response is fetched")
             
-            
+            return {
+                "profile_data": response
+            }
+
         except Exception:
             logger.exception("Unexpected error in profile extractor")
             raise

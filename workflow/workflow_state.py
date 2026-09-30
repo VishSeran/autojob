@@ -19,7 +19,7 @@ class WorkflowState(TypedDict):
     no_of_jobs: int
     
     current_resume: list[Document]
-    profile: ResumeSchema
+    profile_data: ResumeSchema
     
     topjob_summary: list[TopJobSummary] 
     topjob_images_urls: dict 
