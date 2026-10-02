@@ -7,7 +7,9 @@ class Job(BaseModel):
     source: str
     job_url: list[str]
     title: str
-    company: str
+    company_name: str
+    company_email: str
+    company_contact: str
     
     description: str | None = None
     responsibilities: str | None = None

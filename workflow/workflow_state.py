@@ -28,7 +28,7 @@ class WorkflowState(TypedDict):
     
     complete_job_details: list[Job]
  
-    job_relevancy: list[dict[str, bool | ResumeSchema]]
+    relevant_jobs_list: list[dict]
     
     updated_resume: ResumeSchema
     cover_letter: str

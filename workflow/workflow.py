@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from langchain_core.documents import Document
 from langgraph.graph import StateGraph
 
@@ -17,12 +19,11 @@ from workflow.workflow_state import WorkflowState
 
 logger = get_logger("agent-workflow")
 
+
 class AgentWorkflow:
-    
     def __init__(self):
-        
+
         try:
-            
             self.workflow = None
             self.topjob_mcp_client = MCPClient(TOPJOB_SERVER_URL)
             self.topjob_client_server_Source = None
@@ -30,265 +31,227 @@ class AgentWorkflow:
             self.image_handler_agent = ImageDataExtractorAgent()
             self.profile_extractor_agent = ProfileExtractorAgent()
             self.job_relevancy_agent = JobRelevanceAgent()
-            
+
             logger.info("workflow - Agents are initialized")
             self.build_workflow()
             logger.info("Workflow build is completed")
-            
+
         except Exception:
             logger.exception("Unexpected error in agent workflow")
             raise
-        
-        
+
     async def initialize(self):
-        
+
         try:
             await self.topjob_mcp_client.init_connection()
             logger.info("workflow - Topjob mcp client is connected")
-            
+
             self.topjob_client_server_Source = TopJobClientServerSource(
                 self.topjob_mcp_client
             )
-            
-            
+
         except Exception:
-            logger.exception('Unexpected error in worlflow initialize')
+            logger.exception("Unexpected error in worlflow initialize")
             raise
-        
- 
+
     def build_workflow(self):
-        
+
         try:
-            
             if self.workflow is not None:
-                raise RuntimeError("Workflow is already running") 
-            
+                raise RuntimeError("Workflow is already running")
+
             graph = StateGraph(WorkflowState)
             graph.add_node("query_handler_node", self.query_handler_node)
             graph.add_node("topjob_search_node", self.topjob_search_node)
             graph.add_node("image_data_handler_node", self.image_data_handler_node)
             graph.add_node("get_full_job_summary_node", self.get_full_job_summary_node)
             graph.add_node("profile_extractor_node", self.profile_extractor_node)
-            
+            graph.add_node("relevancy_node", self.relevancy_node)
+
         except Exception:
             logger.exception("Unexpected error in build workflow")
             raise
-        
-        
-    async def query_handler_node(self, state:WorkflowState):
-        
+
+    async def query_handler_node(self, state: WorkflowState):
+
         try:
-            
             query = state.get("query", "")
-            
+
             if not query:
                 final_answer = "It seems like you have no questions my friend."
-                
-                return {
-                    "final_response" : final_answer
-                }
-                
+
+                return {"final_response": final_answer}
+
             response: QuerySchema = await self.query_handler_agent.get_response(query)
             logger.info("workflow - query response is fetched")
-            
+
             return {
                 "keyword": response.keyword,
                 "location": response.location,
                 "job_field": response.field,
-                "no_of_jobs": response.number_of_jobs
+                "no_of_jobs": response.number_of_jobs,
             }
-                
 
         except ValueError:
             logger.exception("Unexpected value error in query handler node")
-            raise    
-        
+            raise
+
         except Exception:
             logger.exception("Unexpected error in query handler node")
             raise
-        
-        
+
     async def topjob_search_node(self, state: WorkflowState):
 
         try:
-            
             keyword = state.get("keyword", "")
             location = state.get("location", "")
             field = state.get("job_field", "")
             limit = state.get("no_of_jobs")
-            
+
             job_list = await self.topjob_client_server_Source.search_jobs(
-                keyword,
-                location,
-                field,
-                limit
+                keyword, location, field, limit
             )
-            
+
             if not job_list:
                 logger.info("No relevant jobs found")
 
                 return {
                     "source": "topjob",
                     "topjob_summary": [],
-                    "topjob_images_urls": {}
+                    "topjob_images_urls": {},
                 }
-   
-            relavant_job_images = await self.topjob_client_server_Source.get_jobs_details(
-                job_list
-            )   
-            
-            
+
+            relavant_job_images = (
+                await self.topjob_client_server_Source.get_jobs_details(job_list)
+            )
+
             logger.info("workflow - Relavant jobs extracted")
-            
+
             return {
                 "source": "topjob",
                 "topjob_summary": job_list,
-                "topjob_images_urls": relavant_job_images
-            }         
-            
+                "topjob_images_urls": relavant_job_images,
+            }
+
         except Exception:
             logger.exception("Unexpected error in job search node")
             raise
-    
-        
+
     async def image_data_handler_node(self, state: WorkflowState):
-        
+
         try:
-            
             source = state.get("source", "")
             results = {}
-            
+
             if source == "topjob":
                 job_images_urls = state.get("topjob_images_urls", {})
 
                 for job_title, image_urls in job_images_urls.items():
-                    
                     try:
-                        
-                    
                         logger.info(f"Extracting {job_title}...")
-                        
+
                         if not image_urls:
                             results[job_title] = JobDetails().model_dump()
                             continue
-                    
+
                         images = [
-                            
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": img_url
-                                }
-                            }
-                            
+                            {"type": "image_url", "image_url": {"url": img_url}}
                             for img_url in image_urls
                         ]
-                        
-                        response  = await self.image_handler_agent.get_vision_response(images)
+
+                        response = await self.image_handler_agent.get_vision_response(
+                            images
+                        )
                         logger.info("Image data response is fetched")
-                        
+
                         results[job_title] = response.model_dump()
-                    
+
                     except Exception:
-                        logger.exception("Failed to extract image data for job: %s", job_title)
+                        logger.exception(
+                            "Failed to extract image data for job: %s", job_title
+                        )
                         results[job_title] = JobDetails().model_dump()
-            
-                logger.info("workflow - TopJob job images final details are fetched")    
-                            
-            return {
-                "topjob_images_details": results
-            }
-            
+
+                logger.info("workflow - TopJob job images final details are fetched")
+
+            return {"topjob_images_details": results}
+
         except Exception:
             logger.exception("Unexpected error in image data handler node")
             raise
-        
-        
+
     async def get_full_job_summary_node(self, state: WorkflowState):
-        
+
         try:
-            
             source = state.get("source", "")
             complete_job_details = []
-            
+
             if source == "topjob":
                 job_list = state.get("topjob_summary")
                 topjob_image_details = state.get("topjob_images_details", {})
                 topjob_image_urls = state.get("topjob_images_urls", {})
-                
+
                 for job in job_list:
-                    
                     job = job.model_dump()
                     job_title = job.get("job_title")
-                    
+
                     image_data = topjob_image_details.get(job_title)
-                    
+
                     if not image_data:
-                        logger.warning(
-                            f"No image details found for job: {job_title}"
-                        )
+                        logger.warning(f"No image details found for job: {job_title}")
                         continue
-                        
-                            
+
                     job_summary = Job(
                         source= source,
                         job_url= topjob_image_urls[job_title],
-                        company= job.get("company", ""),
+                        company_name= job.get("company_name", ""),
+                        company_email= image_data["company_email", ""],
+                        company_contact= image_data["company_contact", ""],
                         description= image_data["description"],
                         responsibilities= image_data["responsibilities"],
                         requirments= image_data["requirements"],
                         location= job.get("location", ""),
                         salary= image_data["salary"],
                         starting_date= job.get("starting_date", ""),
-                        closing_date= job.get("closing_date", "")
+                        closing_date= job.get("closing_date", ""),
                     )
-                    
+
                     complete_job_details.append(job_summary)
                     logger.info(f"Topjob job is listed: {job_title}")
- 
+
                 logger.info("workflow - Topjob- job listing is finished")
-                
-            return {
-                "complete_job_details": complete_job_details
-            }
-            
+
+            return {"complete_job_details": complete_job_details}
+
         except Exception:
             logger.exception("Unexpected error in get full job summary")
             raise
-        
-        
-    async def profile_extractor_node(self, state:WorkflowState):
-        
+
+    async def profile_extractor_node(self, state: WorkflowState):
+
         try:
-            
-            current_resume:list[Document] = state.get("current_resume", [])
-            
-            resume_text = "\n".join(
-                doc.page_content for doc in current_resume
-            )
-            
+            current_resume: list[Document] = state.get("current_resume", [])
+
+            resume_text = "\n".join(doc.page_content for doc in current_resume)
+
             response = await self.profile_extractor_agent.get_response(resume_text)
             logger.info("workflow - Response is fetched")
-            
-            return {
-                "profile_data": response
-            }
+
+            return {"profile_data": response}
 
         except Exception:
             logger.exception("Unexpected error in profile extractor")
             raise
-        
-        
+
     async def relevancy_node(self, state: WorkflowState):
-        
+
         try:
-            
             profile = state.get("profile_data", ResumeSchema())
             jobs = state.get("complete_job_details", [])
-            
+
             job_relevancy = []
             is_relevant = False
-            
+
             profile_data = profile.model_dump()
             profile_detail = f"""
                 personal_details: {profile_data.get("personal_details", [])}
@@ -299,14 +262,13 @@ class AgentWorkflow:
                 certifications: {profile_data.get("certifications", [])}
                 extra_curricular_activities: {profile_data.get("extra_curricular_activities", [])}
             """
-            
+
             for job in jobs:
-                
                 job = job.model_dump()
                 job_detail = f"""
                 
                 Job title: {job.get("title", "")}
-                company: {job.get("company", "")}
+                company_name: {job.get("company_name", "")}
                 description: {job.get("description", "")}
                 responsibilities: {job.get("responsibilities", "")}
                 requirments: {job.get("requirments", "")}
@@ -315,38 +277,46 @@ class AgentWorkflow:
                 starting_date : {job.get("starting_date", "")}
                 closing_date: {job.get("closing_date", "")}
                 """
-                
-                relevancy_response = await self.job_relevancy_agent.get_response(
-                    candidate_profile=profile_detail,
-                    job_details= job_detail
-                )
-                
-                logger.info("workflow - Relevancy response is fetched")
-                
-                relevance_score = relevancy_response.model_dump().get("relevance_score", 10) 
 
-                if relevance_score >= JOB_RELEVANCY_THRESHOLD:
-                    is_relevant = True
-                    
-                else:
-                    is_relevant = False
+                relevancy_response = await self.job_relevancy_agent.get_response(
+                    candidate_profile=profile_detail, job_details=job_detail
+                )
+
+                logger.info("workflow - Relevancy response is fetched")
+
+                relevance_score = relevancy_response.relevancy_score
+
+                is_relevant = relevance_score >= JOB_RELEVANCY_THRESHOLD
                 
-                
+                if not is_relevant:
+                    continue
+
                 per_job_relevancy_summary = {
-                    
-                    job.get("title", ""): relevancy_response,
-                    "is_relevant": is_relevant
+                    "job_title": job.get("title", ""),
+                    "company_name": job.get("company_name", ""),
+                    "relevance_score": relevance_score,
+                    "is_relevant": is_relevant,
+                    "relevancy_details": relevancy_response,
                 }
-                
+
                 job_relevancy.append(per_job_relevancy_summary)
-                logger.info(f"workflow - relevancy results of {job.get('title', '')} is added")
-                
-            
+                logger.info(
+                    f"workflow - relevancy results of {job.get('title', '')} is added"
+                )
+
             logger.info("workflow - Final job relevancy results have fetched")
-            return {
-                "job_relevancy": job_relevancy
-            }
+
+            return {"relevant_jobs_list": job_relevancy}
 
         except Exception:
             logger.exception("Unexpected error in relevancy node")
+            raise
+
+    async def decision_making_node(self, state: WorkflowState):
+
+        try:
+            relevant_jobs_list = state.get("relevant_jobs_list", [])
+
+        except Exception:
+            logger.exception("Unexpected error in ats analyze node")
             raise
