@@ -319,11 +319,20 @@ class AgentWorkflow:
 
         try:
             relevant_jobs_list = state.get("relevant_jobs_list", [])
+            current_job_index = state.get("current_job_index", 0)
             
-            for job_item in relevant_jobs_list:
+            if current_job_index > len(relevant_jobs_list):
+                return {
+                    "current_job": None
+                }
                 
-                job_obj: Job = job_item.get("job", Job())
-                job_data = job_obj.model_dump()
+            current_job = relevant_jobs_list[current_job_index]
+            
+            return {
+                "current_job": current_job,
+                "user_decision": None
+            }
+            
                 
                 
             
