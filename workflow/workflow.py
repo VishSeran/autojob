@@ -264,6 +264,8 @@ class AgentWorkflow:
             """
 
             for job in jobs:
+                
+                job_object = job
                 job = job.model_dump()
                 job_detail = f"""
                 
@@ -297,6 +299,7 @@ class AgentWorkflow:
                     "relevance_score": relevance_score,
                     "is_relevant": is_relevant,
                     "relevancy_details": relevancy_response,
+                    "job": job_object
                 }
 
                 job_relevancy.append(per_job_relevancy_summary)
@@ -316,6 +319,15 @@ class AgentWorkflow:
 
         try:
             relevant_jobs_list = state.get("relevant_jobs_list", [])
+            
+            for job_item in relevant_jobs_list:
+                
+                job_obj: Job = job_item.get("job", Job())
+                job_data = job_obj.model_dump()
+                
+                
+            
+            
 
         except Exception:
             logger.exception("Unexpected error in ats analyze node")
