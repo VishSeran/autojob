@@ -420,7 +420,22 @@ class AgentWorkflow:
         
         try:
             
-            pass
+            candidate_profile = state.get("profile_data", ResumeSchema())
+            current_job = state.get("current_job",{})
+            
+            if not current_job:
+                raise ValueError("Current job is missing")
+            
+            job_details = current_job['job'].model_dump()
+            
+            
+            candidate_details = candidate_profile.model_dump()
+            
+            response = await self.cover_letter_agent.get_llm_response(
+                candidate_profile=candidate_details,
+                job_details=job_details
+            )
+            
         except Exception:
             logger.exception("Unexpected error in cover letter node")
             raise
