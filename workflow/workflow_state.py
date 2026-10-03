@@ -1,5 +1,5 @@
 
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 from langchain_core.documents import Document
 
@@ -32,7 +32,9 @@ class WorkflowState(TypedDict):
     current_job_index: int 
     current_job: dict | None
     
-    user_decision: str | None
+    user_decision: Literal[
+        "approve", "reject",
+    ] | None
     
     updated_resume: ResumeSchema
     cover_letter: str

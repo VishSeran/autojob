@@ -68,6 +68,8 @@ class AgentWorkflow:
             graph.add_node("get_full_job_summary_node", self.get_full_job_summary_node)
             graph.add_node("profile_extractor_node", self.profile_extractor_node)
             graph.add_node("relevancy_node", self.relevancy_node)
+            graph.add_node("decision_making_node", self.decision_making_node)
+            graph.add_node("next_job_node", self.next_job_node)
 
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -334,14 +336,17 @@ class AgentWorkflow:
         except Exception:
             logger.exception("Unexpected error in relevancy node")
             raise
+        
 
     async def decision_making_node(self, state: WorkflowState):
 
         try:
+            
             relevant_jobs_list = state.get("relevant_jobs_list", [])
             current_job_index = state.get("current_job_index", 0)
             
             if current_job_index > len(relevant_jobs_list):
+                
                 return {
                     "current_job": None
                 }
@@ -352,12 +357,44 @@ class AgentWorkflow:
                 "current_job": current_job,
                 "user_decision": None
             }
-            
-                
-                
-            
-            
 
         except Exception:
             logger.exception("Unexpected error in ats analyze node")
             raise
+
+        
+    async def user_decision(self, state: WorkflowState):
+        
+        try:
+            
+            user_decision = state.get("user_decision", "")
+            
+            if user_decision == "approve":
+                return "cover_letter"
+            
+            elif user_decision == "reject":
+                return "next_job"
+            
+            else:
+                return "wait"
+            
+        except Exception:
+            logger.exception("Unexpected error in user decision")
+            raise
+        
+        
+    async def next_job_node(self, state:WorkflowState):
+        
+        try:
+            
+            current_job_index = state.get("current_job_index", 0)
+            
+            return {
+                "current_job_index": current_job_index + 1,
+                "user_decision": None
+            }
+             
+        except Exception:
+            logger.exception("Unexpected error in next job node")
+            raise
+    
