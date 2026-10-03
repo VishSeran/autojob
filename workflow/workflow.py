@@ -3,6 +3,7 @@ import asyncio
 from langchain_core.documents import Document
 from langgraph.graph import StateGraph
 
+from agents.cover_letter_agent import CoverLetterAgent
 from agents.image_data_extractor_agent import ImageDataExtractorAgent
 from agents.job_relevance_agent import JobRelevanceAgent
 from agents.profile_extractor_agent import ProfileExtractorAgent
@@ -32,6 +33,7 @@ class AgentWorkflow:
             self.image_handler_agent = ImageDataExtractorAgent()
             self.profile_extractor_agent = ProfileExtractorAgent()
             self.job_relevancy_agent = JobRelevanceAgent()
+            self.cover_letter_agent = CoverLetterAgent()
 
             logger.info("workflow - Agents are initialized")
             self.build_workflow()
@@ -411,5 +413,15 @@ class AgentWorkflow:
         
         except Exception:
             logger.exception("Unexpected error in next job node")
+            raise
+        
+        
+    async def cover_letter_node(self, state:WorkflowState):
+        
+        try:
+            
+            pass
+        except Exception:
+            logger.exception("Unexpected error in cover letter node")
             raise
     
