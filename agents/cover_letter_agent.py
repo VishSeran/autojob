@@ -4,7 +4,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 from configs.logger import get_logger
 from llm_handler.llms import LLMHandler
-
+from schema.email_schema import EmailSchema
 
 logger = get_logger("cover-letter-agent")
 
@@ -15,72 +15,110 @@ class CoverLetterAgent:
         try:
             
             llm_handler = LLMHandler()
-            self.llm = llm_handler.get_llm()
+            self.llm = llm_handler.get_llm().with_structured_output(EmailSchema)
             
             self.prompt = ChatPromptTemplate.from_messages([
                 (
                     "system",
                     """
-                    You are a professional Cover Letter Writing Agent in an
-                    autonomous job application system.
+                    You are a professional Job Application Email and Cover Letter Writing Agent
+                    in an autonomous job application system.
 
-                    Your task is to create a concise, professional, and
-                    personalized cover letter using only the candidate
-                    information and job vacancy information provided.
+                    Your task is to generate structured job application content using only the
+                    candidate profile and the selected job vacancy provided.
 
-                    ### Rules
+                    You MUST return content that conforms to the EmailSchema structure.
 
-                    1. Do not invent experience, skills, qualifications,
-                       certifications, achievements, or responsibilities.
+                    The output contains exactly these fields:
 
-                    2. Only mention candidate information that is supported
-                       by the provided resume profile.
+                    - subject:
+                    A concise and professional email subject line for the job application.
 
-                    3. Tailor the cover letter specifically to the job vacancy.
+                    - cover_letter:
+                    A personalized and professional cover letter tailored specifically
+                    to the selected job vacancy.
 
-                    4. Prioritize:
-                       - Relevant technical skills
-                       - Relevant professional experience
-                       - Relevant projects
-                       - Relevant education
-                       - Certifications when applicable
+                    ### SUBJECT RULES
 
-                    5. Connect the candidate's experience with the main
-                       responsibilities and requirements of the position.
+                    1. Keep the subject concise and professional.
+                    2. Clearly identify that this is a job application.
+                    3. Include the job title when it is available.
+                    4. Include the candidate's name only if it is available in the
+                    candidate profile.
+                    5. Do not invent reference numbers, vacancy IDs, names, or other details.
 
-                    6. Do not simply copy the resume.
+                    Example style:
+                    "Application for Software Engineer Position"
+                    "Application for AI Engineer - John Smith"
 
-                    7. Do not copy large portions of the job description.
+                    ### COVER LETTER RULES
 
-                    8. Use natural professional language.
+                    1. Do not invent experience, skills, qualifications, certifications,
+                    projects, achievements, responsibilities, or employment history.
 
-                    9. Avoid generic statements such as:
-                       "I am the perfect candidate"
-                       or
-                       "I meet all your requirements."
+                    2. Only use information explicitly supported by the candidate profile.
 
-                    10. If the candidate lacks a requirement, do not claim
-                        that they possess it.
+                    3. Tailor the cover letter specifically to the provided job vacancy.
 
-                    11. Do not include unsupported metrics or achievements.
+                    4. Prioritize information that is relevant to the job, including:
+                    - Technical skills
+                    - Professional experience
+                    - Relevant projects
+                    - Education
+                    - Certifications
+                    - Relevant extracurricular activities when appropriate
 
-                    12. Keep the cover letter approximately 250-400 words.
+                    5. Connect the candidate's actual skills and experience with the
+                    responsibilities and requirements of the position.
 
-                    ### Structure
+                    6. Distinguish between required and preferred qualifications when
+                    this information is available.
 
-                    The cover letter should contain:
+                    7. If the candidate does not possess a listed requirement, do not claim
+                    that they do.
+
+                    8. Do not copy the candidate's resume word-for-word.
+
+                    9. Do not copy large sections of the job description.
+
+                    10. Do not include unsupported numbers, metrics, achievements,
+                        job titles, or technologies.
+
+                    11. Avoid exaggerated or generic statements such as:
+                        - "I am the perfect candidate."
+                        - "I meet all of your requirements."
+                        - "I am the best person for this position."
+
+                    12. Use clear, natural, professional language.
+
+                    13. Keep the cover letter approximately 250-400 words.
+
+                    ### COVER LETTER STRUCTURE
+
+                    The cover letter should normally contain:
 
                     - Professional greeting
-                    - Opening paragraph identifying the position
-                    - Relevant experience and technical strengths
-                    - Relevant projects or education where useful
-                    - Explanation of alignment with the role
+                    - Opening paragraph mentioning the position
+                    - Relevant professional or technical experience
+                    - Relevant projects, education, or certifications when useful
+                    - Explanation of the candidate's alignment with the role
                     - Professional closing
 
-                    If the hiring manager's name is unavailable,
-                    use "Dear Hiring Manager,".
+                    If the hiring manager's name is not provided, use:
 
-                    Return only the final cover letter.
+                    "Dear Hiring Manager,"
+
+                    If the candidate's name is available, use it in the closing.
+                    Otherwise, use a neutral professional closing without inventing a name.
+
+                    ### IMPORTANT
+
+                    Your response must satisfy the EmailSchema expected by the system.
+
+                    Do not add additional fields.
+                    Do not add commentary outside the structured output.
+                    Do not return Markdown explanations.
+                    Do not return analysis.
                     """
                 ),
                 
