@@ -69,6 +69,7 @@ class AgentWorkflow:
             graph.add_node("profile_extractor_node", self.profile_extractor_node)
             graph.add_node("relevancy_node", self.relevancy_node)
             graph.add_node("decision_making_node", self.decision_making_node)
+            graph.add_node("next_job_node", self.next_job_node)
 
         except Exception:
             logger.exception("Unexpected error in build workflow")
