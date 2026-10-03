@@ -471,7 +471,14 @@ class AgentWorkflow:
     async def final_review_decision_node(self, state: WorkflowState):
         
         try:
-            pass
+            
+            is_review_email = state.get("review_email", True)
+            
+            if is_review_email:
+                return "preview_node"
+            
+            else:
+                return "send_mail"
             
         except Exception:
             logger.exception("Unexpected error in final review decision node")
