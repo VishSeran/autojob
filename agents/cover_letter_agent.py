@@ -112,7 +112,21 @@ class CoverLetterAgent:
     async def get_llm_response(self, candidate_profile, job_details):
         
         try:
-            pass
+            
+            if not candidate_profile:
+                raise ValueError("Candidate profile is missing")
+            
+            if not job_details:
+                raise ValueError("Job details are missing")
+            
+            response = await self.chain.ainvoke({
+                
+                "candidate_profile": candidate_profile,
+                "job_details": job_details
+            })
+            
+            logger.info("Response has fetched")
+            return response
         
         
         except ValueError:
