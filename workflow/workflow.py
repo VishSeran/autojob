@@ -381,4 +381,14 @@ class AgentWorkflow:
             logger.exception("Unexpected error in user decision")
             raise
         
+        
+    async def next_job_node(self, state:WorkflowState):
+        
+        try:
+            
+            current_job_index = state.get("current_job_index",0)
+             
+        except Exception:
+            logger.exception("Unexpected error in next job node")
+            raise
     
