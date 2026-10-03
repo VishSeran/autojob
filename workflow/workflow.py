@@ -466,4 +466,14 @@ class AgentWorkflow:
         except Exception:
             logger.exception("Unexpected error in cover letter node")
             raise
+        
+        
+    async def final_review_decision_node(self, state: WorkflowState):
+        
+        try:
+            pass
+            
+        except Exception:
+            logger.exception("Unexpected error in final review decision node")
+            raise
     
