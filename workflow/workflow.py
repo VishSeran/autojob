@@ -388,12 +388,27 @@ class AgentWorkflow:
         try:
             
             current_job_index = state.get("current_job_index", 0)
+            current_job = state.get("current_job")
+            
+            if current_job is None:
+                raise ValueError("No current job available to reject")
+
+            
+            rejected_jobs = state.get("rejected_jobs", [])
+            rejected_job = current_job['job']             
+        
             
             return {
+                
+                "rejected_jobs": [*rejected_jobs, rejected_job],
                 "current_job_index": current_job_index + 1,
                 "user_decision": None
             }
-             
+            
+        except ValueError:
+            logger.exception("Unexpected value error in next job node")
+            raise
+        
         except Exception:
             logger.exception("Unexpected error in next job node")
             raise
