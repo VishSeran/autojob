@@ -42,5 +42,8 @@ class WorkflowState(TypedDict):
     updated_resume: ResumeSchema
     email_details: dict 
     
+    review_email: bool = True
+    edit_email: bool = False
+    
     final_response: dict
      

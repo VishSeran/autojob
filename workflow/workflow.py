@@ -72,6 +72,7 @@ class AgentWorkflow:
             graph.add_node("relevancy_node", self.relevancy_node)
             graph.add_node("decision_making_node", self.decision_making_node)
             graph.add_node("next_job_node", self.next_job_node)
+            graph.add_node("cover_letter_node", self.cover_letter_node)
 
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -447,12 +448,14 @@ class AgentWorkflow:
             logger.info("workflow - cover letter generated successfully")
  
             email_details = {
+                
                 "company_email": company_email,
                 "subject": results['subject'],
                 "cover_letter": results['cover_letter']
             }
             
             return {
+                
                 "cover_letter": email_details
             }
         
