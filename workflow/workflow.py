@@ -404,7 +404,11 @@ class AgentWorkflow:
                 "current_job_index": current_job_index + 1,
                 "user_decision": None
             }
-             
+            
+        except ValueError:
+            logger.exception("Unexpected value error in next job node")
+            raise
+        
         except Exception:
             logger.exception("Unexpected error in next job node")
             raise
