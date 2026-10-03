@@ -386,7 +386,12 @@ class AgentWorkflow:
         
         try:
             
-            current_job_index = state.get("current_job_index",0)
+            current_job_index = state.get("current_job_index", 0)
+            
+            return {
+                "current_job_index": current_job_index + 1,
+                "user_decision": None
+            }
              
         except Exception:
             logger.exception("Unexpected error in next job node")
