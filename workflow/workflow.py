@@ -388,14 +388,19 @@ class AgentWorkflow:
         try:
             
             current_job_index = state.get("current_job_index", 0)
-            relevant_jobs_list = state.get("relevant_jobs_list", [])
-            rejected_jobs = state.get("rejected_jobs", [])
+            current_job = state.get("current_job")
             
-            rejected_job = relevant_jobs_list[current_job_index]['job']             
-            rejected_jobs.append(rejected_job)
+            if current_job is None:
+                raise ValueError("No current job available to reject")
+
+            
+            rejected_jobs = state.get("rejected_jobs", [])
+            rejected_job = current_job['job']             
+        
             
             return {
-                "rejected_jobs": rejected_jobs,
+                
+                "rejected_jobs": [*rejected_jobs, rejected_job],
                 "current_job_index": current_job_index + 1,
                 "user_decision": None
             }
