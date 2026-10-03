@@ -3,6 +3,7 @@ import asyncio
 from langchain_core.documents import Document
 from langgraph.graph import StateGraph
 
+from agents.cover_letter_agent import CoverLetterAgent
 from agents.image_data_extractor_agent import ImageDataExtractorAgent
 from agents.job_relevance_agent import JobRelevanceAgent
 from agents.profile_extractor_agent import ProfileExtractorAgent
@@ -32,6 +33,7 @@ class AgentWorkflow:
             self.image_handler_agent = ImageDataExtractorAgent()
             self.profile_extractor_agent = ProfileExtractorAgent()
             self.job_relevancy_agent = JobRelevanceAgent()
+            self.cover_letter_agent = CoverLetterAgent()
 
             logger.info("workflow - Agents are initialized")
             self.build_workflow()
@@ -411,5 +413,41 @@ class AgentWorkflow:
         
         except Exception:
             logger.exception("Unexpected error in next job node")
+            raise
+        
+        
+    async def cover_letter_node(self, state:WorkflowState):
+        
+        try:
+            
+            candidate_profile = state.get("profile_data", ResumeSchema())
+            current_job = state.get("current_job",{})
+            
+            if not current_job:
+                raise ValueError("Current job is missing")
+            
+            job_details = current_job['job'].model_dump()
+            candidate_details = candidate_profile.model_dump()
+            
+            if not job_details:
+                raise ValueError("Job details are missing from current job")
+            
+            response = await self.cover_letter_agent.get_llm_response(
+                candidate_profile=candidate_details,
+                job_details=job_details
+            )
+            
+            logger.info("workflow - cover letter generated successfully")
+            
+            return {
+                "cover_letter": response
+            }
+        
+        except ValueError:
+            logger.exception("Invalid data in cover letter node")
+            raise
+        
+        except Exception:
+            logger.exception("Unexpected error in cover letter node")
             raise
     
