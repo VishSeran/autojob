@@ -40,7 +40,7 @@ class WorkflowState(TypedDict):
     rejected_jobs: list[Job]
     
     updated_resume: ResumeSchema
-    cover_letter: str
+    email_details: dict 
     
     final_response: dict
      

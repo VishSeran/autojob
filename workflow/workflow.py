@@ -427,20 +427,33 @@ class AgentWorkflow:
                 raise ValueError("Current job is missing")
             
             job_details = current_job['job'].model_dump()
+            
             candidate_details = candidate_profile.model_dump()
             
             if not job_details:
                 raise ValueError("Job details are missing from current job")
+            
+            company_email = job_details.get("company_email")
+            
+            if not company_email:
+                raise ValueError("Company email is missing from job details")
             
             response = await self.cover_letter_agent.get_llm_response(
                 candidate_profile=candidate_details,
                 job_details=job_details
             )
             
+            results = response.model_dump()
             logger.info("workflow - cover letter generated successfully")
+ 
+            email_details = {
+                "company_email": company_email,
+                "subject": results['subject'],
+                "cover_letter": results['cover_letter']
+            }
             
             return {
-                "cover_letter": response
+                "cover_letter": email_details
             }
         
         except ValueError:
