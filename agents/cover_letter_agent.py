@@ -107,3 +107,18 @@ class CoverLetterAgent:
         except Exception:
             logger.exception("Unexpected error in cover letter agent initialization")
             raise
+        
+        
+    async def get_llm_response(self, candidate_profile, job_details):
+        
+        try:
+            pass
+        
+        
+        except ValueError:
+            logger.exception("Unexpected value error in get llm response")
+            raise
+            
+        except Exception:
+            logger.exception("Unexpected error in get llm response")
+            raise
