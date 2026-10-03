@@ -36,6 +36,9 @@ class WorkflowState(TypedDict):
         "approve", "reject",
     ] | None
     
+    approved_jobs: list[Job]
+    rejected_jobs: list[Job]
+    
     updated_resume: ResumeSchema
     cover_letter: str
     
