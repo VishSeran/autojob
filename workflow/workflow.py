@@ -427,15 +427,26 @@ class AgentWorkflow:
                 raise ValueError("Current job is missing")
             
             job_details = current_job['job'].model_dump()
-            
-            
             candidate_details = candidate_profile.model_dump()
+            
+            if not job_details:
+                raise ValueError("Job details are missing from current job")
             
             response = await self.cover_letter_agent.get_llm_response(
                 candidate_profile=candidate_details,
                 job_details=job_details
             )
             
+            logger.info("workflow - cover letter generated successfully")
+            
+            return {
+                "cover_letter": response
+            }
+        
+        except ValueError:
+            logger.exception("Invalid data in cover letter node")
+            raise
+        
         except Exception:
             logger.exception("Unexpected error in cover letter node")
             raise
