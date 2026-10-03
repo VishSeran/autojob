@@ -28,8 +28,11 @@ class WorkflowState(TypedDict):
     
     complete_job_details: list[Job]
  
-    job_relevance_score: float
-    is_relevance: bool
+    relevant_jobs_list: list[dict]
+    current_job_index: int 
+    current_job: dict | None
+    
+    user_decision: str | None
     
     updated_resume: ResumeSchema
     cover_letter: str
