@@ -74,6 +74,7 @@ class AgentWorkflow:
             graph.add_node("decision_making_node", self.decision_making_node)
             graph.add_node("next_job_node", self.next_job_node)
             graph.add_node("cover_letter_node", self.cover_letter_node)
+            graph.add_node("email_review_node", self.final_review_node)
 
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -493,4 +494,11 @@ class AgentWorkflow:
         except Exception:
             logger.exception("Unexpected error in final review decision node")
             raise
-    
+        
+        
+    async def final_review_route(self, state:WorkflowState):
+        
+        try: 
+            
+            
+            
