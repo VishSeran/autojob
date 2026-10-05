@@ -500,5 +500,14 @@ class AgentWorkflow:
         
         try: 
             
+            email_review_response = state.get("email_review_response",{} )
             
+            if not email_review_response:
+                raise ValueError("email review response is missing")
+            
+            if 
+         
+        except Exception:
+            logger.exception("Unexpected error in final review node")
+            raise   
             
