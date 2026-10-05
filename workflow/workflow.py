@@ -533,8 +533,19 @@ class AgentWorkflow:
                 return "send_email" 
             
             raise ValueError(f"Unsupported decision: {decision}")
+        
+        except ValueError:
+            logger.exception("Unexpected value error in final review node")
+            raise  
          
         except Exception:
             logger.exception("Unexpected error in final review node")
             raise   
+        
+        
+    async def send_mail_node(self, state: WorkflowState):
+        
+        try:
+            
+        except Exception
             
