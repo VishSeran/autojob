@@ -71,7 +71,7 @@ class AgentWorkflow:
             graph.add_node("get_full_job_summary_node", self.get_full_job_summary_node)
             graph.add_node("profile_extractor_node", self.profile_extractor_node)
             graph.add_node("relevancy_node", self.relevancy_node)
-            graph.add_node("decision_making_node", self.decision_making_node)
+            graph.add_node("job_selection_node", self.job_selection_node)
             graph.add_node("next_job_node", self.next_job_node)
             graph.add_node("cover_letter_node", self.cover_letter_node)
             graph.add_node("email_review_node", self.final_review_node)
@@ -343,7 +343,7 @@ class AgentWorkflow:
             raise
         
 
-    async def decision_making_node(self, state: WorkflowState):
+    async def job_selection_node(self, state: WorkflowState):
 
         try:
             
@@ -358,9 +358,15 @@ class AgentWorkflow:
                 
             current_job = relevant_jobs_list[current_job_index]
             
+            decision = interrupt({
+                "type": "job_review",
+                "message": "review the job for approve or reject"
+            })
+            
             return {
+                
                 "current_job": current_job,
-                "user_decision": None
+                "user_decision": decision
             }
 
         except Exception:
@@ -374,10 +380,12 @@ class AgentWorkflow:
             
             user_decision = state.get("user_decision", "")
             
-            if user_decision == "approve":
+            decision = user_decision.get('decision')
+            
+            if decision == "approve":
                 return "cover_letter"
             
-            elif user_decision == "reject":
+            elif decision == "reject":
                 return "next_job"
             
             else:
