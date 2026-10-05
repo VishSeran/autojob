@@ -2,6 +2,7 @@ import asyncio
 
 from langchain_core.documents import Document
 from langgraph.graph import StateGraph
+from langgraph.types import Command, interrupt
 
 from agents.cover_letter_agent import CoverLetterAgent
 from agents.image_data_extractor_agent import ImageDataExtractorAgent
@@ -472,13 +473,20 @@ class AgentWorkflow:
         
         try:
             
-            is_review_email = state.get("review_email", True)
+            email_data = state.get("email_details",{})
             
-            if is_review_email:
-                return "preview_node"
+            if not email_data:
+                raise ValueError("Application email is missing")
             
-            else:
-                return "send_mail"
+            decision = interrupt({
+                
+                "type":"email_review",
+                "email": email_data,
+                "message": "Review, edit, and approve this email."
+            })
+            
+            user_decision = decision['decision']
+            
             
         except Exception:
             logger.exception("Unexpected error in final review decision node")
