@@ -382,15 +382,17 @@ class AgentWorkflow:
             
             decision = user_decision.get('decision')
             
+            if not decision:
+                raise ValueError("User decision is missing")
+            
             if decision == "approve":
                 return "cover_letter"
             
-            elif decision == "reject":
+            if decision == "reject":
                 return "next_job"
             
-            else:
-                return "wait"
-            
+            raise ValueError(f"Unsupported decision: {decision}")
+        
         except Exception:
             logger.exception("Unexpected error in user decision")
             raise
