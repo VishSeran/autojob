@@ -359,8 +359,10 @@ class AgentWorkflow:
             current_job = relevant_jobs_list[current_job_index]
             
             decision = interrupt({
+                
                 "type": "job_review",
                 "message": "review the job for approve or reject"
+                
             })
             
             return {
@@ -378,7 +380,7 @@ class AgentWorkflow:
         
         try:
             
-            user_decision = state.get("user_decision", "")
+            user_decision = state.get("user_decision", {})
             
             decision = user_decision.get('decision')
             
