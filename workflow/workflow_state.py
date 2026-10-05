@@ -32,9 +32,7 @@ class WorkflowState(TypedDict):
     current_job_index: int 
     current_job: dict | None
     
-    user_decision: Literal[
-        "approve", "reject",
-    ] | None
+    user_decision: dict
     
     approved_jobs: list[Job]
     rejected_jobs: list[Job]
@@ -42,8 +40,7 @@ class WorkflowState(TypedDict):
     updated_resume: ResumeSchema
     email_details: dict 
     
-    review_email: bool = True
-    edit_email: bool = False
+    email_review_response: dict
     
     final_response: dict
      

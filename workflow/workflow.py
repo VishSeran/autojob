@@ -2,6 +2,7 @@ import asyncio
 
 from langchain_core.documents import Document
 from langgraph.graph import StateGraph
+from langgraph.types import Command, interrupt
 
 from agents.cover_letter_agent import CoverLetterAgent
 from agents.image_data_extractor_agent import ImageDataExtractorAgent
@@ -70,9 +71,10 @@ class AgentWorkflow:
             graph.add_node("get_full_job_summary_node", self.get_full_job_summary_node)
             graph.add_node("profile_extractor_node", self.profile_extractor_node)
             graph.add_node("relevancy_node", self.relevancy_node)
-            graph.add_node("decision_making_node", self.decision_making_node)
+            graph.add_node("job_selection_node", self.job_selection_node)
             graph.add_node("next_job_node", self.next_job_node)
             graph.add_node("cover_letter_node", self.cover_letter_node)
+            graph.add_node("email_review_node", self.final_review_node)
 
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -341,7 +343,7 @@ class AgentWorkflow:
             raise
         
 
-    async def decision_making_node(self, state: WorkflowState):
+    async def job_selection_node(self, state: WorkflowState):
 
         try:
             
@@ -356,9 +358,17 @@ class AgentWorkflow:
                 
             current_job = relevant_jobs_list[current_job_index]
             
+            decision = interrupt({
+                
+                "type": "job_review",
+                "message": "review the job for approve or reject"
+                
+            })
+            
             return {
+                
                 "current_job": current_job,
-                "user_decision": None
+                "user_decision": decision
             }
 
         except Exception:
@@ -366,21 +376,25 @@ class AgentWorkflow:
             raise
 
         
-    async def user_decision(self, state: WorkflowState):
+    async def job_selection_route(self, state: WorkflowState):
         
         try:
             
-            user_decision = state.get("user_decision", "")
+            user_decision = state.get("user_decision", {})
             
-            if user_decision == "approve":
+            decision = user_decision.get('decision')
+            
+            if not decision:
+                raise ValueError("User decision is missing")
+            
+            if decision == "approve":
                 return "cover_letter"
             
-            elif user_decision == "reject":
+            if decision == "reject":
                 return "next_job"
             
-            else:
-                return "wait"
-            
+            raise ValueError(f"Unsupported decision: {decision}")
+        
         except Exception:
             logger.exception("Unexpected error in user decision")
             raise
@@ -468,19 +482,70 @@ class AgentWorkflow:
             raise
         
         
-    async def final_review_decision_node(self, state: WorkflowState):
+    async def final_review_node(self, state: WorkflowState):
         
         try:
             
-            is_review_email = state.get("review_email", True)
+            email_data = state.get("email_details",{})
             
-            if is_review_email:
-                return "preview_node"
+            if not email_data:
+                raise ValueError("Application email is missing")
             
-            else:
-                return "send_mail"
+            decision = interrupt({
+                
+                "type":"email_review",
+                "email": email_data,
+                "message": "Review, edit, and approve this email."
+            })
+            
+            #{
+            #     "decision": "send",
+            #     "company_email": "abccompany@gmail.com"
+            #     "subject": "Application for AI Engineer",
+            #     "cover_letter": "Edited cover letter..."
+            #}
+            
+            return {
+
+                "email_review_response": decision
+            }
             
         except Exception:
             logger.exception("Unexpected error in final review decision node")
             raise
-    
+        
+        
+    async def final_review_route(self, state:WorkflowState):
+        
+        try: 
+            
+            email_review_response = state.get("email_review_response",{} )
+            
+            decision = email_review_response.get("decision")
+            
+            if not decision:
+                raise ValueError("email review response is missing")
+            
+            if decision == "cancel":
+                return "next_node"
+            
+            if decision == "send":
+                return "send_email" 
+            
+            raise ValueError(f"Unsupported decision: {decision}")
+        
+        except ValueError:
+            logger.exception("Unexpected value error in final review node")
+            raise  
+         
+        except Exception:
+            logger.exception("Unexpected error in final review node")
+            raise   
+        
+        
+    async def send_mail_node(self, state: WorkflowState):
+        
+        try:
+            
+        except Exception
+            
