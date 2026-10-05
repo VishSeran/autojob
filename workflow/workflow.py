@@ -374,7 +374,7 @@ class AgentWorkflow:
             raise
 
         
-    async def user_decision(self, state: WorkflowState):
+    async def job_selection_route(self, state: WorkflowState):
         
         try:
             
