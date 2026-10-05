@@ -486,6 +486,13 @@ class AgentWorkflow:
                 "message": "Review, edit, and approve this email."
             })
             
+            #{
+            #     "decision": "send",
+            #     "company_email": "abccompany@gmail.com"
+            #     "subject": "Application for AI Engineer",
+            #     "cover_letter": "Edited cover letter..."
+            #}
+            
             return {
 
                 "email_review_response": decision
@@ -502,10 +509,18 @@ class AgentWorkflow:
             
             email_review_response = state.get("email_review_response",{} )
             
-            if not email_review_response:
+            decision = email_review_response.get("decision")
+            
+            if not decision:
                 raise ValueError("email review response is missing")
             
-            if 
+            if decision == "cancel":
+                return "next_node"
+            
+            if decision == "send":
+                return "send_email" 
+            
+            raise ValueError(f"Unsupported decision: {decision}")
          
         except Exception:
             logger.exception("Unexpected error in final review node")
