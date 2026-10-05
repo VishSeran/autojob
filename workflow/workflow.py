@@ -469,7 +469,7 @@ class AgentWorkflow:
             raise
         
         
-    async def final_review_decision_node(self, state: WorkflowState):
+    async def final_review_node(self, state: WorkflowState):
         
         try:
             
@@ -485,8 +485,10 @@ class AgentWorkflow:
                 "message": "Review, edit, and approve this email."
             })
             
-            user_decision = decision['decision']
-            
+            return {
+
+                "email_review_response": decision
+            }
             
         except Exception:
             logger.exception("Unexpected error in final review decision node")
