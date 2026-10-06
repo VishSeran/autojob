@@ -14,6 +14,8 @@ app = FastAPI()
 dotenv.load_dotenv()
 session_secret = os.getenv("Session_Secret")
 
+
+#need session to temporary remember OAuth state
 app.add_middleware(
     SessionMiddleware,
     secret_key=session_secret
