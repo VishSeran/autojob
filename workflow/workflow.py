@@ -546,6 +546,9 @@ class AgentWorkflow:
     async def send_mail_node(self, state: WorkflowState):
         
         try:
-            
-        except Exception
+            pass
+        
+        except Exception:
+            logger.exception("Unexpected error in send mail node")
+            raise
             

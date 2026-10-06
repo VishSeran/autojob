@@ -1,7 +1,25 @@
+
 import asyncio
 import json
+import dotenv
+import os
+
+from fastapi import FastAPI
+from starlette.middleware.sessions import SessionMiddleware
+
 from sources.topjob_source import TopJobSource
 
+app = FastAPI()
+
+dotenv.load_dotenv()
+session_secret = os.getenv("Session_Secret")
+
+
+#need session to temporary remember OAuth state
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=session_secret
+)
 
 
 async def main():
