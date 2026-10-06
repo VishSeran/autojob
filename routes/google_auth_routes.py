@@ -9,9 +9,43 @@ router = APIRouter(
     tags=["google-auth"]
 )
 
+
 @router.get("")
 async def google_login(request:Request):
     
+    # What happens in the browser?
+    # The user visits:
+    # http://localhost:8000/auth/google
+
+    # Your backend responds:
+    # 302 Redirect
+
+    # Browser goes to Google:
+    # accounts.google.com
+
+    # Google says something like:
+    # AutoJobMe wants permission to:
+
+    # Send email on your behalf
+
+    # User clicks:
+    # Allow
+
+    # Google then redirects back to:
+    # http://localhost:8000/auth/google/callback
+
+    # Something like:
+    # http://localhost:8000/auth/google/callback
+    #     ?state=abc123
+    #     &code=4/0Aea...
+
+    # Two important values come back:
+    # state
+    # code
+
+    # The code is not your access token.
+    # It is a short-lived authorization code.
+
     flow = create_google_oauth_flow()
     
     authorization_url, state = flow.authorization_url(
@@ -22,3 +56,17 @@ async def google_login(request:Request):
     
     request.session['google_oauth_state'] = state
     return RedirectResponse(authorization_url)
+
+
+@router.get("/callback")
+async def google_callback(request:Request):
+    
+    
+    saved_state = request.session.get("google_oauth_state")
+    
+    if not saved_state:
+        raise ValueError ("OAuth state is missing")
+    
+    flow = create_google_oauth_flow(state=saved_state)
+
+
