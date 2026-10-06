@@ -68,5 +68,26 @@ async def google_callback(request:Request):
         raise ValueError ("OAuth state is missing")
     
     flow = create_google_oauth_flow(state=saved_state)
+    
+    authorization_response = str(request.url)
+    
+    flow.fetch_token(
+        authorization_response = authorization_response
+    )
+    
+    credentials = flow.credentials
+    
+    
+    return {
+        "message": "Gmail connected successfully",
+        "has_access_token": bool(credentials.token),
+        "has_refresh_token": bool(credentials.refresh_token),
+        "scopes": credentials.granted_scopes
+    }
+    
+    
+
+    
+    
 
 
