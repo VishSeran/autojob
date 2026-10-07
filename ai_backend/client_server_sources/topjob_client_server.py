@@ -1,5 +1,5 @@
 from configs.logger import get_logger
-from mcp_client.client import MCPClient
+from ai_backend.mcp_client.client import MCPClient
 from schema.topjob_summary_schema import TopJobSummary
 
 logger = get_logger("topjob-client-server-source")

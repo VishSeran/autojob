@@ -1,7 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate
 
 from configs.logger import get_logger
-from llm_handler.vision_llm import VisionLLmHandler
+from ai_backend.llm_handler.vision_llm import VisionLLmHandler
 from schema.job_image_schema import JobDetails
 
 logger = get_logger("image-data-extractor-agent")

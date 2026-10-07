@@ -1,7 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate
 
 from configs.logger import get_logger
-from llm_handler.llms import LLMHandler
+from ai_backend.llm_handler.llms import LLMHandler
 from schema.relavance_schema import RelevanceSchema
 
 logger = get_logger("job-relavance-agent")

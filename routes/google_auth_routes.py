@@ -1,9 +1,9 @@
 
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
+
 from auth.google_auth import create_google_oauth_flow
 from auth.token_store import save_credentials
-
 
 router = APIRouter(
     prefix="/auth/google",

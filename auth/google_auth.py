@@ -2,7 +2,6 @@ from google_auth_oauthlib.flow import Flow
 
 from configs.logger import get_logger
 
-
 CLIENT_SECRET = "secret/client_secret.json"
 REDIRECT_URI = "http://localhost:8000/auth/google/callback"
 

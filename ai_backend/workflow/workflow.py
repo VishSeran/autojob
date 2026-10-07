@@ -2,22 +2,24 @@ import asyncio
 
 from langchain_core.documents import Document
 from langgraph.graph import StateGraph
-from langgraph.types import Command, interrupt
+from langgraph.types import interrupt
 
-from agents.cover_letter_agent import CoverLetterAgent
-from agents.image_data_extractor_agent import ImageDataExtractorAgent
-from agents.job_relevance_agent import JobRelevanceAgent
-from agents.profile_extractor_agent import ProfileExtractorAgent
-from agents.query_extractor_agent import QueryHandlerAgent
-from client_server_sources.topjob_client_server import TopJobClientServerSource
+from ai_backend.agents.cover_letter_agent import CoverLetterAgent
+from ai_backend.agents.image_data_extractor_agent import ImageDataExtractorAgent
+from ai_backend.agents.job_relevance_agent import JobRelevanceAgent
+from ai_backend.agents.profile_extractor_agent import ProfileExtractorAgent
+from ai_backend.agents.query_extractor_agent import QueryHandlerAgent
+from ai_backend.client_server_sources.topjob_client_server import (
+    TopJobClientServerSource,
+)
+from ai_backend.mcp_client.client import MCPClient
+from ai_backend.workflow.workflow_state import WorkflowState
 from configs.configurations import JOB_RELEVANCY_THRESHOLD, TOPJOB_SERVER_URL
 from configs.logger import get_logger
-from mcp_client.client import MCPClient
 from schema.job_image_schema import JobDetails
 from schema.job_schema import Job
 from schema.query_schema import QuerySchema
 from schema.resume_schema import ResumeSchema
-from workflow.workflow_state import WorkflowState
 
 logger = get_logger("agent-workflow")
 
