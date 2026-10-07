@@ -38,3 +38,19 @@ class UserRepository:
             logger.exception("Unexpected error in create user")
             raise
             
+            
+    def get_by_email(self, email):
+        
+        try:
+            
+            if not email:
+                raise ValueError("Email cannot be empty")
+            
+            
+        except ValueError:
+            logger.exception("Unexpected value error in get by email")
+            raise
+            
+        except Exception:
+            logger.exception("Unexpected error in get by email")
+            raise
