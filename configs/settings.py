@@ -5,7 +5,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
 
-    DATABASE_URL = Field(validation_alias="DATABASE_URL")
+    DATABASE_URL:str = Field(validation_alias="DATABASE_URL")
+    groq_api: str
+    session_secret: str
     
     model_config = SettingsConfigDict(
         env_file=".env",
