@@ -69,3 +69,26 @@ class UserRepository:
         except Exception:
             logger.exception("Unexpected error in get by email")
             raise
+        
+        
+    def get_by_id(self, user_id) -> User | None:
+        
+        try:
+            
+            if not user_id:
+                raise ValueError("User Id cannot be empty")
+            
+            stmt = (
+                select(User).where(User.id == user_id)
+            )
+            
+            user = self.db.scalar(stmt)
+            return user
+            
+        except ValueError:
+            logger.exception("Unexpected value error in get by id")
+            raise
+            
+        except Exception:
+            logger.exception("Unexpected error in get by id")
+            raise
