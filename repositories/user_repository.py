@@ -39,12 +39,27 @@ class UserRepository:
             raise
             
             
-    def get_by_email(self, email):
+    def get_by_email(self, email) -> User | None:
         
         try:
             
             if not email:
                 raise ValueError("Email cannot be empty")
+            
+            # stmt means statement.
+            # It is basically a SQLAlchemy object representing the query.
+            # So stmt is like a prepared instruction.
+            stmt = (
+                select(User).where(
+                    User.email == email
+                )
+            )
+            
+            # This does NOT execute the database query yet.So stmt is like a prepared instruction.
+            # This is where the query actually gets executed:
+            user = self.db.scalar(stmt)
+            
+            return user
             
             
         except ValueError:
