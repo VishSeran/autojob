@@ -3,7 +3,6 @@
 import json
 from pathlib import Path
 
-
 TOKEN_FILE = Path("token_store.json").resolve()
 
 
@@ -37,6 +36,3 @@ def save_credentials(credentials):
 # There is no browser OAuth login happening anymore.
 # You load the saved credentials.
 
-def load_credentials():
-    
-    pass
