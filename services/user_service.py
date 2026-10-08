@@ -49,3 +49,23 @@ class UserService:
         except Exception:
             logger.exception("Unexpected error in create user")
             raise
+        
+    
+    def get_user_by_email(self, email) -> User | str:
+        
+        try:
+            
+            user = self.user_repository.get_by_email(email)
+            
+            if not user:
+                logger.warning(f"{email} - user not found")
+                return f"{email} - user not found"
+                
+            return user
+        
+        except Exception:
+            logger.exception("Unexpected error in get user by email")
+            raise    
+        
+        
+    
