@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from uuid import UUID
 
 from configs.logger import get_logger
 from models.users import User
@@ -20,12 +21,14 @@ class UserService:
         
         try:
             
-            if not email:
-                raise ValueError("Email is missing")
-            
-            if not name:
-                raise ValueError("Name is missing")
-            
+            if not email or not email.strip():
+                raise ValueError("Email is required")
+
+            if not name or not name.strip():
+                raise ValueError("Name is required")
+
+            email = email.strip()
+            name = name.strip()
             
             exisitng_user = self.user_repository.get_by_email(email)
             
@@ -51,7 +54,7 @@ class UserService:
             raise
         
     
-    def get_user_by_email(self, email) -> User | str:
+    def get_user_by_email(self, email) -> User | None:
         
         try:
             
@@ -59,7 +62,7 @@ class UserService:
             
             if not user:
                 logger.warning(f"{email} - user not found")
-                return f"{email} - user not found"
+                return None
                 
             return user
         
@@ -68,4 +71,18 @@ class UserService:
             raise    
         
         
-    
+    def get_user_by_id(self, user_id:UUID) -> User | None:
+            
+        try:
+            
+            user = self.user_repository.get_by_id(user_id)
+            
+            if not user:
+                logger.warning(f"{user_id} - user not found")
+                return None
+                
+            return user
+        
+        except Exception:
+            logger.exception("Unexpected error in get user by email")
+            raise   
