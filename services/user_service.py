@@ -27,8 +27,21 @@ class UserService:
                 raise ValueError("Name is missing")
             
             
-            exisitng_user = 
-        
+            exisitng_user = self.user_repository.get_by_email(email)
+            
+            if exisitng_user:
+                logger.warning(
+                    f"A user with this email already exists: {email}"
+                )
+                raise ValueError(
+                    f"A user with this email already exists: {email}"
+                )
+                
+            new_user = self.user_repository.create(email, name)
+            logger.info(f"New user created:{name} - {email}")
+                            
+            return new_user
+    
         except ValueError:
             logger.exception("Unexpected value error in create user")
             raise    
