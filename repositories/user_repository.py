@@ -1,4 +1,4 @@
-from sqlalchemy import select, 
+from sqlalchemy import select, delete, update
 from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
@@ -26,7 +26,7 @@ class UserRepository:
             
             self.db.add(new_user)
             self.db.commit()
-            self.db.refresh()
+            self.db.refresh(new_user)
             
             return new_user
         
@@ -93,7 +93,7 @@ class UserRepository:
             logger.exception("Unexpected error in get by id")
             raise
         
-    def updated_name(self, name:str , user:User):
+    def update_name(self, name:str , user:User):
         
         try:
             
@@ -102,7 +102,7 @@ class UserRepository:
             
             user.name = name
             self.db.commit()
-            self.db.refresh()
+            self.db.refresh(user)
             
             return user
             
@@ -111,5 +111,30 @@ class UserRepository:
             raise
             
         except Exception:
+            self.db.rollback()
+            logger.exception("Unexpected error in update name")
+            raise
+        
+        
+    def delete_user(self, user:User):
+        
+        
+        try:
+            
+            if not user:
+                raise ValueError("User cannot be empty")
+            
+            self.db.delete(user)
+            self.db.commit()
+            
+            return user
+            
+            
+        except ValueError:
+            logger.exception("Unexpected value error in update name")
+            raise
+            
+        except Exception:
+            
             logger.exception("Unexpected error in update name")
             raise
