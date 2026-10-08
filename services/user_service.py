@@ -71,7 +71,7 @@ class UserService:
             raise    
         
         
-    def get_user_by_id(self, user_id:UUID) -> User | None:
+    def get_user_by_id(self, user_id) -> User | None:
             
         try:
             
@@ -110,11 +110,11 @@ class UserService:
                 user = self.get_user_by_email(email)
                 
             else:
-                user = self.get_user_by_id(id)
+                user = self.get_user_by_id(user_id)
             
             if user is None:
                 raise ValueError(
-                    f"User not found"
+                    "User not found"
                 )
             
             updated_user = self.user_repository.update_name(name.strip(), user)
@@ -135,13 +135,48 @@ class UserService:
             raise
         
         
-    def delete_user(self, user:User):
-        
+    def delete_user(self, email:str | None, user_id:UUID | None) -> User:
+           
         try:
+
+            user = None
             
+            if email is None and user_id is None:
+                raise ValueError(
+                    "Please provide either email or user ID"
+                )
+                
+            if email is not None and user_id is not None:
+                raise ValueError(
+                    "Please provide either email or user ID, not both"
+                )
             
+            if email:
+                user = self.get_user_by_email(email)
+                
+            else:
+                user = self.get_user_by_id(user_id)
+            
+            if user is None:
+                raise ValueError(
+                    "User not found"
+                )
+            
+            deleted_user = self.user_repository.delete_user(user)
+            logger.info("{deleted_user.name} - deleted")
+            
+            return deleted_user
+            
+        except ValueError:
+            logger.exception(
+                "Validation error while deteling user"
+            )
+            raise
+
         except Exception:
-            logger.exception("Unexpected error in get user by email")
-            raise    
+            logger.exception(
+                "Unexpected error while deleting user"
+            )
+            raise 
     
             
