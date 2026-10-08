@@ -88,17 +88,60 @@ class UserService:
             raise   
         
         
-    def update_user(self, user:User, name) -> User:
+    def update_user(self, email:str | None, user_id:UUID | None, name:str) -> User:
         
         try:
+            if not name or not name.strip():
+                raise ValueError("Name is required")
             
-            updated_user = self.user_repository.update_name(name, user)
-            logger.info("{user.name} - updated")
+            user = None
+            
+            if email is None and user_id is None:
+                raise ValueError(
+                    "Please provide either email or user ID"
+                )
+                
+            if email is not None and user_id is not None:
+                raise ValueError(
+                    "Please provide either email or user ID, not both"
+                )
+            
+            if email:
+                user = self.get_user_by_email(email)
+                
+            else:
+                user = self.get_user_by_id(id)
+            
+            if user is None:
+                raise ValueError(
+                    f"User not found"
+                )
+            
+            updated_user = self.user_repository.update_name(name.strip(), user)
+            logger.info("{updated_user.name} - updated")
             
             return updated_user
             
+        except ValueError:
+            logger.exception(
+                "Validation error while updating user"
+            )
+            raise
+
+        except Exception:
+            logger.exception(
+                "Unexpected error while updating user"
+            )
+            raise
+        
+        
+    def delete_user(self, user:User):
+        
+        try:
+            
+            
         except Exception:
             logger.exception("Unexpected error in get user by email")
-            raise  
+            raise    
     
             
