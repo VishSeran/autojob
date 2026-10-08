@@ -131,10 +131,10 @@ class UserRepository:
             
             
         except ValueError:
-            logger.exception("Unexpected value error in update name")
+            logger.exception("Unexpected value error in delete user")
             raise
             
         except Exception:
             
-            logger.exception("Unexpected error in update name")
+            logger.exception("Unexpected error in delete user")
             raise
