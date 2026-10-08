@@ -92,3 +92,24 @@ class UserRepository:
         except Exception:
             logger.exception("Unexpected error in get by id")
             raise
+        
+    def updated_name(self, name:str , user:User):
+        
+        try:
+            
+            if not name:
+                raise ValueError("Name cannot be empty")
+            
+            user.name = name
+            self.db.commit()
+            self.db.refresh()
+            
+            return user
+            
+        except ValueError:
+            logger.exception("Unexpected value error in update name")
+            raise
+            
+        except Exception:
+            logger.exception("Unexpected error in update name")
+            raise
