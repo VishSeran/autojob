@@ -15,7 +15,7 @@ engine = create_engine(
     echo=False
 )
 
-db_session = sessionmaker(
+DB_Session = sessionmaker(
     bind=engine,
     autoflush=False,
     expire_on_commit=False
@@ -24,7 +24,7 @@ db_session = sessionmaker(
 #Generator[YieldType, SendType, ReturnType]
 def get_db() -> Generator[Session, None, None]:
     
-    db = db_session()
+    db = DB_Session()
     logger.info("Database session is created")
     
     try:
