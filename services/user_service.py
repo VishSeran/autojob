@@ -86,3 +86,19 @@ class UserService:
         except Exception:
             logger.exception("Unexpected error in get user by email")
             raise   
+        
+        
+    def update_user(self, user:User, name) -> User:
+        
+        try:
+            
+            updated_user = self.user_repository.update_name(name, user)
+            logger.info("{user.name} - updated")
+            
+            return updated_user
+            
+        except Exception:
+            logger.exception("Unexpected error in get user by email")
+            raise  
+    
+            

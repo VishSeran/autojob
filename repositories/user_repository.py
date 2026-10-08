@@ -93,7 +93,7 @@ class UserRepository:
             logger.exception("Unexpected error in get by id")
             raise
         
-    def update_name(self, name:str , user:User | None):
+    def update_name(self, name:str , user: User) -> User:
         
         try:
             
