@@ -55,6 +55,7 @@ class GoogleConnectionRepository:
             return connection
             
         except Exception:
+            self.db.rollback()
             logger.exception("Unexpected error in update")
             raise
         
@@ -64,4 +65,20 @@ class GoogleConnectionRepository:
         try:
             
             
+            if connection is None:
+                raise ValueError("Connection ORM object is missing")
+            
+            self.db.delete(connection)
+            self.db.commit()
+            
+            return connection
         
+        except ValueError:
+            self.db.rollback()
+            logger.exception("Unexpected value error in delete")
+            raise
+            
+        except Exception:
+            self.db.rollback()
+            logger.exception("Unexpected error in delete")
+            raise
