@@ -19,7 +19,17 @@ class EncryptionService:
         
         try:
             
+            if value:
             
+                encrypt_value = self.ferent.encrypt(
+                    value.encode()
+                ).decode()
+                logger.info("Encryption is completed")
+            
+                return encrypt_value
+            
+            return None
+        
         except Exception:
             logger.exception("Unexpected error in encrypt")
             raise
