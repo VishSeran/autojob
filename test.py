@@ -23,3 +23,23 @@
 # print(found_user)
 
 # db.close()
+
+# from cryptography.fernet import Fernet
+
+# print(
+#     Fernet.generate_key().decode()
+# )
+
+from services.encryption_service import EncryptionService
+
+
+encryption = EncryptionService()
+
+value = "I am here to find a solution to Autojob"
+print(value)
+
+encrypted_value = encryption.encrypt(value)
+print(f"\nencrypted_value: {encrypted_value}")
+
+decrypted_value = encryption.decrypt(encrypted_value)
+print(f"\ndecrypted_value: {decrypted_value}")

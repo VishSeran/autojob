@@ -1,10 +1,10 @@
-from sqlalchemy.orm import Session
 from uuid import UUID
+
+from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
 from models.users import User
 from repositories.user_repository import UserRepository
-
 
 logger = get_logger("user-service")
 
