@@ -29,7 +29,7 @@ class GoogleConnectionRepository:
             raise
         
     
-    def get_by_user_id(self, id:UUID) -> GoogleConnection:
+    def get_by_user_id(self, id:UUID) -> GoogleConnection | None:
         
         try:
             
