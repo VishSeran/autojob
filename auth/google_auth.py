@@ -1,10 +1,7 @@
 from google_auth_oauthlib.flow import Flow
 
+from configs.settings import settings
 from configs.logger import get_logger
-
-CLIENT_SECRET = "secret/client_secret.json"
-REDIRECT_URI = "http://localhost:8000/auth/google/callback"
-
 
 logger = get_logger("google-auth")
 
@@ -20,12 +17,12 @@ def create_google_oauth_flow(state: str | None = None):
     try:
         
         flow = Flow.from_client_secrets_file(
-            client_secrets_file=CLIENT_SECRET,
+            client_secrets_file=settings.CLIENT_SECRET,
             scopes=["https://www.googleapis.com/auth/gmail.send"],
             state = state
         )
         
-        flow.redirect_uri(REDIRECT_URI)
+        flow.redirect_uri(settings.REDIRECT_URI)
         return flow
         
     except Exception:

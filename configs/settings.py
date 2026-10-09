@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     groq_api: str
     session_secret: str
     TOKEN_ENCRYPTION_KEY:str
+    CLIENT_SECRET:str
+    REDIRECT_URI:str
     
     model_config = SettingsConfigDict(
         env_file=".env",
