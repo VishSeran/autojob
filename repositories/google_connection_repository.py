@@ -14,7 +14,7 @@ class GoogleConnectionRepository:
         self.db = db
         
         
-    def create(self, connection: GoogleConnection):
+    def create(self, connection: GoogleConnection) -> GoogleConnection:
         
         try:
             
@@ -29,7 +29,7 @@ class GoogleConnectionRepository:
             raise
         
     
-    def get_by_user_id(self, id:UUID):
+    def get_by_user_id(self, id:UUID) -> GoogleConnection:
         
         try:
             
@@ -44,4 +44,24 @@ class GoogleConnectionRepository:
             raise
             
         
+    def update(self, connection:GoogleConnection) -> GoogleConnection:
+        
+        try:
+            
+            self.db.add(connection)
+            self.db.commit()
+            self.db.refresh(connection)
+            
+            return connection
+            
+        except Exception:
+            logger.exception("Unexpected error in update")
+            raise
+        
+        
+    def delete(self, connection: GoogleConnection) -> GoogleConnection:
+        
+        try:
+            
+            
         
