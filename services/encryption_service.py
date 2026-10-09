@@ -35,4 +35,23 @@ class EncryptionService:
             raise
         
         
+    def decrypt(self, value: str | None) -> str | None:
+        
+        try:
+            
+            if value:
+                
+                decrypt_value = self.ferent.decrypt(
+                    value.encode()
+                ).decode()
+                logger.info("Decryption is completed")
+                return decrypt_value
+            
+            return None
+        
+        except Exception:
+            logger.exception("Unexpected error in decrypt")
+            raise   
+        
+        
         
