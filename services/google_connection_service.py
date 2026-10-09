@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
 from repositories.google_connection_repository import GoogleConnectionRepository
+from models.google_connection import GoogleConnection
 from services.encryption_service import EncryptionService
 
 logger = get_logger("google-connection-service")
@@ -61,10 +62,21 @@ class GoogleConnectionService:
                 logger.info(f"exisitng data updated: {user_id}")
                 
                 return self.repo.update(exists_data)
+            
+
+            new_connection = GoogleConnection(
                 
-                
-                
-                
+                user_id = user_id,
+                google_email = google_email,
+                access_token_encrpt = encrypted_access_token,
+                refresh_token_encrpt = encrypted_refresh_token,
+                token_expiry = credentials.expiry,
+                scope = scopes
+            )
+            
+            logger.info(f"New connection is created: {user_id}")
+            return self.repo.create(new_connection)    
+       
         except ValueError:
             logger.exception("Unexpected value error in save credentials")
             raise
