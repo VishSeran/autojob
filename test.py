@@ -23,3 +23,9 @@
 # print(found_user)
 
 # db.close()
+
+from cryptography.fernet import Fernet
+
+print(
+    Fernet.generate_key().decode()
+)

@@ -2,8 +2,7 @@
 import uuid
 from datetime import datetime, timezone
 
-
-from sqlalchemy import UniqueConstraint, ForeignKey, String, Text, DateTime
+from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -18,7 +17,7 @@ class GoogleConnection(Base):
         UniqueConstraint(
             "user_id",
             name="uq_google_connection_user"
-        )
+        ),
     )
     
     id: Mapped[uuid.UUID] = mapped_column(

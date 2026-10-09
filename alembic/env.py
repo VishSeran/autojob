@@ -5,6 +5,7 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from configs.settings import settings
 from database.base import Base
+from models.google_connection import GoogleConnection
 from models.users import User
 
 # this is the Alembic Config object, which provides
