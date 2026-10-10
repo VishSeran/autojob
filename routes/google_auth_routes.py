@@ -1,9 +1,12 @@
+import requests
 
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 
 from auth.google_auth import create_google_oauth_flow
 from auth.token_store import save_credentials
+from services.google_connection_service import GoogleConnectionService
+from services.user_service import UserService
 
 router = APIRouter(
     prefix="/auth/google",
@@ -12,7 +15,7 @@ router = APIRouter(
 
 
 @router.get("")
-async def google_login(request:Request):
+async def google_login(request:Request, name:str):
     
     # What happens in the browser?
     # The user visits:
@@ -56,11 +59,18 @@ async def google_login(request:Request):
     )
     
     request.session['google_oauth_state'] = state
-    return RedirectResponse(authorization_url)
+    request.session['google_registration_name'] = name
+    
+    return {
+        "authorization_url": authorization_url
+    }
 
 
 @router.get("/callback")
-async def google_callback(request: Request):
+async def google_callback(request: Request, 
+                          google_connection_service: GoogleConnectionService,
+                          user_service:UserService,
+                          ):
 
     # --------------------------------------------------
     # 1. Get the OAuth state value that we previously
@@ -73,6 +83,10 @@ async def google_callback(request: Request):
     saved_state = request.session.get(
         "google_oauth_state"
     )
+    
+    registration_name = request.session.get(
+        "resgistration_name"
+    ) 
 
     # --------------------------------------------------
     # 2. If the state is missing, we cannot safely
@@ -146,8 +160,42 @@ async def google_callback(request: Request):
     #    In production, save them securely in a database
     #    and associate them with the correct user.
     # --------------------------------------------------
-    save_credentials(credentials)
-
+    response = requests.get(
+        "https://openidconnect.googleapis.com/v1/userinfo",
+        headers= {
+            "Authorization": f"Bearer {credentials.token}"
+        }
+    )
+    response.raise_for_status()
+    
+    user_data = response.json()
+    
+    google_id = user_data["sub"]
+    google_email = user_data["email"]
+    email_verified = user_data["email_verified"]
+    
+    if not email_verified:
+        raise ValueError("Google email is not verified")
+    
+    
+    exisitng_user = user_service.get_user_by_email(google_email)
+    
+    if exisitng_user:
+        ##login
+        return None
+        
+    new_user = user_service.create_user(
+        email=google_email,
+        name=registration_name
+    )
+    
+    google_connection_service.save_credentials(
+        user_id=new_user.id,
+        google_email=google_email,
+        credentials=credentials
+    )
+    
+    
     # --------------------------------------------------
     # 8. Remove the OAuth state from the session.
     #

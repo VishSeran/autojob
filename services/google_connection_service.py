@@ -84,3 +84,32 @@ class GoogleConnectionService:
         except Exception:
             logger.exception("Unexpected error in save credentials")
             raise
+        
+        
+    def load_credentials(self, user_id: uuid.UUID ):
+        
+        try:
+            
+            if not user_id:
+                raise ValueError("User ID is missing")
+            
+            
+            credentials = self.repo.get_by_user_id(user_id)
+            
+            if credentials is None:
+                raise ValueError("Credentials are empty")
+            
+            logger.info(f"Credentials has fetched - {user_id}")
+            return credentials
+            
+            
+        except ValueError:
+            logger.exception("Unexpected value error in load credentials")
+            raise    
+            
+        except Exception:
+            logger.exception("Unexpected error in load credentials")
+            raise
+        
+        
+    
