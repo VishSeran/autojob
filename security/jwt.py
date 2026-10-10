@@ -3,30 +3,42 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 
+from configs.logger import get_logger
 from configs.settings import settings
 
+logger = get_logger("jwt")
 
-def create_access_token(user_id: uuid.UUID) :
+def create_access_token(user_id: uuid.UUID) -> str:
     
-    if not user_id:
-        raise ValueError ("User ID is missing")
+    try:
     
-    now = datetime.now(timezone.utc)
-    
-    exp = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINS)
-    
-    payload = {
+        if not user_id:
+            raise ValueError ("User ID is missing")
         
-        "sub": str(user_id),
-        "iat": now,
-        "exp": exp,
-        "type": "access"
-    }
+        now = datetime.now(timezone.utc)
+        
+        exp = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINS)
+        
+        payload = {
+            
+            "sub": str(user_id),
+            "iat": now,
+            "exp": exp,
+            "type": "access"
+        }
+        
+        token = jwt.encode(
+            payload=payload,
+            key=settings.JWT_SECRET_KEY,
+            algorithm=settings.JWT_ALGORITHM
+        )
+        
+        return token
     
-    token = jwt.encode(
-        payload=payload,
-        key=settings.JWT_SECRET_KEY,
-        algorithm=settings.JWT_ALGORITHM
-    )
+    except ValueError:
+        logger.exception("Unecpected value error in create access token")
+        raise
     
-    return token
+    except Exception:
+        logger.exception("Unecpected error in create access token")
+        raise
