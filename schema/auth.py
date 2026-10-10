@@ -35,7 +35,6 @@ class UserResponse(BaseModel):
         "from_attributes": True
     }
     
-    
 class LogInResponse(BaseModel):
     
     message: str
