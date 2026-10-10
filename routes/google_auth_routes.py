@@ -1,10 +1,7 @@
 import requests
-
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import RedirectResponse
 
 from auth.google_auth import create_google_oauth_flow
-from auth.token_store import save_credentials
 from schema.google_login_request import GoogleLoginRequest
 from services.google_connection_service import GoogleConnectionService
 from services.user_service import UserService

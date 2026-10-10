@@ -6,6 +6,7 @@ from alembic import context
 from configs.settings import settings
 from database.base import Base
 from models.google_connection import GoogleConnection
+from models.user_session import UserSession
 from models.users import User
 
 # this is the Alembic Config object, which provides

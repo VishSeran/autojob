@@ -11,6 +11,8 @@ from database.base import Base
 
 class UserSession(Base):
     
+    __tablename__ = "user_sessions"
+    
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         primary_key=True,
