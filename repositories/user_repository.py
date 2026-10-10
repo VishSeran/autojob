@@ -12,7 +12,7 @@ class UserRepository:
         
         self.db = db
         
-    def create(self, email: str, name:str | None = None) -> User:
+    def create(self, email: str, hashed_password: str, name:str | None = None) -> User:
         
         try:
             
@@ -21,7 +21,8 @@ class UserRepository:
             
             new_user = User(
                 email = email,
-                name=name
+                name=name,
+                hashed_password=hashed_password
             )
             
             self.db.add(new_user)
