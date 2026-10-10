@@ -1,6 +1,7 @@
 from uuid import UUID
-from sqlalchemy.orm import Session
+
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
 from models.google_connection import GoogleConnection
