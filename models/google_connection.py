@@ -27,6 +27,12 @@ class GoogleConnection(Base):
         default=uuid.uuid4
     )
     
+    google_id: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        unique=True
+    )
+    
     user_id: Mapped[uuid.UUID] = mapped_column(
         
         UUID(as_uuid=True),

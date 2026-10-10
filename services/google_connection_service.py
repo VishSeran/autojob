@@ -18,7 +18,7 @@ class GoogleConnectionService:
         self.encryption = EncryptionService()
         
     
-    def save_credentials(self, user_id: uuid.UUID, google_email:str, credentials):
+    def save_credentials(self, user_id: uuid.UUID, google_email:str, credentials, google_id):
         
         try:
             
@@ -71,7 +71,8 @@ class GoogleConnectionService:
                 access_token_encrpt = encrypted_access_token,
                 refresh_token_encrpt = encrypted_refresh_token,
                 token_expiry = credentials.expiry,
-                scope = scopes
+                scope = scopes, 
+                google_id = google_id
             )
             
             logger.info(f"New connection is created: {user_id}")
