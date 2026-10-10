@@ -1,10 +1,11 @@
 import requests
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
 from auth.google_auth import create_google_oauth_flow
 from auth.token_store import save_credentials
+from schema.google_login_request import GoogleLoginRequest
 from services.google_connection_service import GoogleConnectionService
 from services.user_service import UserService
 
@@ -14,8 +15,8 @@ router = APIRouter(
 )
 
 
-@router.get("")
-async def google_login(request:Request, name:str):
+@router.post("")
+async def google_login(request:Request, user_data:GoogleLoginRequest):
     
     # What happens in the browser?
     # The user visits:
@@ -49,7 +50,15 @@ async def google_login(request:Request, name:str):
 
     # The code is not your access token.
     # It is a short-lived authorization code.
-
+    name = user_data.name.strip()
+    
+    
+    if not name:
+        raise HTTPException(
+            status_code=400,
+            detail="Name cannot be empty"
+        )
+        
     flow = create_google_oauth_flow()
     
     authorization_url, state = flow.authorization_url(
@@ -85,7 +94,7 @@ async def google_callback(request: Request,
     )
     
     registration_name = request.session.get(
-        "resgistration_name"
+        "google_registration_name "
     ) 
 
     # --------------------------------------------------
@@ -174,8 +183,12 @@ async def google_callback(request: Request,
     google_email = user_data["email"]
     email_verified = user_data["email_verified"]
     
-    if not email_verified:
-        raise ValueError("Google email is not verified")
+    if not google_id or not google_email or not email_verified:
+        
+        raise HTTPException(
+            status_code=400,
+            detail="Google account information is incomplete or unverified"
+        )
     
     
     exisitng_user = user_service.get_user_by_email(google_email)
@@ -183,6 +196,13 @@ async def google_callback(request: Request,
     if exisitng_user:
         ##login
         return None
+    
+    
+    if not registration_name:
+        raise HTTPException(
+            status_code=400,
+            detail="Registration name is missing"
+        )
         
     new_user = user_service.create_user(
         email=google_email,
@@ -208,6 +228,11 @@ async def google_callback(request: Request,
     # --------------------------------------------------
     request.session.pop(
         "google_oauth_state",
+        None
+    )
+    
+    request.session.pop(
+        "google_registration_name",
         None
     )
 
