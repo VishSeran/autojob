@@ -1,12 +1,18 @@
-from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
+
+from sqlalchemy.orm import Session
+
 from configs.logger import get_logger
+from configs.settings import settings
 from models.users import User
 from repositories.user_repository import UserRepository
-from configs.settings import settings
 from repositories.user_session_repository import UserSessionRepository
-from security.jwt import create_access_token, generate_jwt_refresh_token, hash_refresh_token
 from security.hashing import hash_password, verify_hash_password
+from security.jwt import (
+    create_access_token,
+    generate_jwt_refresh_token,
+    hash_refresh_token,
+)
 
 logger = get_logger("auth-service")
 
