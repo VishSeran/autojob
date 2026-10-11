@@ -1,10 +1,12 @@
 from sqlalchemy.orm import Session
-
+from datetime import datetime, timedelta, timezone
 from configs.logger import get_logger
 from models.users import User
 from repositories.user_repository import UserRepository
+from configs.settings import settings
 from repositories.user_session_repository import UserSessionRepository
-from security.hashing import hash_password
+from security.jwt import create_access_token, generate_jwt_refresh_token, hash_refresh_token
+from security.hashing import hash_password, verify_hash_password
 
 logger = get_logger("auth-service")
 
@@ -55,7 +57,46 @@ class AuthService:
             
             if exisitng_user is None:
                 raise ValueError("Email is not registered")
-                        
+            
+            is_pass_verified = verify_hash_password(
+                password,
+                exisitng_user.hashed_password
+            )
+            
+            if not is_pass_verified:
+                raise ValueError("Invalid email or password")
+            
+            
+            access_token = (
+                create_access_token(exisitng_user.id)
+            )
+            
+            refresh_token = (
+                generate_jwt_refresh_token()
+            )
+            
+            refresh_hashed_token = (
+                hash_refresh_token(refresh_token)   
+            )
+            
+            expires_at = datetime.now(timezone.utc) + timedelta(
+                days=settings.REFRESH_TOKEN_EXPIRE_DAYS
+            )
+            
+            new_session = self.session_repository.create_sesssion(
+                user_id= exisitng_user.id,
+                hash_refresh_token=refresh_hashed_token,
+                expires_at=expires_at
+            )
+            
+            logger.info(f"New session has created: {exisitng_user.id}")
+            
+            return {
+                "user": exisitng_user,
+                "access_token": access_token,
+                "refresh_token": refresh_token
+            }
+           
         except ValueError:
             logger.exception("Unexpected value error in signup")
             raise
