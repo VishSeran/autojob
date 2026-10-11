@@ -23,7 +23,7 @@ class AuthService:
             exisitng_user = self.user_repository.get_by_email(email)
             
             if exisitng_user:
-                raise ValueError("Email already registered!!!")
+                raise ValueError("Email already registered")
             
             name = name.strip()
             hashed_password = hash_password(password)
@@ -47,3 +47,19 @@ class AuthService:
             raise
         
     
+    def login(self, email:str, password:str):
+        
+        try:
+            
+            exisitng_user = self.user_repository.get_by_email(email)
+            
+            if exisitng_user is None:
+                raise ValueError("Email is not registered")
+                        
+        except ValueError:
+            logger.exception("Unexpected value error in signup")
+            raise
+        
+        except Exception:
+            logger.info("Unexpected error in signup")
+            raise
