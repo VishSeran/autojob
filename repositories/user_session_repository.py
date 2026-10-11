@@ -43,3 +43,19 @@ class UserSessionRepository:
         except Exception:
             logger.exception("Unexpected error in create session")
             raise
+        
+        
+    def revoke_session(self, session:UserSession):
+        
+        try:
+            
+            session.revoke = True
+            self.db.commit()
+            self.db.refresh(session)
+            
+        except Exception:
+            self.db.rollback()
+            logger.exception("Unexpected error in revoke session")
+            raise
+                    
+        
