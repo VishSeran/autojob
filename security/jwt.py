@@ -1,3 +1,5 @@
+import hashlib
+import secrets
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -81,3 +83,14 @@ def validate_access_token(token: str) -> dict:
     except Exception:
         logger.exception("Unexpected error in validate access token")
         raise
+    
+    
+    
+def generate_jwt_refresh_token() -> str:
+    
+    return secrets.token_urlsafe(64)
+
+
+def hash_refresh_token(token:str) -> str:
+    
+    return hashlib.sha256(token.encode()).hexdigest()
