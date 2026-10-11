@@ -2,6 +2,7 @@ from datetime import datetime
 import uuid
 
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from configs.logger import get_logger
 from models.user_session import UserSession
@@ -42,6 +43,21 @@ class UserSessionRepository:
             
         except Exception:
             logger.exception("Unexpected error in create session")
+            raise
+        
+        
+    def get_by_hash_refresh_token(self, token_hash:str) -> UserSession | None:
+        
+        try:
+            
+            stmt = (
+                select(UserSession).where(UserSession.hashed_refresh_token == token_hash)
+            )
+            
+            return self.db.scalar(stmt)
+            
+        except Exception:
+            logger.exception("Unexpected error in get by hash refresh token")
             raise
         
         
