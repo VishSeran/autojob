@@ -95,7 +95,7 @@ class AuthService:
                 expires_at=expires_at
             )
             
-            logger.info(f"New session has created: {exisitng_user.id}")
+            logger.info(f"New session has created: {new_session.id}")
             
             return {
                 "user": exisitng_user,
@@ -117,15 +117,17 @@ class AuthService:
         try:
             
             if not token:
-                raise ValueError("Token is missing")
+                logger.warning("Token is missing")
+                return
             
             token_hash = hash_refresh_token(token)
             session = self.session_repository.get_by_hash_refresh_token(token_hash)
             
             if session is None:
-                raise ValueError("User session not found")
+                logger.warning("User session not found")
+                return
             
-            session.revoke = True
+            self.session_repository.revoke_session(session)
             logger.info(f"User session of {session.user_id} is revoked")
             
         except ValueError:

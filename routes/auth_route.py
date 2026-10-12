@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
@@ -19,11 +19,11 @@ def signup(
     data: SignUpRequest,
     db: Session = Depends(get_db)
 ):
+        
+    auth_service = AuthService(db)
     
     try:
-        
-        auth_service = AuthService(db)
-        
+    
         new_user = auth_service.signup(
             email=data.email,
             name=data.name,
@@ -33,78 +33,70 @@ def signup(
         return new_user
     
     except ValueError as error:
-        logger.error(f"Unexpected value error in signup: {e}")
+        logger.error(f"Unexpected value error in signup: {error}")
         raise HTTPException(
             status_code=401,
             detail=str(error)
         )
-      
-    except Exception:
-        logger.exception("Unexpected error in signup")
-        raise 
 
 
 @router.post("/login", response_model=LogInResponse)
 def login(data:LogInRequest, response:Response, db:Session = Depends(get_db)):
     
+        
+    if data is None:
+        raise ValueError("Requested data is missing")
+    
+    auth_service = AuthService(db)
+        
     try:
-        
-        if data is None:
-            raise ValueError("Requested data is missing")
-        
-        auth_service = AuthService(db)
-        
-        login_response = auth_service.login(
-            email=data.email,
-            password=data.password
-        )
-        
-        access_token = login_response['access_token']
-        refresh_token = login_response['refresh_token']
-        user = login_response['user']
-        
-        
-        response.set_cookie(
-            key="access_token",
-            value=access_token,
-            httponly=True,
-            secure=False,
-            samesite="lax",
-            max_age=30*60
-        )
-        
-        response.set_cookie(
-            key="resfresh_token",
-            value=refresh_token,
-            httponly=True,
-            secure=False,
-            samesite="lax",
-            max_age= 30*24*60*60
-        )
-        
-        logger.info("Cookies are created")
+            login_response = auth_service.login(
+                email=data.email,
+                password=data.password
+            )
+            
+            access_token = login_response['access_token']
+            refresh_token = login_response['refresh_token']
+            user = login_response['user']
+            
+            
+            response.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                secure=False,
+                samesite="lax",
+                max_age=30*60
+            )
+            
+            response.set_cookie(
+                key="resfresh_token",
+                value=refresh_token,
+                httponly=True,
+                secure=False,
+                samesite="lax",
+                max_age= 30*24*60*60
+            )
+            
+            logger.info("Cookies are created")
 
-        return {
-            "message": "LogIn Successfull",
-            "user": {
-                "id": str(user.id),
-                "name": user.name,
-                "email": user.email
+            return {
+                "message": "LogIn Successfull",
+                "user": {
+                    "id": str(user.id),
+                    "name": user.name,
+                    "email": user.email
+                }
             }
-        }
-        
+            
     except ValueError as error:
         logger.error(f"Unexpected value error in login: {error}")
         raise HTTPException(
             status_code=401,
             detail=str(error)
         )
-        
-    except Exception:
-        logger.exception("Unexpected error in login")
-        raise 
-    
-    
+
+
 @router.post("/logout")
 def logout(request:Request , response: Response, db:Session = Depends(get_db)):
     
@@ -123,16 +115,18 @@ def logout(request:Request , response: Response, db:Session = Depends(get_db)):
         response.delete_cookie(
             "refresh_token"
         )
-        
-        
+ 
         return {
             "message": "Logged out successfully"
         }
+     
+    except ValueError as error:
+        logger.error(f"Unexpected value error in login: {error}")
+        raise HTTPException(
+            status_code=401,
+            detail=str(error)
+        )
         
-        
-    except Exception:
-        logger.exception("Unexpected error in logout")
-        raise 
         
     
     
