@@ -105,12 +105,29 @@ def login(data:LogInRequest, response:Response, db:Session = Depends(get_db)):
         raise 
     
     
-@router("/logout")
+@router.post("/logout")
 def logout(request:Request , response: Response, db:Session = Depends(get_db)):
     
     try:
         
+        refresh_token = request.cookies.get("refresh_token")
         
+        if refresh_token:
+            auth_service = AuthService(db)
+            auth_service.logout(refresh_token)
+            
+        response.delete_cookie(
+            "access_token"
+        )
+        
+        response.delete_cookie(
+            "refresh_token"
+        )
+        
+        
+        return {
+            "message": "Logged out successfully"
+        }
         
         
     except Exception:
