@@ -126,9 +126,3 @@ def logout(request:Request , response: Response, db:Session = Depends(get_db)):
             status_code=401,
             detail=str(error)
         )
-        
-        
-    
-    
-    
-    
