@@ -139,3 +139,37 @@ class AuthService:
             raise
         
         
+    def refresh_access_token(self, refresh_token:str):
+        
+        try:
+            
+            if refresh_token is None:
+                raise ValueError("Refresh token is missing")
+            
+            hash_token = hash_refresh_token(
+                refresh_token
+            )
+            
+            current_session = self.session_repository.get_by_hash_refresh_token(
+                hash_token
+            )
+            
+            if current_session is None:
+                raise ValueError(
+                    "Invalid refresh token"
+                )
+
+            if current_session.revoke:
+                raise ValueError(
+                    "Session revoked"
+                )
+            
+            
+            
+            
+             
+            
+        except ValueError:
+            raise logger.exception("Unexpected value error")
+
+        
