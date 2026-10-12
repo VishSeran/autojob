@@ -1,7 +1,7 @@
 
 import uuid
 
-from fastapi import Request, Depends, HTTPException
+from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
