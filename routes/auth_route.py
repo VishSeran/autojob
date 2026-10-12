@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, Request
 from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
@@ -94,7 +94,7 @@ def login(data:LogInRequest, response:Response, db:Session = Depends(get_db)):
         }
         
     except ValueError as error:
-        logger.error(f"Unexpected value error in login: {e}")
+        logger.error(f"Unexpected value error in login: {error}")
         raise HTTPException(
             status_code=401,
             detail=str(error)
@@ -103,6 +103,20 @@ def login(data:LogInRequest, response:Response, db:Session = Depends(get_db)):
     except Exception:
         logger.exception("Unexpected error in login")
         raise 
+    
+    
+@router("/logout")
+def logout(request:Request , response: Response, db:Session = Depends(get_db)):
+    
+    try:
+        
+        
+        
+        
+    except Exception:
+        logger.exception("Unexpected error in logout")
+        raise 
+        
     
     
     

@@ -110,3 +110,30 @@ class AuthService:
         except Exception:
             logger.info("Unexpected error in signup")
             raise
+        
+        
+    def logout(self, token):
+        
+        try:
+            
+            if not token:
+                raise ValueError("Token is missing")
+            
+            token_hash = hash_refresh_token(token)
+            session = self.session_repository.get_by_hash_refresh_token(token_hash)
+            
+            if session is None:
+                raise ValueError("User session not found")
+            
+            session.revoke = True
+            logger.info(f"User session of {session.user_id} is revoked")
+            
+        except ValueError:
+            logger.exception("Unexpected value error in logout")
+            raise
+        
+        except Exception:
+            logger.exception("Unexpected error in logout")
+            raise
+        
+        
