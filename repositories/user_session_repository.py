@@ -1,8 +1,8 @@
-from datetime import datetime
 import uuid
+from datetime import datetime
 
-from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
 from models.user_session import UserSession
