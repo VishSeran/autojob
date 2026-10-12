@@ -1,14 +1,17 @@
 
+import uuid
+
 from fastapi import Request, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
 from database.session import get_db
+from repositories.user_repository import UserRepository
 from security.jwt import validate_access_token
 
 logger = get_logger("auth-dependencies")
 
-def current_user(request:Request, db:Session = Depends(get_db)):
+def get_current_user(request:Request, db:Session = Depends(get_db)):
     
     try:
         
@@ -39,8 +42,30 @@ def current_user(request:Request, db:Session = Depends(get_db)):
                 status_code=401,
                 detail="Invalid token"
             )
+            
+            
+        try:
+            
+            user_id = uuid.UUID(user_id_string)
+            user_repo = UserRepository(db)
+            
+            current_user = user_repo.get_by_id(
+                user_id
+            )
+            
+            if current_user is None:
+                raise HTTPException(
+                    status_code=401,
+                    detail="User not found"
+                )
+                
+            return current_user
         
-        
+        except ValueError:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid user ID"
+            )
         
         
     except Exception:
