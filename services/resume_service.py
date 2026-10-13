@@ -49,5 +49,19 @@ class ResumeService:
         except Exception:
             logger.exception("Unexpected error in upload resume")
             raise
+        
+        
+    def remove_resume(self, resume_id):
+        
+        try:
+            
+            if resume_id is None:
+                raise ValueError("Resume ID is missing")
+            
+            
+        except Exception:
+            logger.exception("Unexpected error in remove resume")
+            raise
+        
     
     
