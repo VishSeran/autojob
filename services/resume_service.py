@@ -24,8 +24,11 @@ class ResumeService:
         
         try:
             
-            if not user_id or storage_path:
-                raise ValueError("User ID or storage path is missing")
+            if not user_id:
+                raise ValueError("User ID is missing")
+
+            if not storage_path:
+                raise ValueError("Storage path is missing")
             
             user = self.user_repository.get_by_id(user_id)
             
@@ -42,7 +45,7 @@ class ResumeService:
             )
             
             self.resume_repository.add_resume(new_resume)
-            logger.info("New resume added successfully")
+            logger.info(f"Resume {new_resume.id} added for user {user_id}")
             
             return new_resume
 
