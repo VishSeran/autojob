@@ -2,6 +2,7 @@
 import uuid
 
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from configs.logger import get_logger
 from models.resume import Resume
@@ -32,6 +33,25 @@ class ResumeRepository:
      
         except Exception:
             logger.exception('Unexpected error in add resume')
+            raise
+        
+        
+    def get_by_id(self, res_id:uuid.UUID) -> Resume | None:
+        
+        try:
+            
+            stmt = (
+                select(Resume).where(
+                    Resume.id == res_id
+                )
+            )
+            
+            return self.db.scalar(
+                stmt
+            )
+            
+        except Exception:
+            logger.exception('Unexpected error in get by id')
             raise
         
         
