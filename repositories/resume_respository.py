@@ -43,9 +43,26 @@ class ResumeRepository:
             resume.is_default = True
             self.db.commit()
             self.db.refresh(resume)
+            logger.info(f"{resume.id} is set to default")
             
             return resume
             
         except Exception:
             logger.exception('Unexpected error in make default')
+            raise
+        
+        
+    def delete(self, resume:Resume) ->Resume :
+        
+        try:
+            
+            self.db.delete(resume)
+            self.db.commit()
+            self.db.refresh(resume)
+            logger.info(f"{resume.id} is deleted successfully")
+            
+            return resume
+            
+        except Exception:
+            logger.exception('Unexpected error in delete resume')
             raise
