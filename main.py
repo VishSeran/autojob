@@ -1,15 +1,17 @@
 
 import asyncio
-import json
-import dotenv
 import os
 
+import dotenv
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
+from routes.auth_route import auth_router
 from sources.topjob_source import TopJobSource
 
-app = FastAPI()
+app = FastAPI(
+    title="AutoJob API"
+)
 
 dotenv.load_dotenv()
 session_secret = os.getenv("Session_Secret")
@@ -19,6 +21,10 @@ session_secret = os.getenv("Session_Secret")
 app.add_middleware(
     SessionMiddleware,
     secret_key=session_secret
+)
+
+app.include_router(
+    auth_router
 )
 
 
