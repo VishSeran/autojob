@@ -16,13 +16,19 @@ class ResumeRepository:
         self.db = db
         
     
-    def add_reume(
+    def add_resume(
         self,
-        user_id: uuid.UUID,
-        storage_path: str
+        resume:Resume
     ) -> Resume :
         
         try:
-            
-            
-        except Exception
+           
+           self.db.add(resume) 
+           self.db.commit()
+           self.db.refresh(resume)
+           
+           return resume
+     
+        except Exception:
+            logger.exception('Unexpected error in add reume')
+            raise
