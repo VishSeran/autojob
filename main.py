@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 
 from routes.auth_route import auth_router
+from routes.user_route import user_router
 from sources.topjob_source import TopJobSource
 
 app = FastAPI(
@@ -25,6 +26,9 @@ app.add_middleware(
 
 app.include_router(
     auth_router
+)
+app.include_router(
+    user_router
 )
 
 

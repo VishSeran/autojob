@@ -59,6 +59,7 @@ def get_current_user(request:Request, db:Session = Depends(get_db)):
                     detail="User not found"
                 )
                 
+            logger.info(f"Current user has fetched: {current_user.id}")
             return current_user
         
         except ValueError:
