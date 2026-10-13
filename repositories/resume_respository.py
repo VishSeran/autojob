@@ -54,7 +54,7 @@ class ResumeRepository:
             raise
         
     
-    def get_by_user_id(self, user_id:uuid.UUID) -> Resume | None:
+    def get_by_user_id(self, user_id:uuid.UUID) -> list[Resume]:
         
         try:
             
@@ -64,9 +64,7 @@ class ResumeRepository:
                 )
             )
             
-            return self.db.scalar(
-                stmt
-            )
+            return list(self.db.scalars(stmt).all())
             
         except Exception:
             logger.exception('Unexpected error in get by user id')
@@ -76,7 +74,20 @@ class ResumeRepository:
         
         try:
             
+            stmt = (
+                select(Resume).where(
+                    Resume.user_id == resume.user_id,
+                    Resume.id != resume.id
+                )
+            )
+            
+            other_resumes = self.db.scalars(stmt).all()
+            
+            for other_resume in other_resumes:
+                other_resume.is_default = False
+            
             resume.is_default = True
+            
             self.db.commit()
             self.db.refresh(resume)
             logger.info(f"{resume.id} is set to default")
@@ -95,7 +106,7 @@ class ResumeRepository:
             
             self.db.delete(resume)
             self.db.commit()
-            self.db.refresh(resume)
+            
             logger.info(f"{resume.id} is deleted successfully")
             
             return resume

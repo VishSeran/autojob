@@ -24,8 +24,11 @@ class ResumeService:
         
         try:
             
-            if not user_id or storage_path:
-                raise ValueError("User ID or storage path is missing")
+            if not user_id:
+                raise ValueError("User ID is missing")
+
+            if not storage_path:
+                raise ValueError("Storage path is missing")
             
             user = self.user_repository.get_by_id(user_id)
             
@@ -42,12 +45,66 @@ class ResumeService:
             )
             
             self.resume_repository.add_resume(new_resume)
-            logger.info("New resume added successfully")
+            logger.info(f"Resume {new_resume.id} added for user {user_id}")
             
             return new_resume
 
         except Exception:
             logger.exception("Unexpected error in upload resume")
             raise
-    
+        
+        
+    def remove_resume(self,user_id:uuid.UUID, resume_id:uuid.UUID) -> Resume:
+        
+        try:
+            
+            if resume_id is None:
+                raise ValueError("Resume ID is missing")
+            
+            wanted_resume = self.resume_repository.get_by_id(
+                resume_id
+            )
+            
+            if wanted_resume is None:
+                raise ValueError("Resume not found")
+            
+            if wanted_resume.user_id != user_id:
+                raise ValueError("Resume does not belong to user")
+
+            self.resume_repository.delete(wanted_resume)
+            return wanted_resume
+        
+        except Exception:
+            logger.exception("Unexpected error in remove resume")
+            raise
+        
+        
+    def select_default(self, user_id:uuid.UUID, resume_id:uuid.UUID):
+        
+        try:
+            
+            if resume_id is None:
+                raise ValueError("Resume ID is missing")
+            
+            selected_resume = self.resume_repository.get_by_id(
+                resume_id
+            )
+            
+            if selected_resume is None:
+                raise ValueError("Resume not found")
+            
+            if selected_resume.user_id != user_id:
+                raise ValueError("Resume does not belong to user")
+            
+            self.resume_repository.make_default(
+                selected_resume
+            )
+            
+            logger.info(f"{selected_resume.id} is set to default successfully")
+            return selected_resume
+        
+        except Exception:
+            logger.exception("Unexpected error in select default")
+            raise
+
     
