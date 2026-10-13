@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINS:int
     REFRESH_TOKEN_EXPIRE_DAYS:int
     RESEND_API:str
+    SUPABASE_SECRET_KEY:str
+    SUPABASE_URL:str
     
     model_config = SettingsConfigDict(
         env_file=".env",
