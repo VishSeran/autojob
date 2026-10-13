@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from configs.logger import get_logger
 from repositories.resume_respository import ResumeRepository
 from repositories.user_repository import UserRepository
+from models.resume import Resume
 
 
 logger = get_logger("resume-service")
@@ -29,8 +30,22 @@ class ResumeService:
             user = self.user_repository.get_by_id(user_id)
             
             if user is None:
-                raise 
-        
+                raise ValueError("User not found")
+            
+            if not storage_path:
+                raise ValueError("Storage path is missing")
+            
+            new_resume = Resume(
+                
+                user_id = user_id,
+                storage_path = storage_path
+            )
+            
+            self.resume_repository.add_resume(new_resume)
+            logger.info("New resume added successfully")
+            
+            return new_resume
+
         except Exception:
             logger.exception("Unexpected error in upload resume")
             raise
