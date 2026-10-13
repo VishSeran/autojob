@@ -2,17 +2,26 @@ import requests
 from fastapi import APIRouter, HTTPException, Request
 
 from auth.google_auth import create_google_oauth_flow
+from configs.logger import get_logger
+from database.session import get_db
 from schema.google_login_request import GoogleLoginRequest
 from services.google_connection_service import GoogleConnectionService
 from services.user_service import UserService
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from services.auth_service import AuthService
 
-router = APIRouter(
+
+
+logger = get_logger("google-auth-route")
+
+google_auth_router = APIRouter(
     prefix="/auth/google",
     tags=["google-auth"]
 )
 
 
-@router.post("")
+@google_auth_router.post("")
 async def google_login(request:Request, user_data:GoogleLoginRequest):
     
     # What happens in the browser?
@@ -48,6 +57,7 @@ async def google_login(request:Request, user_data:GoogleLoginRequest):
     # The code is not your access token.
     # It is a short-lived authorization code.
     name = user_data.name.strip()
+    password = user_data.password
     
     
     if not name:
@@ -57,25 +67,27 @@ async def google_login(request:Request, user_data:GoogleLoginRequest):
         )
         
     flow = create_google_oauth_flow()
+    logger.info("Flow has created")
     
     authorization_url, state = flow.authorization_url(
         access_type = "offline",
         include_granted_scope = True,
         prompt = "consent"
     )
+    logger.info("Authorization url and state are created")
     
     request.session['google_oauth_state'] = state
     request.session['google_registration_name'] = name
+    request.session['prefer_password'] = password
     
     return {
         "authorization_url": authorization_url
     }
 
 
-@router.get("/callback")
+@google_auth_router.get("/callback")
 async def google_callback(request: Request, 
-                          google_connection_service: GoogleConnectionService,
-                          user_service:UserService,
+                          db:Session = Depends(get_db)
                           ):
 
     # --------------------------------------------------
@@ -89,10 +101,14 @@ async def google_callback(request: Request,
     saved_state = request.session.get(
         "google_oauth_state"
     )
+    logger.info("Saved state is fetched")
     
     registration_name = request.session.get(
-        "google_registration_name "
+        "google_registration_name"
     ) 
+    prefer_password = request.session.get(
+        "prefer_password"
+    )
 
     # --------------------------------------------------
     # 2. If the state is missing, we cannot safely
@@ -111,6 +127,7 @@ async def google_callback(request: Request,
     flow = create_google_oauth_flow(
         state=saved_state
     )
+    logger.info("flow is created using saved state")
 
     # --------------------------------------------------
     # 4. Get the full callback URL returned by Google.
@@ -125,7 +142,7 @@ async def google_callback(request: Request,
     #    authorization code returned by Google.
     # --------------------------------------------------
     authorization_response = str(request.url)
-
+    logger.info("authorization response is fetched")
     # --------------------------------------------------
     # 5. Exchange the temporary authorization code
     #    for real OAuth credentials.
@@ -156,7 +173,7 @@ async def google_callback(request: Request,
     #           without asking the user to log in again
     # --------------------------------------------------
     credentials = flow.credentials
-
+    logger.info("Credentials are fetched")
     # --------------------------------------------------
     # 7. Save the credentials somewhere secure.
     #
@@ -201,16 +218,32 @@ async def google_callback(request: Request,
             detail="Registration name is missing"
         )
         
-    new_user = user_service.create_user(
+    if not prefer_password:
+        raise HTTPException(
+            status_code=400,
+            detail="Password is missing"
+        )
+        
+    
+    auth_service = AuthService(db)
+    new_user = auth_service.signup(
         email=google_email,
-        name=registration_name
+        name = registration_name,
+        password=prefer_password
     )
     
-    google_connection_service.save_credentials(
+    logger.info(f"New user has created: {new_user.id}")
+    
+    google_connection_service = GoogleConnectionService(db)
+    
+    new_connection = google_connection_service.save_credentials(
         user_id=new_user.id,
         google_email=google_email,
-        credentials=credentials
+        credentials=credentials,
+        google_id=google_id
     )
+    
+    logger.info(f"New google connection has established {new_connection.id}")
     
     
     # --------------------------------------------------
