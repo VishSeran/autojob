@@ -106,7 +106,7 @@ class ResumeRepository:
             
             self.db.delete(resume)
             self.db.commit()
-            self.db.refresh(resume)
+            
             logger.info(f"{resume.id} is deleted successfully")
             
             return resume

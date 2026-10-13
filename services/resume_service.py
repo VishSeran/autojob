@@ -54,7 +54,7 @@ class ResumeService:
             raise
         
         
-    def remove_resume(self, resume_id) -> Resume:
+    def remove_resume(self,user_id:uuid.UUID, resume_id:uuid.UUID) -> Resume:
         
         try:
             
@@ -68,6 +68,9 @@ class ResumeService:
             if wanted_resume is None:
                 raise ValueError("Resume not found")
             
+            if wanted_resume.user_id != user_id:
+                raise ValueError("Resume does not belong to user")
+
             self.resume_repository.delete(wanted_resume)
             return wanted_resume
         
@@ -76,7 +79,7 @@ class ResumeService:
             raise
         
         
-    def select_default(self, resume_id):
+    def select_default(self, user_id:uuid.UUID, resume_id:uuid.UUID):
         
         try:
             
@@ -89,6 +92,9 @@ class ResumeService:
             
             if selected_resume is None:
                 raise ValueError("Resume not found")
+            
+            if selected_resume.user_id != user_id:
+                raise ValueError("Resume does not belong to user")
             
             self.resume_repository.make_default(
                 selected_resume
