@@ -1,9 +1,10 @@
 
 import uuid
+from datetime import datetime, timezone
 
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import Mapped, mapped_column
 
 from database.base import Base
 
@@ -30,5 +31,44 @@ class GmailModel(Base):
         nullable=False,
         index=True
     )
+    
+    resend_email_id: Mapped[str | None] = mapped_column (
+            String(255),
+            nullable=True,
+        )
+    
+    company_mail: Mapped[str] = mapped_column (
+        
+        String(255),
+        nullable=False
+    )
+    
+    subject: Mapped [str] = mapped_column (
+        
+        String(255),
+        nullable=False
+        
+    )
+    
+    email_body: Mapped [str] = mapped_column (
+        
+        String(255),
+        nullable=False
+    )
+    
+    status: Mapped[str] = mapped_column(
+        String(30),
+        nullable=False,
+        default="pending",
+    )
+    
+    create_at: Mapped[datetime] = mapped_column(
+        
+        DateTime(timezone=True),
+        nullable=False,
+        default= lambda: datetime.now(timezone.utc)
+    )
+    
+    
     
     
