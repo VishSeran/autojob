@@ -51,17 +51,51 @@ class ResumeService:
             raise
         
         
-    def remove_resume(self, resume_id):
+    def remove_resume(self, resume_id) -> Resume:
         
         try:
             
             if resume_id is None:
                 raise ValueError("Resume ID is missing")
             
+            wanted_resume = self.resume_repository.get_by_id(
+                resume_id
+            )
             
+            if wanted_resume is None:
+                raise ValueError("Resume not found")
+            
+            self.resume_repository.delete(wanted_resume)
+            return wanted_resume
+        
         except Exception:
             logger.exception("Unexpected error in remove resume")
             raise
         
-    
+        
+    def select_default(self, resume_id):
+        
+        try:
+            
+            if resume_id is None:
+                raise ValueError("Resume ID is missing")
+            
+            selected_resume = self.resume_repository.get_by_id(
+                resume_id
+            )
+            
+            if selected_resume is None:
+                raise ValueError("Resume not found")
+            
+            self.resume_repository.make_default(
+                selected_resume
+            )
+            
+            logger.info(f"{selected_resume.id} is set to default successfully")
+            return selected_resume
+        
+        except Exception:
+            logger.exception("Unexpected error in select default")
+            raise
+
     
