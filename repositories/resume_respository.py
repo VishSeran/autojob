@@ -54,7 +54,24 @@ class ResumeRepository:
             logger.exception('Unexpected error in get by id')
             raise
         
+    
+    def get_by_user_id(self, user_id:uuid.UUID) -> Resume | None:
         
+        try:
+            
+            stmt = (
+                select(Resume).where(
+                    Resume.user_id == user_id
+                )
+            )
+            
+            return self.db.scalar(
+                stmt
+            )
+            
+        except Exception:
+            logger.exception('Unexpected error in get by user id')
+            raise   
         
     def make_default(self, resume:Resume) -> Resume:
         
