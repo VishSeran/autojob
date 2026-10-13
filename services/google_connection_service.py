@@ -18,7 +18,7 @@ class GoogleConnectionService:
         self.encryption = EncryptionService()
         
     
-    def save_credentials(self, user_id: uuid.UUID, google_email:str, credentials, google_id):
+    def save_credentials(self, user_id: uuid.UUID, google_email:str, credentials, google_id) -> GoogleConnection:
         
         try:
             

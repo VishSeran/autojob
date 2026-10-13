@@ -10,3 +10,5 @@ class GoogleLoginRequest(BaseModel):
         max_length=100,
         description="User;s preferred display name"
     )
+    
+    password: str

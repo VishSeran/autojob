@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM:str
     ACCESS_TOKEN_EXPIRE_MINS:int
     REFRESH_TOKEN_EXPIRE_DAYS:int
+    RESEND_API:str
     
     model_config = SettingsConfigDict(
         env_file=".env",

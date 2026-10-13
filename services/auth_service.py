@@ -76,10 +76,12 @@ class AuthService:
             access_token = (
                 create_access_token(exisitng_user.id)
             )
+            logger.info("Access token has created")
             
             refresh_token = (
                 generate_jwt_refresh_token()
             )
+            logger.info("Refresh token has created")
             
             refresh_hashed_token = (
                 hash_refresh_token(refresh_token)   
@@ -96,6 +98,7 @@ class AuthService:
             )
             
             logger.info(f"New session has created: {new_session.id}")
+            logger.info(f"{new_session.user_id} user has logged in successfully")
             
             return {
                 "user": exisitng_user,
@@ -121,14 +124,16 @@ class AuthService:
                 return
             
             token_hash = hash_refresh_token(token)
+            logger.info("Got the token hashed")
             session = self.session_repository.get_by_hash_refresh_token(token_hash)
+            logger.info(f"Got the session: {session.id}")
             
             if session is None:
                 logger.warning("User session not found")
                 return
             
             self.session_repository.revoke_session(session)
-            logger.info(f"User session of {session.user_id} is revoked")
+            logger.info(f"User session of {session.id} is revoked")
             
         except ValueError:
             logger.exception("Unexpected value error in logout")
@@ -138,4 +143,54 @@ class AuthService:
             logger.exception("Unexpected error in logout")
             raise
         
+        
+    def refresh_access_token(self, refresh_token:str):
+        
+        try:
+            
+            if refresh_token is None:
+                raise ValueError("Refresh token is missing")
+            
+            hash_token = hash_refresh_token(
+                refresh_token
+            )
+            logger.info("got the token hashed")
+            
+            current_session = self.session_repository.get_by_hash_refresh_token(
+                hash_token
+            )
+            
+            if current_session is None:
+                raise ValueError(
+                    "Invalid refresh token"
+                )
+
+            if current_session.revoke:
+                raise ValueError(
+                    "Session revoked"
+                )
+            
+            now = datetime.now(timezone.utc)
+            
+            if current_session.expires_at < now:
+                raise ValueError(
+                    "Refresh token has expired"
+                )
+                
+            user = self.user_repository.get_by_id(
+                current_session.user_id
+            )
+            
+            if user is None:
+                raise  ValueError(
+                    "User not found"
+                )
+                
+            new_access_token = create_access_token(user.id)
+            logger.info("New access token has created")
+            return new_access_token
+
+        except ValueError:
+            raise logger.exception("Unexpected value error")
+
         
