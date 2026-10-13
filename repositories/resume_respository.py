@@ -26,9 +26,26 @@ class ResumeRepository:
            self.db.add(resume) 
            self.db.commit()
            self.db.refresh(resume)
+           logger.info(f"{resume.id} is added to bucket")
            
            return resume
      
         except Exception:
-            logger.exception('Unexpected error in add reume')
+            logger.exception('Unexpected error in add resume')
+            raise
+        
+        
+        
+    def make_default(self, resume:Resume) -> Resume:
+        
+        try:
+            
+            resume.is_default = True
+            self.db.commit()
+            self.db.refresh(resume)
+            
+            return resume
+            
+        except Exception:
+            logger.exception('Unexpected error in make default')
             raise
