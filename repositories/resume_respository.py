@@ -1,12 +1,11 @@
 
 import uuid
 
-from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
 from models.resume import Resume
-
 
 logger = get_logger("resume-repository")
 
@@ -85,6 +84,7 @@ class ResumeRepository:
             return resume
             
         except Exception:
+            self.db.rollback()
             logger.exception('Unexpected error in make default')
             raise
         
@@ -101,5 +101,6 @@ class ResumeRepository:
             return resume
             
         except Exception:
+            self.db.rollback()
             logger.exception('Unexpected error in delete resume')
             raise
