@@ -123,6 +123,7 @@ class ResumeService:
             
             resumes = self.resume_repository.get_by_user_id(user_id)
             logger.info(f"User resumes are fetched: {user_id}")
+            
             return resumes
         
         except Exception:
