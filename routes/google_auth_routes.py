@@ -204,7 +204,7 @@ async def google_callback(request: Request,
             detail="Google account information is incomplete or unverified"
         )
     
-    
+    user_service = UserService(db)
     exisitng_user = user_service.get_user_by_email(google_email)
     
     if exisitng_user:
