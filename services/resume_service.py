@@ -106,5 +106,27 @@ class ResumeService:
         except Exception:
             logger.exception("Unexpected error in select default")
             raise
+        
+        
+    def get_all_reumes(self, user_id:uuid.UUID) -> list[Resume]:
+        
+        try:
+            
+            if user_id is None:
+                raise ValueError("User ID is missing")
+            
+            user = self.user_repository.get_by_id(user_id)
+            
+            if user is None:
+                raise ValueError("User not found")
+            logger.info(f"User has fetched:{user_id}")
+            
+            resumes = self.resume_repository.get_by_user_id(user_id)
+            logger.info(f"User resumes are fetched: {user_id}")
+            return resumes
+        
+        except Exception:
+            logger.exception("Unexpected error in get all resumes")
+            raise
 
     
