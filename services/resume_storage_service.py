@@ -77,7 +77,7 @@ class ResumeStorageService:
             if not storage_path:
                 raise ValueError("storage path is missing")
             
-            results =  self.client.storage.from_(
+            self.client.storage.from_(
                 self.BUCKET_NAME
             ).remove(
                 
@@ -88,7 +88,7 @@ class ResumeStorageService:
                     f"File deleted from storage: {storage_path}"
             )
             
-            return results
+            return storage_path
             
 
         except Exception:
