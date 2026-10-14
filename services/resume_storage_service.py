@@ -62,3 +62,29 @@ class ResumeStorageService:
         except Exception:
             logger.exception("Unexpected error in download")
             raise
+        
+        
+    def delete(self, storage_path:str):
+        
+        try:
+            
+            if not storage_path:
+                raise ValueError("storage path is missing")
+            
+            results =  self.client.storage.from_(
+                self.BUCKET_NAME
+            ).remove(
+                
+                [storage_path]
+            )
+            
+            logger.info(
+                    f"File deleted from storage: {storage_path}"
+            )
+            
+            return results
+            
+
+        except Exception:
+            logger.exception("Unexpected error in delete")
+            raise
