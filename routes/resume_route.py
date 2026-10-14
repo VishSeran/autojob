@@ -21,7 +21,6 @@ resume_router = APIRouter(
 )
 
 
-
 @resume_router.post("/upload")
 async def upload_resume(file:UploadFile, db:Session = Depends(get_db), 
                   current_user:User = Depends(get_current_user)):
@@ -53,10 +52,27 @@ async def upload_resume(file:UploadFile, db:Session = Depends(get_db),
         resume_storage_service = ResumeStorageService(client)
         logger.info("resume services are initialized")
         
+        user_id = current_user.id
         
+        storage_path = resume_storage_service.upload(
+            user_id,
+            content
+        )
+        logger.info("storage path is received")
         
+        new_resume = resume_service.upload_resume(
+            user_id,
+            storage_path
+        )
         
+        logger.info("New resume has uploaded")
         
+        return {
+            "message": "Resume uploaded successfully",
+            "resume_id": str(new_resume.id)
+        }
+        
+   
     finally:
         
        await file.close()
