@@ -17,18 +17,42 @@ class ResumeStorageService:
         self.client = client
         logger.info("Supabase client has connected")
         
+        
     def upload(self, user_id:uuid.UUID, file_content:bytes):
         
-        storage_path = f"{user_id}/{uuid.uuid4}.pdf"
+        try:
+            
+            if user_id is None:
+                raise ValueError("User ID is missing")
+            
+            storage_path = f"{user_id}/{uuid.uuid4}.pdf"
+            
+            self.client.storage.from_(
+                self.BUCKET_NAME
+            ).upload(
+                storage_path,
+                file_content,
+                file_options= {
+                    
+                    "content-type": "application/pdf"
+                }
+            )
+            
+            logger.info("Reumes has uploaded to storage bucket")
+            return storage_path
         
-        self.client.storage.from_(
-            self.BUCKET_NAME
-        ).upload(
-            storage_path,
-            file_content,
-            file_options= {
-                "content-type":"application/pdf"
-            }
-        )
+        except Exception:
+            logger.exception("Unexpected error in upload")
+            raise
         
-        logger.info()
+        
+    def download(self, storage_path:str):
+        
+        try:
+            
+            if not storage_path:
+                raise ValueError("storage path is missing")
+            
+        except Exception:
+            logger.exception("Unexpected error in download")
+            raise
