@@ -41,7 +41,8 @@ class ResumeRepository:
             
             stmt = (
                 select(Resume).where(
-                    Resume.id == res_id
+                    Resume.id == res_id,
+                    Resume.user_id == user_id
                 )
             )
             
@@ -49,13 +50,6 @@ class ResumeRepository:
                 stmt
             )
             
-            if resume is None:
-                raise ValueError("Resume not found")
-            
-            if resume.user_id != user_id:
-                raise ValueError("Unauthoried access to resumes")
-            
-            logger.info(f"Resume {resume.id} is fetched")
             return resume
             
         except Exception:

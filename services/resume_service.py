@@ -141,10 +141,18 @@ class ResumeService:
                 raise ValueError("Resume ID is missing")
             
             resume = self.resume_repository.get_by_id(
-                resume_id
+                resume_id,
+                user_id
             )
             
+            if resume is None:
+                raise ValueError("Resume not found")
+                        
+            if resume.user_id != user_id:
+                raise ValueError("Unauthoried access to resumes")
             
+            logger.info(f"{resume_id} resume is retrieved")
+            return resume
             
         except Exception:
             logger.exception(f"Unexpected error in {resume_id} resume")
