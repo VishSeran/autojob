@@ -148,7 +148,16 @@ def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_curre
     resume_storage_service = ResumeStorageService(client)
     logger.info('Resume storage service initialized')
     
-    results = resume_storage_service.download(storage_path)
+    file_content = resume_storage_service.download(storage_path)
+    logger.info("file has started downloading")
+    
+    return Response(
+        content=file_content,
+        media_type="application/pdf"
+    )
+    
+    
+
     
     
     
