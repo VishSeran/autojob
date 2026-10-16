@@ -35,7 +35,7 @@ class ResumeRepository:
             raise
         
         
-    def get_by_id(self, res_id:uuid.UUID) -> Resume | None:
+    def get_by_id(self, res_id:uuid.UUID, user_id:uuid.UUID) -> Resume | None:
         
         try:
             
@@ -45,9 +45,18 @@ class ResumeRepository:
                 )
             )
             
-            return self.db.scalar(
+            resume = self.db.scalar(
                 stmt
             )
+            
+            if resume is None:
+                raise ValueError("Resume not found")
+            
+            if resume.user_id != user_id:
+                raise ValueError("Unauthoried access to resumes")
+            
+            logger.info(f"Resume {resume.id} is fetched")
+            return resume
             
         except Exception:
             logger.exception('Unexpected error in get by id')

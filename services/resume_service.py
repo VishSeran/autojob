@@ -140,6 +140,10 @@ class ResumeService:
             if resume_id is None:
                 raise ValueError("Resume ID is missing")
             
+            resume = self.resume_repository.get_by_id(
+                resume_id
+            )
+            
             
             
         except Exception:
