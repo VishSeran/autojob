@@ -157,6 +157,39 @@ def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_curre
     )
     
     
+@resume_router.post("/delete")    
+def delete_resume(resume_id:uuid.UUID, current_user: User = Depends(get_current_user),
+                  db:Session = Depends(get_db)):
+    
+    if resume_id is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Resume ID is missing"
+        )
+        
+    user_id = current_user.id
+    logger.info(f"User ID is exctracted: {user_id}")
+    
+    resume_service = ResumeService(db)
+    logger.info("Resume service has initialized")
+    
+    delete_resume = resume_service.get_resume(
+        user_id,
+        resume_id
+    ) 
+    
+    if delete_resume.id != user_id:
+        raise HTTPException(
+            status_code=401,
+            detail="resume not belongs to user"
+        )
+        
+    resume_storage_service = ResumeStorageService(client)
+    logger.info("Resume storage service has initialized")
+    
+    storage_path = delete_resume.storage_path
+    logger.info(f"{resume_id} resume storage path is fetched") 
+    
 
     
     

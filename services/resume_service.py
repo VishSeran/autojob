@@ -62,7 +62,8 @@ class ResumeService:
                 raise ValueError("Resume ID is missing")
             
             wanted_resume = self.resume_repository.get_by_id(
-                resume_id
+                resume_id,
+                user_id
             )
             
             if wanted_resume is None:
@@ -87,7 +88,8 @@ class ResumeService:
                 raise ValueError("Resume ID is missing")
             
             selected_resume = self.resume_repository.get_by_id(
-                resume_id
+                resume_id,
+                user_id
             )
             
             if selected_resume is None:
