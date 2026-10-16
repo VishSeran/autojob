@@ -25,7 +25,7 @@ class ResumeStorageService:
             if user_id is None:
                 raise ValueError("User ID is missing")
             
-            storage_path = f"{user_id}/{uuid.uuid4}.pdf"
+            storage_path = f"{user_id}/{uuid.uuid4()}.pdf"
             
             self.client.storage.from_(
                 self.BUCKET_NAME

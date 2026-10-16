@@ -35,19 +35,22 @@ class ResumeRepository:
             raise
         
         
-    def get_by_id(self, res_id:uuid.UUID) -> Resume | None:
+    def get_by_id(self, res_id:uuid.UUID, user_id:uuid.UUID) -> Resume | None:
         
         try:
             
             stmt = (
                 select(Resume).where(
-                    Resume.id == res_id
+                    Resume.id == res_id,
+                    Resume.user_id == user_id
                 )
             )
             
-            return self.db.scalar(
+            resume = self.db.scalar(
                 stmt
             )
+            
+            return resume
             
         except Exception:
             logger.exception('Unexpected error in get by id')
