@@ -134,7 +134,13 @@ class ResumeService:
     def get_resume(self, user_id:uuid.UUID, resume_id: uuid.UUID) -> Resume:
         
         try:
-            if not user_id:
+            if user_id is None:
+                raise ValueError("User ID is missing")
+            
+            if resume_id is None:
+                raise ValueError("Resume ID is missing")
+            
+            
             
         except Exception:
             logger.exception(f"Unexpected error in {resume_id} resume")
