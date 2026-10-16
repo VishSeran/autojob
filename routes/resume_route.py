@@ -128,6 +128,7 @@ def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_curre
     logger.info('Resume service initialized')
     
     resume = resume_service.get_resume(
+        
         user_id,
         resume_id
     )

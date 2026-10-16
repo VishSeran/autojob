@@ -1,6 +1,7 @@
 
 import uuid
 
+from fastapi import HTTPException, Response
 from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
@@ -164,6 +165,44 @@ class ResumeService:
             
         except Exception:
             logger.exception(f"Unexpected error in {resume_id} resume")
+            raise
+        
+        
+    def download_resume(self, user_id:uuid.UUID, resume_id:uuid.UUID):
+        
+        try:
+            
+            if user_id is None:
+                raise ValueError("User ID is missing")
+            
+            resume = self.get_resume(
+                user_id,
+                resume_id
+            )
+            
+            storage_path = resume.storage_path
+                
+            if storage_path is None:
+                raise HTTPException(
+                    status_code=401,
+                    detail="Resume storage path is missing"
+                )
+
+            file_content = self.storage_service.download(storage_path)
+            logger.info("file has started downloading")
+            
+            response  = Response(
+                content= file_content,
+                media_type="application/pdf",
+                headers={
+                    "Content-Disposition": f'attachment; filename="resume.pdf"'
+                }
+            )
+            logger.info("Response has fetched")
+            return response
+            
+        except Exception:
+            logger.exception('Unexpected error in resume downloading')
             raise
         
     
