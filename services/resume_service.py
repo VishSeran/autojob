@@ -7,6 +7,9 @@ from configs.logger import get_logger
 from repositories.resume_respository import ResumeRepository
 from repositories.user_repository import UserRepository
 from models.resume import Resume
+from services.resume_storage_service import ResumeStorageService
+from supabase import Client 
+from database.supabase_client import client
 
 
 logger = get_logger("resume-service")
@@ -14,26 +17,29 @@ logger = get_logger("resume-service")
 class ResumeService:
     
     
-    def __init__(self, db:Session):
+    def __init__(self, db:Session, client:Client = client):
         
         self.resume_repository = ResumeRepository(db)
         self.user_repository = UserRepository(db)
+        self.storage_service = ResumeStorageService(client)
         
         
-    def upload_resume(self, user_id:uuid.UUID, storage_path: str) -> Resume:
+    def upload_resume(self,content:bytes, user_id:uuid.UUID) -> Resume:
         
         try:
             
             if not user_id:
                 raise ValueError("User ID is missing")
-
-            if not storage_path:
-                raise ValueError("Storage path is missing")
             
             user = self.user_repository.get_by_id(user_id)
             
             if user is None:
                 raise ValueError("User not found")
+            
+            storage_path = self.storage_service.upload(
+                user_id,
+                content
+            )
             
             if not storage_path:
                 raise ValueError("Storage path is missing")
@@ -43,7 +49,7 @@ class ResumeService:
                 user_id = user_id,
                 storage_path = storage_path
             )
-            
+
             self.resume_repository.add_resume(new_resume)
             logger.info(f"Resume {new_resume.id} added for user {user_id}")
             

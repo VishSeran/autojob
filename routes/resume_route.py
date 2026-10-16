@@ -51,21 +51,16 @@ async def upload_resume(file:UploadFile, db:Session = Depends(get_db),
     try:
         
         resume_service = ResumeService(db)
-        resume_storage_service = ResumeStorageService(client)
-        logger.info("resume services are initialized")
+        logger.info("resume service initialized")
         
         user_id = current_user.id
         logger.info(f"User ID is exctracted: {user_id}")
         
-        storage_path = resume_storage_service.upload(
-            user_id,
-            content
-        )
         logger.info("storage path is received")
         
         new_resume = resume_service.upload_resume(
-            user_id,
-            storage_path
+            content,
+            user_id
         )
         
         logger.info("New resume has uploaded")
@@ -153,7 +148,10 @@ def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_curre
     
     return Response(
         content=file_content,
-        media_type="application/pdf"
+        media_type="application/pdf", 
+        headers={
+        "Content-Disposition": f'attachment; filename=f"{current_user.name}-resume.pdf"'
+        }
     )
     
     
