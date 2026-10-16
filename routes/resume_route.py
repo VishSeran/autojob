@@ -129,7 +129,26 @@ def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_curre
     user_id = current_user.id
     logger.info(f"User ID is exctracted: {user_id}")
     
-    if not
+    resume_service = ResumeService(db)
+    logger.info('Resume service initialized')
+    
+    resume = resume_service.get_resume(
+        user_id,
+        resume_id
+    )
+    
+    storage_path = resume.storage_path
+    
+    if storage_path is None:
+        raise HTTPException(
+            status_code=401,
+            detail="Resume storage path is missing"
+        )
+        
+    resume_storage_service = ResumeStorageService(client)
+    logger.info('Resume storage service initialized')
+    
+    results = resume_storage_service.download(storage_path)
     
     
     
