@@ -190,6 +190,29 @@ def delete_resume(resume_id:uuid.UUID, current_user: User = Depends(get_current_
     storage_path = delete_resume.storage_path
     logger.info(f"{resume_id} resume storage path is fetched") 
     
+    path = resume_storage_service.delete(
+        storage_path
+    )
+    
+    logger.info(f"{resume_id} resume content is deleted from {path} successfully")
+    
+    deleted_resume = resume_service.remove_resume(
+        user_id,
+        resume_id
+    )
+    
+    logger.info(f"{deleted_resume.id} path is deleted from successfully")
+    
+    return {
+        
+        "message": "Resume deleted successfully",
+        "resume_id": resume_id
+    }
+    
+    
+    
+    
+    
 
     
     
