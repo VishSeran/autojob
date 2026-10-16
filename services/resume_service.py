@@ -198,6 +198,7 @@ class ResumeService:
                     "Content-Disposition": f'attachment; filename="resume.pdf"'
                 }
             )
+            
             logger.info("Response has fetched")
             return response
             

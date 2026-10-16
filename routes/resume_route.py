@@ -127,33 +127,16 @@ def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_curre
     resume_service = ResumeService(db)
     logger.info('Resume service initialized')
     
-    resume = resume_service.get_resume(
-        
+    resume = resume_service.download_resume(
         user_id,
         resume_id
     )
+    logger.info("Resume downloaded successfully")
     
-    storage_path = resume.storage_path
-    
-    if storage_path is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Resume storage path is missing"
-        )
-        
-    resume_storage_service = ResumeStorageService(client)
-    logger.info('Resume storage service initialized')
-    
-    file_content = resume_storage_service.download(storage_path)
-    logger.info("file has started downloading")
-    
-    return Response(
-        content=file_content,
-        media_type="application/pdf", 
-        headers={
-        "Content-Disposition": f'attachment; filename=f"{current_user.name}-resume.pdf"'
-        }
-    )
+    return {
+        "message": "Resume downloaded successfully",
+        "content": resume,
+    }
     
     
 @resume_router.post("/delete")    
