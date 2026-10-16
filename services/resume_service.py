@@ -68,6 +68,9 @@ class ResumeService:
             if resume_id is None:
                 raise ValueError("Resume ID is missing")
             
+            if user_id is None:
+                raise ValueError("User ID is missing")
+
             wanted_resume = self.resume_repository.get_by_id(
                 resume_id,
                 user_id
@@ -78,9 +81,28 @@ class ResumeService:
             
             if wanted_resume.user_id != user_id:
                 raise ValueError("Resume does not belong to user")
+            
+            storage_path = wanted_resume.storage_path
+                            
+            if storage_path is None:
+                raise HTTPException(
+                    status_code=401,
+                    detail="Resume storage path is missing"
+                )
+                
+            if wanted_resume.user_id != user_id:
+                raise HTTPException(
+                    status_code=401,
+                    detail="resume not belongs to user"
+                )
 
-            self.resume_repository.delete(wanted_resume)
-            return wanted_resume
+            deleted_resume = self.resume_repository.delete(wanted_resume)
+            
+            path = self.storage_service.delete(
+                    storage_path
+            )
+            
+            return deleted_resume
         
         except Exception:
             logger.exception("Unexpected error in remove resume")
@@ -205,6 +227,34 @@ class ResumeService:
         except Exception:
             logger.exception('Unexpected error in resume downloading')
             raise
+        
+        
+    def delete_resume(self, user_id:uuid.UUID, resume_id:uuid.UUID):
+        
+        try:
+            
+            if user_id is None:
+                raise ValueError("User ID is missing")
+            
+            resume = self.get_resume(
+                        user_id,
+                        resume_id
+            )
+                        
+            storage_path = resume.storage_path
+                
+            if storage_path is None:
+                raise HTTPException(
+                    status_code=401,
+                    detail="Resume storage path is missing"
+                )           
+                
+            
+            
+        except Exception:
+            logger.exception('Unexpected error in resume deleting')
+            raise    
+        
         
     
 
