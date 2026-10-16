@@ -55,6 +55,7 @@ async def upload_resume(file:UploadFile, db:Session = Depends(get_db),
         logger.info("resume services are initialized")
         
         user_id = current_user.id
+        logger.info(f"User ID is exctracted: {user_id}")
         
         storage_path = resume_storage_service.upload(
             user_id,
@@ -86,6 +87,8 @@ def make_default(resume_id:uuid.UUID ,
     
     
     user_id = current_user.id
+    logger.info(f"User ID is exctracted: {user_id}")
+    
     resume_service = ResumeService(db)
     
     selected_resume = resume_service.select_default(
@@ -98,8 +101,24 @@ def make_default(resume_id:uuid.UUID ,
     return {
         
         "message": "Resume set to default successfully",
-        "resume_id": resume_id
+        "resume_id": selected_resume.id
     }
+    
+@resume_router.get("/all")
+def get_all_resumes(current_user:User = Depends(get_current_user), 
+                    db:Session = Depends(get_db)):
+    
+    user_id = current_user.id
+    logger.info(f"User ID is exctracted: {user_id}")
+    
+    resume_service = ResumeService(db)
+    
+    resume_list = resume_service.get_all_resumes(
+        user_id
+    ) 
+    logger.info(f"Resume list is fetched: {len(resume_list)}") 
+    
+    return resume_list
     
     
     

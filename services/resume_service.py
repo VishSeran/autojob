@@ -108,7 +108,7 @@ class ResumeService:
             raise
         
         
-    def get_all_reumes(self, user_id:uuid.UUID) -> list[Resume]:
+    def get_all_resumes(self, user_id:uuid.UUID) -> list[Resume]:
         
         try:
             
