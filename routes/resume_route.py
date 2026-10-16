@@ -1,7 +1,7 @@
 
 import uuid
 
-from fastapi import APIRouter, Request, Response, Depends, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile
 from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
@@ -9,9 +9,6 @@ from database.session import get_db
 from dependencies.auth import get_current_user
 from models.users import User
 from services.resume_service import ResumeService
-from services.resume_storage_service import ResumeStorageService
-from database.supabase_client import client
-
 
 logger = get_logger("resume-route")
 
@@ -115,7 +112,7 @@ def get_all_resumes(current_user:User = Depends(get_current_user),
     
     return resume_list
 
-@resume_router.post("/download")
+@resume_router.delete("/download")
 def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_current_user),
                     db: Session = Depends(get_db)
                     ):
@@ -127,16 +124,20 @@ def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_curre
     resume_service = ResumeService(db)
     logger.info('Resume service initialized')
     
-    resume = resume_service.download_resume(
+    file_content = resume_service.download_resume(
         user_id,
         resume_id
     )
+    
     logger.info("Resume downloaded successfully")
     
-    return {
-        "message": "Resume downloaded successfully",
-        "content": resume,
-    }
+    return Response(
+        content=file_content,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'attachment; filename="resume.pdf"'
+        }
+    )
     
     
 @resume_router.post("/delete")    

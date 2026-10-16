@@ -3,15 +3,14 @@ import uuid
 
 from fastapi import HTTPException, Response
 from sqlalchemy.orm import Session
+from supabase import Client
 
 from configs.logger import get_logger
+from database.supabase_client import client
+from models.resume import Resume
 from repositories.resume_respository import ResumeRepository
 from repositories.user_repository import UserRepository
-from models.resume import Resume
 from services.resume_storage_service import ResumeStorageService
-from supabase import Client 
-from database.supabase_client import client
-
 
 logger = get_logger("resume-service")
 
@@ -90,17 +89,11 @@ class ResumeService:
                     detail="Resume storage path is missing"
                 )
                 
-            if wanted_resume.user_id != user_id:
-                raise HTTPException(
-                    status_code=401,
-                    detail="resume not belongs to user"
-                )
-
-            deleted_resume = self.resume_repository.delete(wanted_resume)
-            
-            path = self.storage_service.delete(
+            self.storage_service.delete(
                     storage_path
             )
+
+            deleted_resume = self.resume_repository.delete(wanted_resume) 
             
             return deleted_resume
         
@@ -190,7 +183,7 @@ class ResumeService:
             raise
         
         
-    def download_resume(self, user_id:uuid.UUID, resume_id:uuid.UUID):
+    def download_resume(self, user_id:uuid.UUID, resume_id:uuid.UUID) -> bytes:
         
         try:
             
@@ -205,55 +198,18 @@ class ResumeService:
             storage_path = resume.storage_path
                 
             if storage_path is None:
-                raise HTTPException(
-                    status_code=401,
-                    detail="Resume storage path is missing"
+                raise ValueError(
+                    "Resume storage path is missing"
                 )
 
             file_content = self.storage_service.download(storage_path)
             logger.info("file has started downloading")
             
-            response  = Response(
-                content= file_content,
-                media_type="application/pdf",
-                headers={
-                    "Content-Disposition": f'attachment; filename="resume.pdf"'
-                }
-            )
-            
-            logger.info("Response has fetched")
-            return response
+            return file_content
             
         except Exception:
             logger.exception('Unexpected error in resume downloading')
             raise
-        
-        
-    def delete_resume(self, user_id:uuid.UUID, resume_id:uuid.UUID):
-        
-        try:
-            
-            if user_id is None:
-                raise ValueError("User ID is missing")
-            
-            resume = self.get_resume(
-                        user_id,
-                        resume_id
-            )
-                        
-            storage_path = resume.storage_path
-                
-            if storage_path is None:
-                raise HTTPException(
-                    status_code=401,
-                    detail="Resume storage path is missing"
-                )           
-                
-            
-            
-        except Exception:
-            logger.exception('Unexpected error in resume deleting')
-            raise    
         
         
     
