@@ -53,7 +53,7 @@ class ResumeStorageService:
             if not storage_path:
                 raise ValueError("storage path is missing")
             
-            results =  self.client.storage.from_(
+            file_content = self.client.storage.from_(
                 self.BUCKET_NAME
             ).download(
                 storage_path
@@ -63,7 +63,7 @@ class ResumeStorageService:
                 f"File download from storage: {storage_path}"
             )
             
-            return results
+            return file_content
     
         except Exception:
             logger.exception("Unexpected error in download")

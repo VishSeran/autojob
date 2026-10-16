@@ -1,7 +1,7 @@
 
 import uuid
 
-from fastapi import APIRouter, Request, Response, Depends, UploadFile, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile
 from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
@@ -9,9 +9,6 @@ from database.session import get_db
 from dependencies.auth import get_current_user
 from models.users import User
 from services.resume_service import ResumeService
-from services.resume_storage_service import ResumeStorageService
-from database.supabase_client import client
-
 
 logger = get_logger("resume-route")
 
@@ -51,21 +48,16 @@ async def upload_resume(file:UploadFile, db:Session = Depends(get_db),
     try:
         
         resume_service = ResumeService(db)
-        resume_storage_service = ResumeStorageService(client)
-        logger.info("resume services are initialized")
+        logger.info("resume service initialized")
         
         user_id = current_user.id
         logger.info(f"User ID is exctracted: {user_id}")
         
-        storage_path = resume_storage_service.upload(
-            user_id,
-            content
-        )
         logger.info("storage path is received")
         
         new_resume = resume_service.upload_resume(
-            user_id,
-            storage_path
+            content,
+            user_id
         )
         
         logger.info("New resume has uploaded")
@@ -79,8 +71,9 @@ async def upload_resume(file:UploadFile, db:Session = Depends(get_db),
     finally:
         
        await file.close()
+       
     
-@resume_router.post("/make_default")
+@resume_router.patch("/{resume_id}/default")
 def make_default(resume_id:uuid.UUID , 
                  db:Session = Depends(get_db), 
                  current_user:User = Depends(get_current_user)):
@@ -101,7 +94,7 @@ def make_default(resume_id:uuid.UUID ,
     return {
         
         "message": "Resume set to default successfully",
-        "resume_id": selected_resume.id
+        "resume_id": str(selected_resume.id)
     }
     
 @resume_router.get("/all")
@@ -120,7 +113,7 @@ def get_all_resumes(current_user:User = Depends(get_current_user),
     
     return resume_list
 
-@resume_router.post("/download")
+@resume_router.get("/download/{resume_id}")
 def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_current_user),
                     db: Session = Depends(get_db)
                     ):
@@ -132,23 +125,51 @@ def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_curre
     resume_service = ResumeService(db)
     logger.info('Resume service initialized')
     
-    resume = resume_service.get_resume(
+    file_content = resume_service.download_resume(
         user_id,
         resume_id
     )
     
-    storage_path = resume.storage_path
+    logger.info("Resume downloaded successfully")
     
-    if storage_path is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Resume storage path is missing"
-        )
+    return Response(
+        content=file_content,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'attachment; filename="resume.pdf"'
+        }
+    )
+    
+    
+@resume_router.delete("/{resume_id}")    
+def delete_resume(resume_id:uuid.UUID, current_user: User = Depends(get_current_user),
+                  db:Session = Depends(get_db)):
         
-    resume_storage_service = ResumeStorageService(client)
-    logger.info('Resume storage service initialized')
+    user_id = current_user.id
+    logger.info(f"User ID is exctracted: {user_id}")
     
-    results = resume_storage_service.download(storage_path)
+    resume_service = ResumeService(db)
+    logger.info("Resume service has initialized")
+    
+    delete_resume = resume_service.remove_resume(
+        user_id,
+        resume_id
+    ) 
+
+    logger.info(f"{delete_resume.id} resume content is deleted from {delete_resume.storage_path} successfully")
+    
+    logger.info(f"{delete_resume.id} path is deleted from successfully")
+    
+    return {
+        "message": "Resume deleted successfully",
+        "resume_id": str(delete_resume.id)
+    }
+    
+    
+    
+    
+    
+
     
     
     
