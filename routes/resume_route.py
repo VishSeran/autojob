@@ -113,7 +113,7 @@ def get_all_resumes(current_user:User = Depends(get_current_user),
     
     return resume_list
 
-@resume_router.delete("/download")
+@resume_router.get("/download/{resume_id}")
 def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_current_user),
                     db: Session = Depends(get_db)
                     ):
@@ -161,7 +161,6 @@ def delete_resume(resume_id:uuid.UUID, current_user: User = Depends(get_current_
     logger.info(f"{delete_resume.id} path is deleted from successfully")
     
     return {
-        
         "message": "Resume deleted successfully",
         "resume_id": str(delete_resume.id)
     }
