@@ -130,6 +130,16 @@ class ResumeService:
             logger.exception("Unexpected error in get all resumes")
             raise
         
+        
+    def get_resume(self, user_id:uuid.UUID, resume_id: uuid.UUID) -> Resume:
+        
+        try:
+            if not user_id:
+            
+        except Exception:
+            logger.exception(f"Unexpected error in {resume_id} resume")
+            raise
+        
     
 
     

@@ -119,6 +119,18 @@ def get_all_resumes(current_user:User = Depends(get_current_user),
     logger.info(f"Resume list is fetched: {len(resume_list)}") 
     
     return resume_list
+
+@resume_router.post("/download")
+def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_current_user),
+                    db: Session = Depends(get_db)
+                    ):
+    
+    
+    user_id = current_user.id
+    logger.info(f"User ID is exctracted: {user_id}")
+    
+    if not
+    
     
     
     
