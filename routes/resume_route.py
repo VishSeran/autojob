@@ -71,8 +71,9 @@ async def upload_resume(file:UploadFile, db:Session = Depends(get_db),
     finally:
         
        await file.close()
+       
     
-@resume_router.post("/make_default")
+@resume_router.patch("/{resume_id}/default")
 def make_default(resume_id:uuid.UUID , 
                  db:Session = Depends(get_db), 
                  current_user:User = Depends(get_current_user)):
@@ -93,7 +94,7 @@ def make_default(resume_id:uuid.UUID ,
     return {
         
         "message": "Resume set to default successfully",
-        "resume_id": selected_resume.id
+        "resume_id": str(selected_resume.id)
     }
     
 @resume_router.get("/all")
@@ -140,15 +141,9 @@ def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_curre
     )
     
     
-@resume_router.post("/delete")    
+@resume_router.delete("/{resume_id}")    
 def delete_resume(resume_id:uuid.UUID, current_user: User = Depends(get_current_user),
                   db:Session = Depends(get_db)):
-    
-    if resume_id is None:
-        raise HTTPException(
-            status_code=401,
-            detail="Resume ID is missing"
-        )
         
     user_id = current_user.id
     logger.info(f"User ID is exctracted: {user_id}")
@@ -168,7 +163,7 @@ def delete_resume(resume_id:uuid.UUID, current_user: User = Depends(get_current_
     return {
         
         "message": "Resume deleted successfully",
-        "resume_id": delete_resume.id
+        "resume_id": str(delete_resume.id)
     }
     
     
