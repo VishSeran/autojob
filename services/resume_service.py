@@ -1,7 +1,7 @@
 
 import uuid
 
-from fastapi import HTTPException, Response
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from supabase import Client
 
