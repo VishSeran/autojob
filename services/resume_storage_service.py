@@ -5,7 +5,6 @@ from supabase import Client
 
 from configs.logger import get_logger
 
-
 logger = get_logger("resume-storage-service")
 
 class ResumeStorageService:
@@ -89,7 +88,6 @@ class ResumeStorageService:
             )
             
             return storage_path
-            
 
         except Exception:
             logger.exception("Unexpected error in delete")
