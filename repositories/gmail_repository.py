@@ -52,4 +52,24 @@ class GmailRepository:
             logger.exception("Unexpected error in get by id")
             raise
         
+    
+    def get_by_user_id(self, user_id:uuid.UUID) -> list[GmailModel] | None:
+        
+        try:
+            
+            stmt = (
+                select(GmailModel).where(
+                    GmailModel.user_id == user_id
+                )
+            )
+            
+            emails = self.db.scalars(stmt).all()
+            logger.info("Emails are fetched")
+            
+            return list(emails)
+            
+        except Exception:
+            logger.exception("Unexpected error in get by user id")
+            raise
+        
         
