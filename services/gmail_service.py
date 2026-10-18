@@ -25,18 +25,18 @@ class GmailService:
     def send_email(
         self, 
         user_id:uuid.UUID,
-        resend_email_id:str,
+        reply_email:str,
         company_mail:str,
         subject:str,
         email_body:str
-    )->resend.Email:
+    ) -> GmailModel:
         
         try:
             
             if user_id is None:
                 raise ValueError("User ID is missing")
             
-            if resend_email_id is None:
+            if reply_email is None:
                 raise ValueError("Resend email is missing")
             
             if company_mail is None:
@@ -53,20 +53,36 @@ class GmailService:
             params:resend.Emails.SendParams = {
                 
                 "from": "Acme <onboarding@resend.dev>",
-                "to": [company_mail, resend_email_id],
-                "reply_to":resend_email_id,
+                "to": [company_mail, reply_email],
+                "reply_to":reply_email,
                 "subject":subject,
                 "text":email_body
                 
             }
             
-            email = resend.Emails.send(params)
-        
+            send_email = resend.Emails.send(params)
+            logger.info("Email sent successfully")
             
-            return email
+            resend_email_id = send_email.get("id", "")
             
-        
-        except ResendError:
+            email_data = GmailModel(
+                            
+                user_id= user_id,
+                resend_email_id= resend_email_id,
+                reply_email= reply_email,
+                company_mail= company_mail,
+                subject= subject,
+                email_body= email_body,
+                status="sent"
+            )
+            
+            email_data = self.gmail_repository.create_gmail(email_data)
+            logger.info("Send email added to database successfully")
+            
+            return email_data
+            
+
+        except ResendError:            
             logger.exception("Unexpected error in send email")
             raise    
             
