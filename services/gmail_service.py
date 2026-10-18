@@ -72,8 +72,16 @@ class GmailService:
                 
             }
             
-            send_email = resend.Emails.send(params)
-            logger.info("Email sent successfully")
+            try:
+            
+                send_email = resend.Emails.send(params)
+                logger.info("Email sent successfully")
+                
+            except ResendError:
+                email_data.status = "failed"
+                self.gmail_repository.update(email_data)
+                logger.exception("Resend failed to send the email")
+                raise
             
             resend_email_id = send_email.get("id")
             
@@ -83,7 +91,9 @@ class GmailService:
             
             email_data.resend_email_id = resend_email_id
             email_data.status = "sent"
-            logger.info("Send email added to database successfully - sent")
+            
+            self.gmail_repository.update(email_data)
+            logger.info(f"Send email added to database successfully - sent: {email_data.id}")
             
             return email_data
 
@@ -92,6 +102,8 @@ class GmailService:
             raise    
             
         except ValueError:
+            email_data.status = "failed"
+            self.gmail_repository.update(email_data)
             logger.exception("Unexpected value error in send email")
             raise    
             
