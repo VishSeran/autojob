@@ -108,3 +108,23 @@ class GmailService:
             raise
         
         
+    def view_all_emails(self, user_id:uuid.UUID):
+        
+        try:
+            
+            if user_id is None:
+                raise ValueError("User ID is missing")
+            
+            emails = self.gmail_repository.get_by_user_id(
+                user_id
+            )
+            
+            logger.info("Emails are fetched")
+            
+            return emails
+        
+        except Exception:
+            logger.exception("Unexpected error in view all emails")
+            raise
+        
+        
