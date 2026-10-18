@@ -1,5 +1,7 @@
 
-from fastapi import APIRouter, Response, Depends
+import uuid
+
+from fastapi import APIRouter, Response, Depends, Request, HTTPException
 
 from configs.logger import get_logger
 from database.session import get_db
@@ -45,5 +47,62 @@ def send_mail(request: GmailRequest,
         "message": "Email sent successfully",
         "email_id": sent_mail.id
     }
+    
+@gmail_router.get("allmails")
+def view_all_mails(request:Request,
+                   current_user:User = Depends(get_current_user),
+                   db:Session = Depends(get_db)):
+    
+    user_id = current_user.id
+    logger.info(f"User ID is exctracted: {user_id}")
+    
+    try:
+        gmail_service = GmailService(db)
+        all_emails =  gmail_service.view_all_emails(user_id)
+        logger.info("All emails are retrieved")
+    
+    except ValueError as error:
+        raise HTTPException(
+            status_code=401,
+            detail=f"Error in view all emails: {error}"
+        )
+            
+    return {
+        
+        "message": "All emails are fetched",
+        "emails": all_emails,
+        "no_emails": str(len(all_emails))
+    }
+
+
+@gmail_router.get("/{gmail_id}")
+def view_email(gmail_id:uuid.UUID,
+               current_user:User = Depends(get_current_user),
+               db:Session = Depends(get_db)):
+    
+    user_id = current_user.id
+    logger.info(f"User ID is exctracted: {user_id}")
+    
+    try:
+    
+        email_service = GmailService(db)
+        email = email_service.view_email(
+            user_id,gmail_id
+        )
+        logger.info("Email is retrieved")
+        
+    except ValueError as error:
+        raise HTTPException(
+            status_code=401,
+            detail=f"Error in view emails: {error}"
+        )
+    
+    return {
+        
+        "message": f"{email.id} is retrieved successfully",
+        "email": email
+    }
+
+    
     
 

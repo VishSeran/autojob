@@ -1,8 +1,7 @@
 from cryptography.fernet import Fernet
 
-from configs.settings import settings
 from configs.logger import get_logger
-
+from configs.settings import settings
 
 logger = get_logger("encryption-service")
 
