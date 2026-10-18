@@ -14,7 +14,7 @@ class UserService:
         
         self.db = db
         self.user_repository = UserRepository(self.db)
-        logger.info("user repository created")
+        logger.info("User service has initialized")
         
     
     def create_user(self, email: str, name: str) -> User:

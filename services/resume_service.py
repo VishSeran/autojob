@@ -22,6 +22,7 @@ class ResumeService:
         self.resume_repository = ResumeRepository(db)
         self.user_repository = UserRepository(db)
         self.storage_service = ResumeStorageService(client)
+        logger.info("Resume service has initialized")
         
         
     def upload_resume(self,content:bytes, user_id:uuid.UUID) -> Resume:
