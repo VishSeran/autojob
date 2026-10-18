@@ -83,14 +83,24 @@ def view_email(gmail_id:uuid.UUID,
     user_id = current_user.id
     logger.info(f"User ID is exctracted: {user_id}")
     
-    email_service = GmailService(db)
-    email = email_service.view_email(
-        user_id,gmail_id
-    )
-    logger.info("Email is retrieved")
+    try:
+    
+        email_service = GmailService(db)
+        email = email_service.view_email(
+            user_id,gmail_id
+        )
+        logger.info("Email is retrieved")
+        
+    except ValueError as error:
+        raise HTTPException(
+            status_code=401,
+            detail=f"Error in view emails: {error}"
+        )
     
     return {
         
+        "message": f"{email.id} is retrieved successfully",
+        "email": email
     }
 
     
