@@ -71,6 +71,21 @@ class GmailRepository:
             logger.exception("Unexpected error in get by user id")
             raise
         
+    
+    def update(self, gmail:GmailModel):
+        
+        try:
+            
+            self.db.add(gmail)
+            self.db.commit()
+            self.db.refresh(gmail)
+            
+            logger.info("Update gmail successfully")
+            
+        except Exception:
+            logger.exception("Unexpected error in update gmail")
+            raise   
+        
         
     def delete(self, email:GmailModel):
         
