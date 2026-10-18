@@ -1,15 +1,15 @@
 
 import uuid
 
-from sqlalchemy.orm import Session
 import resend
 from resend.exceptions import ResendError
+from sqlalchemy.orm import Session
+
 from configs.logger import get_logger
-from models.gmail import GmailModel
 from configs.settings import settings
+from models.gmail import GmailModel
 from repositories.gmail_repository import GmailRepository
 from repositories.user_repository import UserRepository
-
 
 logger = get_logger("gmail-service")
 
@@ -48,6 +48,18 @@ class GmailService:
             if email_body is None:
                 raise ValueError("Email body is missing")
             
+            
+            email_data = GmailModel(                    
+                user_id= user_id,
+                reply_email= reply_email,
+                company_mail= company_mail,
+                subject= subject,
+                email_body= email_body,
+            )
+            
+            email_data = self.gmail_repository.create_gmail(email_data)
+            logger.info("Send email added to database successfully - pending")
+            
             resend.api_key = settings.RESEND_API
             
             params:resend.Emails.SendParams = {
@@ -63,24 +75,17 @@ class GmailService:
             send_email = resend.Emails.send(params)
             logger.info("Email sent successfully")
             
-            resend_email_id = send_email.get("id", "")
+            resend_email_id = send_email.get("id")
             
-            email_data = GmailModel(
-                            
-                user_id= user_id,
-                resend_email_id= resend_email_id,
-                reply_email= reply_email,
-                company_mail= company_mail,
-                subject= subject,
-                email_body= email_body,
-                status="sent"
+            logger.info(
+                f"Email accepted by Resend. Resend ID: {resend_email_id}"
             )
             
-            email_data = self.gmail_repository.create_gmail(email_data)
-            logger.info("Send email added to database successfully")
+            email_data.resend_email_id = resend_email_id
+            email_data.status = "sent"
+            logger.info("Send email added to database successfully - sent")
             
             return email_data
-            
 
         except ResendError:            
             logger.exception("Unexpected error in send email")
