@@ -1,12 +1,11 @@
 
 import uuid
 
-from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
 from models.gmail import GmailModel
-
 
 logger = get_logger("gmail-repository")
 
