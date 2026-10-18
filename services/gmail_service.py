@@ -96,11 +96,7 @@ class GmailService:
             logger.info(f"Send email added to database successfully - sent: {email_data.id}")
             
             return email_data
-
-        except ResendError:            
-            logger.exception("Unexpected error in send email")
-            raise    
-            
+    
         except ValueError:
             email_data.status = "failed"
             self.gmail_repository.update(email_data)
