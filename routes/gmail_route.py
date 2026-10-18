@@ -1,5 +1,5 @@
 
-from fastapi import APIRouter, Response, Depends
+from fastapi import APIRouter, Response, Depends, Request
 
 from configs.logger import get_logger
 from database.session import get_db
@@ -45,5 +45,25 @@ def send_mail(request: GmailRequest,
         "message": "Email sent successfully",
         "email_id": sent_mail.id
     }
+    
+@gmail_router.get("allmails")
+def view_all_mails(request:Request,
+                   current_user:User = Depends(get_current_user),
+                   db:Session = Depends(get_db)):
+    
+    user_id = current_user.id
+    
+    gmail_service = GmailService(db)
+    all_emails =  gmail_service.view_all_emails(user_id)
+    
+    return {
+        
+        "message": "All emails are fetched",
+        "emails": all_emails,
+        "no_emails": str(len(all_emails))
+    }
+    
+
+    
     
 
