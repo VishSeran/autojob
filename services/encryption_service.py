@@ -14,6 +14,7 @@ class EncryptionService:
         self.ferent = Fernet(
             key=settings.TOKEN_ENCRYPTION_KEY.encode() #use encode to convert str into bytes
         )
+        logger.info("Encryption service has initialized")
         
     def encrypt(self, value: str | None) -> str | None:
         

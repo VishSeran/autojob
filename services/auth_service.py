@@ -22,6 +22,7 @@ class AuthService:
         
         self.user_repository = UserRepository(db)
         self.session_repository =  UserSessionRepository(db)
+        logger.info("Authentication service has initialized")
         
         
     def signup(self, email:str, name:str, password:str) -> User:

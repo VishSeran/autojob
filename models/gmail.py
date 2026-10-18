@@ -33,9 +33,14 @@ class GmailModel(Base):
     )
     
     resend_email_id: Mapped[str | None] = mapped_column (
-            String(255),
-            nullable=True,
-        )
+        String(255),
+        nullable=True,
+    )
+    
+    reply_email: Mapped[str] = mapped_column (
+        String(255),
+        nullable=True,
+    )
     
     company_mail: Mapped[str] = mapped_column (
         

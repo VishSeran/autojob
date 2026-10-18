@@ -16,6 +16,7 @@ class GoogleConnectionService:
         
         self.repo = GoogleConnectionRepository(db)
         self.encryption = EncryptionService()
+        logger.info("Gpoogle connection service has initialized")
         
     
     def save_credentials(self, user_id: uuid.UUID, google_email:str, credentials, google_id) -> GoogleConnection:
