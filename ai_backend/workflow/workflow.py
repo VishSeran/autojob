@@ -516,6 +516,7 @@ class AgentWorkflow:
             
             email_data = state.get("email_details",{})
             
+            
             if not email_data:
                 raise ValueError("Application email is missing")
             
@@ -535,7 +536,8 @@ class AgentWorkflow:
             
             return {
 
-                "email_review_response": decision
+                "email_review_response": decision,
+                
             }
             
         except Exception:
@@ -575,7 +577,8 @@ class AgentWorkflow:
 
         try:
             email_data = state.get("email_details")
-
+            current_job_index = state['current_job_index']
+            
             if not email_data:
                 raise ValueError("Email data is missing")
 
@@ -590,7 +593,8 @@ class AgentWorkflow:
             logger.info(f"Email sent successfully: {send_mail.id}")
 
             return {
-                "final_response": f"Email sent successfully: {send_mail.id}"
+                "final_response": f"Email sent successfully: {send_mail.id}",
+                "current_job_index": current_job_index + 1
             }
 
         
@@ -605,6 +609,13 @@ class AgentWorkflow:
         
         try:
             
+            relevant_jobs_list = state['relevant_jobs_list']
+            current_job_index = state['current_job_index']
+            
+            if current_job_index >= len(relevant_jobs_list):
+                return "end"
+            
+            return "job_selection"
             
         except Exception:
             logger.exception("Unexpected error in send mail route")
