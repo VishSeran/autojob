@@ -95,7 +95,8 @@ class AgentWorkflow:
             graph.add_conditional_edges("job_selection_node",
                                         self.job_selection_route,{
                                             "cover_letter": "cover_letter_node",
-                                            "next_job": "next_job_node"
+                                            "next_job": "next_job_node",
+                                            "end": END
                                         })
             graph.add_edge("cover_letter_node", "email_review_node")
             graph.add_conditional_edges(
@@ -475,13 +476,23 @@ class AgentWorkflow:
             
             rejected_jobs = state.get("rejected_jobs", [])
             rejected_job = current_job['job']             
-        
+
+            if rejected_job is not None:
+
+                rejected_jobs = [
+                    *rejected_jobs,
+                    rejected_job
+                ]
             
             return {
                 
-                "rejected_jobs": [*rejected_jobs, rejected_job],
+                "rejected_jobs": rejected_jobs,
                 "current_job_index": current_job_index + 1,
-                "user_decision": None
+                "user_decision": None,
+                "current_job":None,
+                "email_details":None,
+                "email_review_response":None,
+                "final_response": None
             }
             
         except ValueError:
