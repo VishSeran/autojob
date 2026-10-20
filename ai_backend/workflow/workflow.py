@@ -109,13 +109,24 @@ class AgentWorkflow:
             
             graph.add_conditional_edges(
                 "send_mail_node",
-                self.send_mail_route,
+                self.next_job_route,
+                {
+                    "end": END,
+                    "job_selection": "job_selection_node" 
+                }
+            )
+            graph.add_conditional_edges(
+                "next_job_node",
+                self.next_job_route,
                 {
                     "end": END,
                     "job_selection": "job_selection_node" 
                 }
             )
 
+            self.workflow = graph.compile(
+                
+            )
         except Exception:
             logger.exception("Unexpected error in build workflow")
             raise
@@ -390,8 +401,11 @@ class AgentWorkflow:
             relevant_jobs_list = state.get("relevant_jobs_list", [])
             current_job_index = state.get("current_job_index", 0)
             
-            if current_job_index > len(relevant_jobs_list):
-                
+            if current_job_index >= len(relevant_jobs_list):
+                logger.info(
+                    "No more relevant jobs available"
+                )
+
                 return {
                     "current_job": None
                 }
@@ -401,6 +415,7 @@ class AgentWorkflow:
             decision = interrupt({
                 
                 "type": "job_review",
+                "job": current_job,
                 "message": "review the job for approve or reject"
                 
             })
@@ -421,11 +436,18 @@ class AgentWorkflow:
         try:
             
             user_decision = state.get("user_decision", {})
+            relevant_jobs = state['relevant_jobs_list']
+            current_job_index = state['current_job_index']
+            
+            
+            if current_job_index + 1 >= len(relevant_jobs):
+                logger.info("No further jobs to proceed")
+                return "end" 
+            
+            if not user_decision:
+                raise ValueError("User decision is missing")
             
             decision = user_decision.get('decision')
-            
-            if not decision:
-                raise ValueError("User decision is missing")
             
             if decision == "approve":
                 return "cover_letter"
@@ -470,8 +492,6 @@ class AgentWorkflow:
             logger.exception("Unexpected error in next job node")
             raise
         
-        
-    async def next_job_route(self, )
         
         
     async def cover_letter_node(self, state:WorkflowState):
@@ -619,14 +639,14 @@ class AgentWorkflow:
                 "final_response": "Email sending failed. Please try again."
             }
             
-    async def send_mail_route(self, state:WorkflowState):
+    async def next_job_route(self, state:WorkflowState):
         
         try:
             
             relevant_jobs_list = state['relevant_jobs_list']
             current_job_index = state['current_job_index']
             
-            if current_job_index >= len(relevant_jobs_list):
+            if current_job_index + 1 >= len(relevant_jobs_list):
                 return "end"
             
             return "job_selection"
