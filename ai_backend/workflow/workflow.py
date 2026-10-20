@@ -72,52 +72,56 @@ class AgentWorkflow:
                 raise RuntimeError("Workflow is already running")
 
             graph = StateGraph(WorkflowState)
+            graph.add_node("profile_extractor_node", self.profile_extractor_node)
             graph.add_node("query_handler_node", self.query_handler_node)
             graph.add_node("topjob_search_node", self.topjob_search_node)
             graph.add_node("image_data_handler_node", self.image_data_handler_node)
             graph.add_node("get_full_job_summary_node", self.get_full_job_summary_node)
-            graph.add_node("profile_extractor_node", self.profile_extractor_node)
             graph.add_node("relevancy_node", self.relevancy_node)
             graph.add_node("job_selection_node", self.job_selection_node)
             graph.add_node("next_job_node", self.next_job_node)
             graph.add_node("cover_letter_node", self.cover_letter_node)
             graph.add_node("email_review_node", self.final_review_node)
+            graph.add_node("cancel_application_node", self.cancel_application_node)
             graph.add_node("send_mail_node", self.send_mail_node)
             
             graph.add_edge(START, "profile_extractor_node")
             #graph.add_edge(START,"query_handler_node")
             graph.add_edge("profile_extractor_node", "query_handler_node")
+            
             graph.add_edge("query_handler_node", "topjob_search_node")
+            
             graph.add_edge("topjob_search_node", "image_data_handler_node")
+            
             graph.add_edge("image_data_handler_node", "get_full_job_summary_node")
+            
             graph.add_edge("get_full_job_summary_node", "relevancy_node")
+            
             graph.add_edge("relevancy_node", "job_selection_node")
+            
             graph.add_conditional_edges("job_selection_node",
                                         self.job_selection_route,{
                                             "cover_letter": "cover_letter_node",
                                             "next_job": "next_job_node",
                                             "end": END
                                         })
+            
+            graph.add_edge("next_job_node", "job_selection_node")
             graph.add_edge("cover_letter_node", "email_review_node")
+            
             graph.add_conditional_edges(
                 "email_review_node",
                 self.final_review_route,
                 {
-                    "next_node": "next_job_node",
+                    "cancel": "cancel_application_node",
                     "send_email": "send_mail_node"
                 }
             )
             
+            graph.add_edge("cancel_application_node", "next_job_node")
+            
             graph.add_conditional_edges(
                 "send_mail_node",
-                self.next_job_route,
-                {
-                    "end": END,
-                    "job_selection": "job_selection_node" 
-                }
-            )
-            graph.add_conditional_edges(
-                "next_job_node",
                 self.next_job_route,
                 {
                     "end": END,
@@ -602,7 +606,7 @@ class AgentWorkflow:
                 raise ValueError("email review response is missing")
             
             if decision == "cancel":
-                return "next_node"
+                return "cancel"
             
             if decision == "send":
                 return "send_email" 
@@ -649,20 +653,48 @@ class AgentWorkflow:
             return {
                 "final_response": "Email sending failed. Please try again."
             }
-            
-    async def next_job_route(self, state:WorkflowState):
         
+        
+    async def cancel_application_node(
+        self,
+        state: WorkflowState
+    ):
+
         try:
-            
-            relevant_jobs_list = state['relevant_jobs_list']
-            current_job_index = state['current_job_index']
-            
-            if current_job_index + 1 >= len(relevant_jobs_list):
-                return "end"
-            
-            return "job_selection"
-            
+
+            logger.info(
+                "User cancelled current application"
+            )
+
+            return {
+                "final_response":
+                    "Application cancelled by user.",
+
+                "current_job_index":
+                    state.get(
+                        "current_job_index",
+                        0
+                    ) + 1,
+
+                "current_job":
+                    None,
+
+                "email_details":
+                    None,
+
+                "email_review_response":
+                    None,
+
+                "email_sent":
+                    False,
+            }
+
         except Exception:
-            logger.exception("Unexpected error in send mail route")
+            logger.exception(
+                "Unexpected error in cancel application node"
+            )
             raise
+        
+        
+    async
             
