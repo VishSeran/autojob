@@ -86,9 +86,11 @@ class AgentWorkflow:
             
             graph.add_edge(START, "profile_extractor_node")
             #graph.add_edge(START,"query_handler_node")
+            graph.add_edge("profile_extractor_node", "query_handler_node")
             graph.add_edge("query_handler_node", "topjob_search_node")
             graph.add_edge("topjob_search_node", "image_data_handler_node")
-            graph.add_edge("relevancy_node", "job_selection_node")
+            graph.add_edge("image_data_handler_node", "get_full_job_summary_node")
+            graph.add_edge("get_full_job_summary_node", "relevancy_node")
             graph.add_edge("relevancy_node", "job_selection_node")
             graph.add_conditional_edges("job_selection_node",
                                         self.job_selection_route,{
@@ -102,6 +104,15 @@ class AgentWorkflow:
                 {
                     "next_node": "next_job_node",
                     "send_email": "send_mail_node"
+                }
+            )
+            
+            graph.add_conditional_edges(
+                "send_mail_node",
+                self.send_mail_route,
+                {
+                    "end": END,
+                    "job_selection": "job_selection_node" 
                 }
             )
 
@@ -458,6 +469,9 @@ class AgentWorkflow:
         except Exception:
             logger.exception("Unexpected error in next job node")
             raise
+        
+        
+    async def next_job_route(self, )
         
         
     async def cover_letter_node(self, state:WorkflowState):
