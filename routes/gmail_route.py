@@ -1,17 +1,15 @@
 
 import uuid
 
-from fastapi import APIRouter, Response, Depends, Request, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
 from database.session import get_db
 from dependencies.auth import get_current_user
 from models.users import User
 from schema.gmail_schema import GmailRequest
-from sqlalchemy.orm import Session
-
 from services.gmail_service import GmailService
-
 
 logger = get_logger("gmail-router")
 

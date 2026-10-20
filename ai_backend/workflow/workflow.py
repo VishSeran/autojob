@@ -1,8 +1,10 @@
 import asyncio
+import uuid
 
 from langchain_core.documents import Document
 from langgraph.graph import StateGraph
 from langgraph.types import interrupt
+from sqlalchemy.orm import Session
 
 from ai_backend.agents.cover_letter_agent import CoverLetterAgent
 from ai_backend.agents.image_data_extractor_agent import ImageDataExtractorAgent
@@ -16,17 +18,19 @@ from ai_backend.mcp_client.client import MCPClient
 from ai_backend.workflow.workflow_state import WorkflowState
 from configs.configurations import JOB_RELEVANCY_THRESHOLD, TOPJOB_SERVER_URL
 from configs.logger import get_logger
+from models.users import User
 from schema.job_image_schema import JobDetails
 from schema.job_schema import Job
 from schema.query_schema import QuerySchema
 from schema.resume_schema import ResumeSchema
+from services.gmail_service import GmailService
 
 logger = get_logger("agent-workflow")
 
 
 
 class AgentWorkflow:
-    def __init__(self):
+    def __init__(self, db:Session, user:User):
 
         try:
             self.workflow = None
@@ -37,7 +41,9 @@ class AgentWorkflow:
             self.profile_extractor_agent = ProfileExtractorAgent()
             self.job_relevancy_agent = JobRelevanceAgent()
             self.cover_letter_agent = CoverLetterAgent()
-
+            self.gmail_service = GmailService(db)
+            self.user = user
+            
             logger.info("workflow - Agents are initialized")
             self.build_workflow()
             logger.info("Workflow build is completed")
@@ -77,6 +83,7 @@ class AgentWorkflow:
             graph.add_node("next_job_node", self.next_job_node)
             graph.add_node("cover_letter_node", self.cover_letter_node)
             graph.add_node("email_review_node", self.final_review_node)
+            graph.add_node("send_mail", self.send_mail_node)
 
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -471,8 +478,7 @@ class AgentWorkflow:
             }
             
             return {
-                
-                "cover_letter": email_details
+                "email_details": email_details
             }
         
         except ValueError:
@@ -546,11 +552,32 @@ class AgentWorkflow:
         
         
     async def send_mail_node(self, state: WorkflowState):
-        
+
         try:
-            pass
+            email_data = state.get("email_details")
+
+            if not email_data:
+                raise ValueError("Email data is missing")
+
+            send_mail = self.gmail_service.send_email(
+                self.user.id,
+                self.user.email,
+                email_data.get("company_email"),
+                email_data.get("subject"),
+                email_data.get("cover_letter")
+            )
+
+            logger.info(f"Email sent successfully: {send_mail.id}")
+
+            return {
+                "final_response": f"Email sent successfully: {send_mail.id}"
+            }
+
         
         except Exception:
             logger.exception("Unexpected error in send mail node")
-            raise
+
+            return {
+                "final_response": "Email sending failed. Please try again."
+            }
             
