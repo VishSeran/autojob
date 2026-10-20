@@ -42,5 +42,6 @@ class WorkflowState(TypedDict):
     
     email_review_response: dict
     
+    email_sent: bool 
     final_response: dict
      

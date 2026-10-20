@@ -445,7 +445,7 @@ class AgentWorkflow:
             current_job_index = state['current_job_index']
             
             
-            if current_job_index + 1 >= len(relevant_jobs):
+            if current_job_index >= len(relevant_jobs):
                 logger.info("No further jobs to proceed")
                 return "end" 
             
@@ -642,8 +642,21 @@ class AgentWorkflow:
             logger.info(f"Email sent successfully: {send_mail.id}")
 
             return {
+                
+                "email_sent": True,
                 "final_response": f"Email sent successfully: {send_mail.id}",
-                "current_job_index": current_job_index + 1
+                "current_job_index": current_job_index + 1,
+                "current_job":
+                    None,
+
+                "email_details":
+                    None,
+
+                "email_review_response":
+                    None,
+
+                "user_decision":
+                    None,
             }
 
         
@@ -696,5 +709,44 @@ class AgentWorkflow:
             raise
         
         
-    async
+    async def send_mail_route(self, state:WorkflowState):
+        
+        try:
+            email_sent = state.get("email_sent", False)
+            
+            if not email_sent:
+                logger.warning(
+                    "Email was not sent. "
+                    "Returning to current job selection."
+                )
+                
+                return "job_selection"
+            
+            relevant_jobs_list = state.get(
+                "relevant_jobs_list",
+                []
+            )
+
+            current_job_index = state.get(
+                "current_job_index",
+                0
+            )
+
+            if current_job_index >= len(
+                relevant_jobs_list
+            ):
+
+                logger.info(
+                    "All relevant jobs have been processed"
+                )
+
+                return "end"
+            
+            return "job_selection"
+
+        except Exception:
+            logger.exception(
+                "Unexpected error in send mail route"
+            )
+            raise
             
