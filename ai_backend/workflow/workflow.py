@@ -1,8 +1,7 @@
 import asyncio
-import uuid
 
 from langchain_core.documents import Document
-from langgraph.graph import StateGraph
+from langgraph.graph import END, START, StateGraph
 from langgraph.types import interrupt
 from sqlalchemy.orm import Session
 
@@ -83,7 +82,28 @@ class AgentWorkflow:
             graph.add_node("next_job_node", self.next_job_node)
             graph.add_node("cover_letter_node", self.cover_letter_node)
             graph.add_node("email_review_node", self.final_review_node)
-            graph.add_node("send_mail", self.send_mail_node)
+            graph.add_node("send_mail_node", self.send_mail_node)
+            
+            graph.add_edge(START, "profile_extractor_node")
+            #graph.add_edge(START,"query_handler_node")
+            graph.add_edge("query_handler_node", "topjob_search_node")
+            graph.add_edge("topjob_search_node", "image_data_handler_node")
+            graph.add_edge("relevancy_node", "job_selection_node")
+            graph.add_edge("relevancy_node", "job_selection_node")
+            graph.add_conditional_edges("job_selection_node",
+                                        self.job_selection_route,{
+                                            "cover_letter": "cover_letter_node",
+                                            "next_job": "next_job_node"
+                                        })
+            graph.add_edge("cover_letter_node", "email_review_node")
+            graph.add_conditional_edges(
+                "email_review_node",
+                self.final_review_route,
+                {
+                    "next_node": "next_job_node",
+                    "send_email": "send_mail_node"
+                }
+            )
 
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -580,4 +600,13 @@ class AgentWorkflow:
             return {
                 "final_response": "Email sending failed. Please try again."
             }
+            
+    async def send_mail_route(self, state:WorkflowState):
+        
+        try:
+            
+            
+        except Exception:
+            logger.exception("Unexpected error in send mail route")
+            raise
             
