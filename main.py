@@ -5,13 +5,25 @@ import os
 import dotenv
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
+from configs.settings import settings
 from routes.auth_route import auth_router
 from routes.google_auth_routes import google_auth_router
 from routes.user_route import user_router
 from routes.resume_route import resume_router
 from routes.gmail_route import gmail_router
 from sources.topjob_source import TopJobSource
+
+async def lifespan(app:FastAPI):
+    
+    async with AsyncPostgresSaver.from_conn_string(
+        settings.DATABASE_URL
+    ) as checkpointer:
+        
+        await checkpointer.setup()
+        
+        graph = build
 
 app = FastAPI(
     title="AutoJob API"

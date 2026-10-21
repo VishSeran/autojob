@@ -1,6 +1,7 @@
 import asyncio
 
 from langchain_core.documents import Document
+from langgraph.checkpoint.memory import In
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import interrupt
 from sqlalchemy.orm import Session
@@ -29,7 +30,7 @@ logger = get_logger("agent-workflow")
 
 
 class AgentWorkflow:
-    def __init__(self, db:Session, user:User):
+    def __init__(self, db:Session, user:User, thread_id, checkpointer):
 
         try:
             self.workflow = None
@@ -42,6 +43,8 @@ class AgentWorkflow:
             self.cover_letter_agent = CoverLetterAgent()
             self.gmail_service = GmailService(db)
             self.user = user
+            self.thread_id = thread_id
+            self.checkpointer = checkpointer
             
             logger.info("workflow - Agents are initialized")
             self.build_workflow()
@@ -122,7 +125,7 @@ class AgentWorkflow:
             
             graph.add_conditional_edges(
                 "send_mail_node",
-                self.next_job_route,
+                self.send_mail_route,
                 {
                     "end": END,
                     "job_selection": "job_selection_node" 
@@ -130,8 +133,13 @@ class AgentWorkflow:
             )
 
             self.workflow = graph.compile(
-                
+                checkpointer=self.checkpointer
             )
+            
+            logger.info(
+                "Workflow graph compiled successfully"
+            )
+            
         except Exception:
             logger.exception("Unexpected error in build workflow")
             raise
