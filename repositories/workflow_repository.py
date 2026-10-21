@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 
 from configs.logger import get_logger
-from models.workflow import WorkflowData
+from models.workflow import WorkflowRun
 
 logger = get_logger("workflow-repository")
 class WorkflowRepository:
@@ -14,7 +14,7 @@ class WorkflowRepository:
         self.db = db
         
     
-    def create(self, workflow:WorkflowData):
+    def create(self, workflow:WorkflowRun):
         
         try:
             
@@ -30,12 +30,12 @@ class WorkflowRepository:
             raise
         
         
-    def get_by_user_id(self, user_id:uuid.UUID) -> list[WorkflowData]:
+    def get_by_user_id(self, user_id:uuid.UUID) -> list[WorkflowRun]:
         
         try:
             stmt = (
-                select(WorkflowData).where(
-                    WorkflowData.user_id == user_id
+                select(WorkflowRun).where(
+                    WorkflowRun.user_id == user_id
                 )
             )
             
@@ -46,4 +46,20 @@ class WorkflowRepository:
             raise   
         
         
-    def get_by_id()
+    def get_by_id(self, user_id:uuid.UUID, id:uuid.UUID):
+        
+        try:
+            
+            stmt = (
+                
+                select(WorkflowRun).where(
+                    WorkflowRun.id == id,
+                    WorkflowRun.user_id == user_id
+                )
+            )
+            
+            return self.db.scalar(stmt)
+            
+        except Exception:
+            logger.exception("Unexpected error in get by id")
+            raise   
