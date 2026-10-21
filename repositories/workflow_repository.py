@@ -19,8 +19,7 @@ class WorkflowRunRepository:
         try:
             
             self.db.add(workflowrun)
-            self.db.commit()
-            self.db.refresh(workflowrun)
+            self.db.flush()
             
             logger.info("New workflow run data added successfully")
             return workflowrun
@@ -71,7 +70,7 @@ class WorkflowRunRepository:
         try:
             
             self.db.delete(workflowrun)
-            self.db.commit()
+            self.db.flush()
             
             logger.info("Workflow run data deleted successfully")
             return workflowrun

@@ -13,7 +13,7 @@ from repositories.workflow_repository import WorkflowRunRepository
 logger = get_logger("workflow-service")
 
 
-class WokrflowService:
+class WorkflowService:
     
     def __init__(self, db:Session):
         
@@ -39,6 +39,7 @@ class WokrflowService:
             )
             
             new_workflow = self.workflow_repository.create(workflow_run)
+            
             logger.info("Workflow is added to database successfully")
             
             workflow = AgentWorkflow(
@@ -48,6 +49,8 @@ class WokrflowService:
                 new_workflow.thread_id,
                 checkpointer
             )
+            
+            self.db.commit()
             
             logger.info("Workflow is initialized")
             return workflow
