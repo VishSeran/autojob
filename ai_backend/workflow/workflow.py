@@ -1,8 +1,8 @@
 import asyncio
-import uuid
 
 from langchain_core.documents import Document
-from langgraph.graph import StateGraph
+from langgraph.checkpoint.memory import In
+from langgraph.graph import END, START, StateGraph
 from langgraph.types import interrupt
 from sqlalchemy.orm import Session
 
@@ -30,7 +30,7 @@ logger = get_logger("agent-workflow")
 
 
 class AgentWorkflow:
-    def __init__(self, db:Session, user:User):
+    def __init__(self, db:Session, user:User, thread_id, checkpointer):
 
         try:
             self.workflow = None
@@ -43,6 +43,8 @@ class AgentWorkflow:
             self.cover_letter_agent = CoverLetterAgent()
             self.gmail_service = GmailService(db)
             self.user = user
+            self.thread_id = thread_id
+            self.checkpointer = checkpointer
             
             logger.info("workflow - Agents are initialized")
             self.build_workflow()
@@ -73,18 +75,71 @@ class AgentWorkflow:
                 raise RuntimeError("Workflow is already running")
 
             graph = StateGraph(WorkflowState)
+            graph.add_node("profile_extractor_node", self.profile_extractor_node)
             graph.add_node("query_handler_node", self.query_handler_node)
             graph.add_node("topjob_search_node", self.topjob_search_node)
             graph.add_node("image_data_handler_node", self.image_data_handler_node)
             graph.add_node("get_full_job_summary_node", self.get_full_job_summary_node)
-            graph.add_node("profile_extractor_node", self.profile_extractor_node)
             graph.add_node("relevancy_node", self.relevancy_node)
             graph.add_node("job_selection_node", self.job_selection_node)
             graph.add_node("next_job_node", self.next_job_node)
             graph.add_node("cover_letter_node", self.cover_letter_node)
             graph.add_node("email_review_node", self.final_review_node)
-            graph.add_node("send_mail", self.send_mail_node)
+            graph.add_node("cancel_application_node", self.cancel_application_node)
+            graph.add_node("send_mail_node", self.send_mail_node)
+            
+            graph.add_edge(START, "profile_extractor_node")
+            #graph.add_edge(START,"query_handler_node")
+            graph.add_edge("profile_extractor_node", "query_handler_node")
+            
+            graph.add_edge("query_handler_node", "topjob_search_node")
+            
+            graph.add_edge("topjob_search_node", "image_data_handler_node")
+            
+            graph.add_edge("image_data_handler_node", "get_full_job_summary_node")
+            
+            graph.add_edge("get_full_job_summary_node", "relevancy_node")
+            
+            graph.add_edge("relevancy_node", "job_selection_node")
+            
+            graph.add_conditional_edges("job_selection_node",
+                                        self.job_selection_route,{
+                                            "cover_letter": "cover_letter_node",
+                                            "next_job": "next_job_node",
+                                            "end": END
+                                        })
+            
+            graph.add_edge("next_job_node", "job_selection_node")
+            graph.add_edge("cover_letter_node", "email_review_node")
+            
+            graph.add_conditional_edges(
+                "email_review_node",
+                self.final_review_route,
+                {
+                    "cancel": "cancel_application_node",
+                    "send_email": "send_mail_node"
+                }
+            )
+            
+            graph.add_edge("cancel_application_node", "next_job_node")
+            
+            graph.add_conditional_edges(
+                "send_mail_node",
+                self.send_mail_route,
+                {
+                    "end": END,
+                    "job_selection": "job_selection_node" 
+                }
+            )
 
+            self.workflow = graph.compile(
+                checkpointer=self.checkpointer
+            )
+            
+            logger.info(
+                "Workflow graph compiled successfully"
+            )
+            
         except Exception:
             logger.exception("Unexpected error in build workflow")
             raise
@@ -359,8 +414,11 @@ class AgentWorkflow:
             relevant_jobs_list = state.get("relevant_jobs_list", [])
             current_job_index = state.get("current_job_index", 0)
             
-            if current_job_index > len(relevant_jobs_list):
-                
+            if current_job_index >= len(relevant_jobs_list):
+                logger.info(
+                    "No more relevant jobs available"
+                )
+
                 return {
                     "current_job": None
                 }
@@ -370,6 +428,7 @@ class AgentWorkflow:
             decision = interrupt({
                 
                 "type": "job_review",
+                "job": current_job,
                 "message": "review the job for approve or reject"
                 
             })
@@ -390,11 +449,18 @@ class AgentWorkflow:
         try:
             
             user_decision = state.get("user_decision", {})
+            relevant_jobs = state['relevant_jobs_list']
+            current_job_index = state['current_job_index']
+            
+            
+            if current_job_index >= len(relevant_jobs):
+                logger.info("No further jobs to proceed")
+                return "end" 
+            
+            if not user_decision:
+                raise ValueError("User decision is missing")
             
             decision = user_decision.get('decision')
-            
-            if not decision:
-                raise ValueError("User decision is missing")
             
             if decision == "approve":
                 return "cover_letter"
@@ -422,13 +488,23 @@ class AgentWorkflow:
             
             rejected_jobs = state.get("rejected_jobs", [])
             rejected_job = current_job['job']             
-        
+
+            if rejected_job is not None:
+
+                rejected_jobs = [
+                    *rejected_jobs,
+                    rejected_job
+                ]
             
             return {
                 
-                "rejected_jobs": [*rejected_jobs, rejected_job],
+                "rejected_jobs": rejected_jobs,
                 "current_job_index": current_job_index + 1,
-                "user_decision": None
+                "user_decision": None,
+                "current_job":None,
+                "email_details":None,
+                "email_review_response":None,
+                "final_response": None
             }
             
         except ValueError:
@@ -438,6 +514,7 @@ class AgentWorkflow:
         except Exception:
             logger.exception("Unexpected error in next job node")
             raise
+        
         
         
     async def cover_letter_node(self, state:WorkflowState):
@@ -496,6 +573,7 @@ class AgentWorkflow:
             
             email_data = state.get("email_details",{})
             
+            
             if not email_data:
                 raise ValueError("Application email is missing")
             
@@ -515,7 +593,8 @@ class AgentWorkflow:
             
             return {
 
-                "email_review_response": decision
+                "email_review_response": decision,
+                
             }
             
         except Exception:
@@ -535,7 +614,7 @@ class AgentWorkflow:
                 raise ValueError("email review response is missing")
             
             if decision == "cancel":
-                return "next_node"
+                return "cancel"
             
             if decision == "send":
                 return "send_email" 
@@ -555,7 +634,8 @@ class AgentWorkflow:
 
         try:
             email_data = state.get("email_details")
-
+            current_job_index = state['current_job_index']
+            
             if not email_data:
                 raise ValueError("Email data is missing")
 
@@ -570,7 +650,21 @@ class AgentWorkflow:
             logger.info(f"Email sent successfully: {send_mail.id}")
 
             return {
-                "final_response": f"Email sent successfully: {send_mail.id}"
+                
+                "email_sent": True,
+                "final_response": f"Email sent successfully: {send_mail.id}",
+                "current_job_index": current_job_index + 1,
+                "current_job":
+                    None,
+
+                "email_details":
+                    None,
+
+                "email_review_response":
+                    None,
+
+                "user_decision":
+                    None,
             }
 
         
@@ -580,4 +674,96 @@ class AgentWorkflow:
             return {
                 "final_response": "Email sending failed. Please try again."
             }
+        
+        
+    async def cancel_application_node(
+        self,
+        state: WorkflowState
+    ):
+
+        try:
+
+            logger.info(
+                "User cancelled current application"
+            )
+
+            return {
+                "final_response":
+                    "Application cancelled by user.",
+
+                "current_job_index":
+                    state.get(
+                        "current_job_index",
+                        0
+                    ) + 1,
+
+                "current_job":
+                    None,
+
+                "email_details":
+                    None,
+
+                "email_review_response":
+                    None,
+
+                "email_sent":
+                    False,
+            }
+
+        except Exception:
+            logger.exception(
+                "Unexpected error in cancel application node"
+            )
+            raise
+        
+        
+    async def send_mail_route(self, state:WorkflowState):
+        
+        try:
+            email_sent = state.get("email_sent", False)
+            
+            if not email_sent:
+                logger.warning(
+                    "Email was not sent. "
+                    "Returning to current job selection."
+                )
+                
+                return "job_selection"
+            
+            relevant_jobs_list = state.get(
+                "relevant_jobs_list",
+                []
+            )
+
+            current_job_index = state.get(
+                "current_job_index",
+                0
+            )
+
+            if current_job_index >= len(
+                relevant_jobs_list
+            ):
+
+                logger.info(
+                    "All relevant jobs have been processed"
+                )
+
+                return "end"
+            
+            return "job_selection"
+
+        except Exception:
+            logger.exception(
+                "Unexpected error in send mail route"
+            )
+            raise
+    
+    @property
+    def config(self):
+        
+        return {
+            "configurable": {
+                "thread_id": self.thread_id
+            }
+        }
             
