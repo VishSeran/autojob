@@ -78,6 +78,11 @@ class WorkflowService:
                 thread_id
             )
             
+            if current_workflow is None:
+                raise ValueError("Workflow not found")
+            
+            logger.info(f"Current Wokrflow is received successfully: {current_workflow.id}")
+            
         except Exception:
             logger.exception("Unexpected error in get workflow by id")
             raise
