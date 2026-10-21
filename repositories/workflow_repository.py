@@ -46,6 +46,25 @@ class WorkflowRunRepository:
             raise   
         
         
+    def get_by_thread_id(self, user_id:uuid.UUID, thread_id:uuid.UUID):
+        
+        try:
+            
+            stmt = (
+                
+                select(WorkflowRun).where(
+                    WorkflowRun.thread_id == thread_id,
+                    WorkflowRun.user_id == user_id
+                )
+            )
+            logger.info("Workflow run data retrieved successfully")
+            return self.db.scalar(stmt)
+            
+        except Exception:
+            logger.exception("Unexpected error in get by id")
+            raise  
+        
+        
     def get_by_id(self, user_id:uuid.UUID, id:uuid.UUID):
         
         try:
