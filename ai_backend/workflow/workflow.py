@@ -757,4 +757,13 @@ class AgentWorkflow:
                 "Unexpected error in send mail route"
             )
             raise
+    
+    @property
+    def config(self):
+        
+        return {
+            "configurable": {
+                "thread_id": self.thread_id
+            }
+        }
             
