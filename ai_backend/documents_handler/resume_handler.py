@@ -2,6 +2,7 @@ from pathlib import Path
 
 from langchain_community.document_loaders import Docx2txtLoader, PyPDFLoader
 from database.supabase_client import client
+from tempfile import NamedTemporaryFile
 
 from configs.configurations import STORAGE_DIR
 from configs.logger import get_logger
@@ -50,6 +51,16 @@ class ResumeDocumentHandler:
                 raise RuntimeError(
                     "Uploaded document is not in supported format"
                 )
+                
+            with NamedTemporaryFile(
+                suffix=extension,
+                delete=False
+            ) as temp_file:
+                
+                temp_file.write(file_content)
+                temp_path = temp_file.name
+                
+            return self.load(temp_path)
         
         except Exception:
             logger.exception("Unexpected error in load from storage")
