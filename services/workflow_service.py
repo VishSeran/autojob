@@ -110,4 +110,25 @@ class WorkflowService:
             except Exception:
                 logger.exception("Unexpected error in get workflow by id")
                 raise
+            
+            
+    def get_workflows(self, user_id):
         
+        try:
+            
+            if not user_id:
+                raise ValueError("User ID is missing")
+            
+            workflows = self.workflow_repository.get_by_user_id(
+                user_id
+            )
+            
+            logger.info("Workflows fetched successfully")
+            return workflows
+            
+        
+        except Exception:
+            logger.exception("Unexpected error in get workflows")
+            raise
+        
+    
