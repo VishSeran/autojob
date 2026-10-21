@@ -1,4 +1,5 @@
 import asyncio
+import uuid
 
 from langchain_core.documents import Document
 from langgraph.checkpoint.memory import In
@@ -30,7 +31,7 @@ logger = get_logger("agent-workflow")
 
 
 class AgentWorkflow:
-    def __init__(self, db:Session, user:User, thread_id, checkpointer):
+    def __init__(self, db:Session, user_id:uuid.UUID, thread_id, checkpointer):  # noqa: F821
 
         try:
             self.workflow = None
@@ -42,7 +43,7 @@ class AgentWorkflow:
             self.job_relevancy_agent = JobRelevanceAgent()
             self.cover_letter_agent = CoverLetterAgent()
             self.gmail_service = GmailService(db)
-            self.user = user
+            self.user_id = user_id
             self.thread_id = thread_id
             self.checkpointer = checkpointer
             
