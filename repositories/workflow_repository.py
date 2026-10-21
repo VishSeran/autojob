@@ -1,14 +1,14 @@
 
 import uuid
 
-from sqlalchemy.orm import Session
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
 from models.workflow import WorkflowRun
 
 logger = get_logger("workflow-repository")
-class WorkflowRepository:
+class WorkflowRunRepository:
     
     def __init__(self, db: Session):
         self.db = db
@@ -19,8 +19,7 @@ class WorkflowRepository:
         try:
             
             self.db.add(workflowrun)
-            self.db.commit()
-            self.db.refresh(workflowrun)
+            self.db.flush()
             
             logger.info("New workflow run data added successfully")
             return workflowrun
@@ -71,7 +70,7 @@ class WorkflowRepository:
         try:
             
             self.db.delete(workflowrun)
-            self.db.commit()
+            self.db.flush()
             
             logger.info("Workflow run data deleted successfully")
             return workflowrun

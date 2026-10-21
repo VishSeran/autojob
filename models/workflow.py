@@ -53,10 +53,12 @@ class WorkflowRun(Base):
         index=True,
     )
 
-    thread_id: Mapped[str] = mapped_column(
-        String(255),
+    thread_id: Mapped[uuid.UUID] = mapped_column(
+        
+        UUID(as_uuid=True),
         unique=True,
         nullable=False,
+        default=uuid.uuid4,
         index=True,
     )
 
