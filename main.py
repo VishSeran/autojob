@@ -1,20 +1,23 @@
 
 import asyncio
 import os
+from contextlib import asynccontextmanager
 
 import dotenv
 from fastapi import FastAPI
-from starlette.middleware.sessions import SessionMiddleware
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from starlette.middleware.sessions import SessionMiddleware
 
 from configs.settings import settings
 from routes.auth_route import auth_router
-from routes.google_auth_routes import google_auth_router
-from routes.user_route import user_router
-from routes.resume_route import resume_router
 from routes.gmail_route import gmail_router
+from routes.google_auth_routes import google_auth_router
+from routes.resume_route import resume_router
+from routes.user_route import user_router
 from sources.topjob_source import TopJobSource
 
+
+@asynccontextmanager
 async def lifespan(app:FastAPI):
     
     async with AsyncPostgresSaver.from_conn_string(
@@ -23,10 +26,14 @@ async def lifespan(app:FastAPI):
         
         await checkpointer.setup()
         
-        graph = build
+        app.state.langgraph_checkpointer = checkpointer
+        
+        yield
+        
 
 app = FastAPI(
-    title="AutoJob API"
+    title="AutoJob API",
+    lifespan=lifespan
 )
 
 dotenv.load_dotenv()
