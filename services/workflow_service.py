@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from ai_backend.workflow.workflow import AgentWorkflow
 from configs.logger import get_logger
-from models.users import User
 from models.workflow import WorkflowRun
 from repositories.user_repository import UserRepository
 from repositories.workflow_repository import WorkflowRunRepository
