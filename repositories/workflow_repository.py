@@ -14,16 +14,16 @@ class WorkflowRepository:
         self.db = db
         
     
-    def create(self, workflow:WorkflowRun):
+    def create(self, workflowrun:WorkflowRun):
         
         try:
             
-            self.db.add(workflow)
+            self.db.add(workflowrun)
             self.db.commit()
-            self.db.refresh(workflow)
+            self.db.refresh(workflowrun)
             
-            logger.info("New workflow data added successfully")
-            return workflow
+            logger.info("New workflow run data added successfully")
+            return workflowrun
             
         except Exception:
             logger.exception("Unexpected error in create")
@@ -39,6 +39,7 @@ class WorkflowRepository:
                 )
             )
             
+            logger.info("Workflow run data retrieved successfully")
             return list(self.db.scalars(stmt).all())
             
         except Exception:
@@ -57,9 +58,27 @@ class WorkflowRepository:
                     WorkflowRun.user_id == user_id
                 )
             )
-            
+            logger.info("Workflow run data retrieved successfully")
             return self.db.scalar(stmt)
             
         except Exception:
             logger.exception("Unexpected error in get by id")
-            raise   
+            raise  
+        
+        
+    def delete_by_id(self, workflowrun:WorkflowRun):
+        
+        try:
+            
+            self.db.delete(workflowrun)
+            self.db.commit()
+            
+            logger.info("Workflow run data deleted successfully")
+            return workflowrun
+            
+        except Exception:
+            logger.exception("Unexpected error in delete")
+            raise  
+                
+             
+             
