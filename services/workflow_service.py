@@ -58,3 +58,26 @@ class WorkflowService:
         except Exception:
             logger.exception("Unexpected error in create workflow")
             raise
+        
+        
+    def get_workflow_by_id(self, user_id:uuid.UUID, thread_id:uuid.UUID, checkpointer):
+        
+        try:
+            
+            if not user_id:
+                raise ValueError("User ID is missing")
+            
+            if not thread_id:
+                raise ValueError("Thread ID is missing")
+
+            if not checkpointer:
+                raise ValueError("Checkpointer is missing")
+            
+            current_workflow = self.workflow_repository.get_by_thread_id(
+                user_id,
+                thread_id
+            )
+            
+        except Exception:
+            logger.exception("Unexpected error in get workflow by id")
+            raise
