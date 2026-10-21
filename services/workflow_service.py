@@ -112,7 +112,7 @@ class WorkflowService:
                 raise
             
             
-    def get_workflows(self, user_id):
+    def get_workflows(self, user_id:uuid.UUID):
         
         try:
             
@@ -129,6 +129,31 @@ class WorkflowService:
         
         except Exception:
             logger.exception("Unexpected error in get workflows")
+            raise
+        
+        
+    def delete_workflow(self, id:uuid.UUID, user_id:uuid.UUID):
+        
+        try:
+            
+            if not user_id:
+                raise ValueError("User ID is missing")
+
+            if not id:
+                raise ValueError("Workflow ID is missing")
+            
+            workflow = self.workflow_repository.get_by_id(
+                user_id,
+                id
+            )
+            deleted_workflow = self.workflow_repository.delete_by_id(workflow)
+            
+            self.db.commit()
+            logger.info(f"{deleted_workflow.id} deleted successfully")
+            return deleted_workflow
+            
+        except Exception:
+            logger.exception("Unexpected error in delete workflow by id")
             raise
         
     
