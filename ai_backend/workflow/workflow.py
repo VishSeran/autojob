@@ -3,7 +3,7 @@ import uuid
 
 from langchain_core.documents import Document
 from langgraph.graph import END, START, StateGraph
-from langgraph.types import interrupt
+from langgraph.types import Command, interrupt
 from sqlalchemy.orm import Session
 
 from ai_backend.agents.cover_letter_agent import CoverLetterAgent
@@ -792,4 +792,38 @@ class AgentWorkflow:
             logger.exception(
                 "Unexpected error in  executing workflow"
             )
+            raise
+        
+        
+    async def resume(
+        self,
+        resume_data:dict
+    ):
+        
+        
+        try:
+            
+            if self.workflow is None:
+                raise RuntimeError(
+                    "Workflow is not initialized"
+                )
+                
+            response = await self.workflow.ainvoke(
+                Command(
+                    resume=resume_data
+                ),
+                config=self.config
+            )
+            
+            logger.info(
+                "Workflow resumed successfully"
+            )
+
+            return response
+ 
+        except Exception:
+            logger.exception(
+            "Unexpected error while resuming workflow"
+            )
+
             raise
