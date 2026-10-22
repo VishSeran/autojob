@@ -122,11 +122,11 @@ class TopJobMcpServer:
             raise
         
     
-    async def run(self):
+    def run(self):
         
         try:
             
-            logger.info(f"Starting HTTP MCP Server on http://{TOPJOB_MCP_SERVER_HOST}:{TOPJOB_MCP_SERVER_PORT}")
+            logger.info(f"Starting HTTP MCP Server on http://{TOPJOB_MCP_SERVER_HOST}:{TOPJOB_MCP_SERVER_PORT}/mcp")
             logger.info(f"Workspace roots: {BASE_DIR}")
             
             self.topjob_server.run(
@@ -138,4 +138,10 @@ class TopJobMcpServer:
         except Exception:
             logger.exception("Unexpected error in server run")
             raise
+        
+        
+if __name__ == "__main__":
+
+    server = TopJobMcpServer()
+    server.run()
     

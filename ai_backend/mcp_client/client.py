@@ -40,7 +40,7 @@ class MCPClient:
                 raise RuntimeError("Session is already running")
             
             
-            read, write, _ = await self.exit_stack.enter_async_context(
+            read, write = await self.exit_stack.enter_async_context(
                 
                 streamable_http_client(self.server_url)
                 

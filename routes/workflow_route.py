@@ -30,11 +30,9 @@ async def create_workflow(
     checkpointer = request.app.state.langgraph_checkpointer
     logger.info("checkpointer fetched")
     
-    workflow_service = WorkflowService(db)
-    workflow_service.
-    workflow, new_workflow = workflow_service.create_workflow(
-        user_id,
-        checkpointer
+    workflow_service = WorkflowService(db,checkpointer)
+    workflow, new_workflow = await workflow_service.create_workflow(
+        user_id
     )
     logger.info("New workflow created successfully")
     
@@ -56,12 +54,34 @@ async def continue_workflow(
     checkpointer = request.app.state.langgraph_checkpointer
     logger.info("checkpointer fetched")
     
-    workflow_service = WorkflowService(db)
+    workflow_service = WorkflowService(db,checkpointer)
     
-    current_workflow = workflow_service.get_workflow_by_id(
+    initial_state = {
+        "query": data.query,
+        "current_resume": data.resume_path,
+        "current_job_index": 0,
+        "rejected_jobs": [],
+        "user_decision": None,
+        "email_details": None,
+        "email_review_response": None,
+        "email_sent": False,
+        "final_response": None,
+    }
+    
+    
+    response = await workflow_service.continue_workflow(
         user_id,
-        data.workflow_id
+        data.workflow_id,
+        initial_state
     )
+    
+    logger.info("Response has received successfully")
+    
+    return {
+        "workflow_id": str(data.workflow_id),
+        "response": response
+    }
+    
     
     
 

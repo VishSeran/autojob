@@ -160,16 +160,13 @@ class WorkflowService:
         
         
         
-    async def continue_workflow(self, user_id:uuid.UUID, workflow_id:uuid.UUID, query, resume_path):
+    async def continue_workflow(self, user_id:uuid.UUID, workflow_id:uuid.UUID, initial_state:dict):
         
         try:
             
-            if not query:
-                raise ValueError("Query is missing")
-            
-            if not resume_path:
-                raise ValueError("Resume path is missing")
-            
+            if not initial_state:
+                raise ValueError("Initial state is missing")
+
             current_workflow = self.get_workflow_by_id(
                 user_id,
                 workflow_id
@@ -191,9 +188,11 @@ class WorkflowService:
             await agent_service.initialize()
             await agent_service.build_workflow()
             
-            response = agent_service.
+            response = agent_service.get_response(
+                initial_state
+            )
             
-            
+            return response
             
         except Exception:
             logger.exception("Unexpected error in continue workflow")
