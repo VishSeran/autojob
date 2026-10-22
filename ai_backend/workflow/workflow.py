@@ -2,7 +2,6 @@ import asyncio
 import uuid
 
 from langchain_core.documents import Document
-from langgraph.checkpoint.memory import In
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import interrupt
 from sqlalchemy.orm import Session
@@ -19,7 +18,6 @@ from ai_backend.mcp_client.client import MCPClient
 from ai_backend.workflow.workflow_state import WorkflowState
 from configs.configurations import JOB_RELEVANCY_THRESHOLD, TOPJOB_SERVER_URL
 from configs.logger import get_logger
-from models.users import User
 from schema.job_image_schema import JobDetails
 from schema.job_schema import Job
 from schema.query_schema import QuerySchema
@@ -48,6 +46,7 @@ class AgentWorkflow:
             self.checkpointer = checkpointer
             
             logger.info("workflow - Agents are initialized")
+            self.initialize()
             self.build_workflow()
             logger.info("Workflow build is completed")
 

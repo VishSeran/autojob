@@ -14,23 +14,24 @@ logger = get_logger("workflow-service")
 
 class WorkflowService:
     
-    def __init__(self, db:Session):
+    def __init__(self, db:Session, checkpointer):
         
         self.db = db
+        self.checkpointer = checkpointer
         self.workflow_repository = WorkflowRunRepository(db)
         self.user_repository = UserRepository(db)
         
         logger.info("Repositories are initialized")
         
         
-    def create_workflow(self, user_id:uuid.UUID, checkpointer):
+    def create_workflow(self, user_id:uuid.UUID):
         
         try:
             
             if not user_id:
                 raise ValueError("User ID is missing")
 
-            if not checkpointer:
+            if not self.checkpointer:
                 raise ValueError("Checkpointer is missing")
             
             workflow_run = WorkflowRun(
@@ -46,13 +47,13 @@ class WorkflowService:
                 self.db,
                 user_id,
                 new_workflow.thread_id,
-                checkpointer
+                self.checkpointer
             )
             
             self.db.commit()
             
             logger.info("Workflow is initialized")
-            return workflow
+            return workflow, new_workflow
             
         except Exception:
             logger.exception("Unexpected error in create workflow")
@@ -154,5 +155,43 @@ class WorkflowService:
         except Exception:
             logger.exception("Unexpected error in delete workflow by id")
             raise
+        
+        
+        
+    def continue_workflow(self, user_id:uuid.UUID, workflow_id:uuid.UUID, query, resume_path):
+        
+        try:
+            
+            if not query:
+                raise ValueError("Query is missing")
+            
+            if not resume_path:
+                raise ValueError("Resume path is missing")
+            
+            current_workflow = self.get_workflow_by_id(
+                user_id,
+                workflow_id
+            )
+            
+            if current_workflow is None:
+                raise ValueError("Workflow not found")
+            
+            thread_id = current_workflow.thread_id
+            logger.info("Thread ID fetched")
+            
+            agent_service = AgentWorkflow(
+                self.db,
+                user_id,
+                thread_id,
+                self.checkpointer
+            )
+            
+            response = agent_service.
+            
+            
+            
+        except Exception:
+            logger.exception("Unexpected error in continue workflow")
+            raise        
         
     

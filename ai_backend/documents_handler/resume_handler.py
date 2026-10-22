@@ -1,8 +1,7 @@
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from langchain_community.document_loaders import Docx2txtLoader, PyPDFLoader
-from database.supabase_client import client
-from tempfile import NamedTemporaryFile
 
 from configs.configurations import STORAGE_DIR
 from configs.logger import get_logger

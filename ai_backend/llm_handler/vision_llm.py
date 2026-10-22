@@ -39,5 +39,5 @@ class VisionLLmHandler:
             raise
         
         
-    def get_vision_llm(self):
+    def get_vision_llm(self,):
         return self.vision_llm
