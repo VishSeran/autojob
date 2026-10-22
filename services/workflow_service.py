@@ -24,7 +24,7 @@ class WorkflowService:
         logger.info("Repositories are initialized")
         
         
-    def create_workflow(self, user_id:uuid.UUID):
+    async def create_workflow(self, user_id:uuid.UUID):
         
         try:
             
@@ -49,6 +49,8 @@ class WorkflowService:
                 new_workflow.thread_id,
                 self.checkpointer
             )
+            await workflow.initialize()
+            await workflow.build_workflow()
             
             self.db.commit()
             
@@ -158,7 +160,7 @@ class WorkflowService:
         
         
         
-    def continue_workflow(self, user_id:uuid.UUID, workflow_id:uuid.UUID, query, resume_path):
+    async def continue_workflow(self, user_id:uuid.UUID, workflow_id:uuid.UUID, query, resume_path):
         
         try:
             
@@ -185,6 +187,9 @@ class WorkflowService:
                 thread_id,
                 self.checkpointer
             )
+            
+            await agent_service.initialize()
+            await agent_service.build_workflow()
             
             response = agent_service.
             

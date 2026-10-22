@@ -46,9 +46,7 @@ class AgentWorkflow:
             self.checkpointer = checkpointer
             
             logger.info("workflow - Agents are initialized")
-            self.initialize()
-            self.build_workflow()
-            logger.info("Workflow build is completed")
+
 
         except Exception:
             logger.exception("Unexpected error in agent workflow")
@@ -139,6 +137,7 @@ class AgentWorkflow:
             logger.info(
                 "Workflow graph compiled successfully"
             )
+            logger.info("Workflow build is completed")
             
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -763,7 +762,34 @@ class AgentWorkflow:
         
         return {
             "configurable": {
-                "thread_id": self.thread_id
+                "thread_id": str(self.thread_id)
             }
         }
+    
+    async def get_response(self, initial_state):
+        
+        try:
             
+            if self.workflow is None:
+                raise RuntimeError(
+                    "Workflow is not initialized"
+                )
+            
+            if self.topjob_client_server_Source is None:
+                raise RuntimeError(
+                    "Workflow dependencies are not initialized"
+                )
+            
+            response = await self.workflow.ainvoke(
+                input=initial_state,
+                config=self.config
+            )
+            logger.info(
+            "Workflow execution completed or interrupted"
+            )
+            return response
+        except Exception:
+            logger.exception(
+                "Unexpected error in  executing workflow"
+            )
+            raise

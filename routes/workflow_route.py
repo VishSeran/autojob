@@ -31,6 +31,7 @@ async def create_workflow(
     logger.info("checkpointer fetched")
     
     workflow_service = WorkflowService(db)
+    workflow_service.
     workflow, new_workflow = workflow_service.create_workflow(
         user_id,
         checkpointer
