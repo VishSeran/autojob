@@ -14,6 +14,7 @@ from routes.gmail_route import gmail_router
 from routes.google_auth_routes import google_auth_router
 from routes.resume_route import resume_router
 from routes.user_route import user_router
+from routes.workflow_route import workflow_router
 from sources.topjob_source import TopJobSource
 
 
@@ -63,6 +64,10 @@ app.include_router(
 
 app.include_router(
     gmail_router
+)
+
+app.include_router(
+    workflow_router
 )
 
 

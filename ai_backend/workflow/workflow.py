@@ -2,9 +2,8 @@ import asyncio
 import uuid
 
 from langchain_core.documents import Document
-from langgraph.checkpoint.memory import In
 from langgraph.graph import END, START, StateGraph
-from langgraph.types import interrupt
+from langgraph.types import Command, interrupt
 from sqlalchemy.orm import Session
 
 from ai_backend.agents.cover_letter_agent import CoverLetterAgent
@@ -19,7 +18,6 @@ from ai_backend.mcp_client.client import MCPClient
 from ai_backend.workflow.workflow_state import WorkflowState
 from configs.configurations import JOB_RELEVANCY_THRESHOLD, TOPJOB_SERVER_URL
 from configs.logger import get_logger
-from models.users import User
 from schema.job_image_schema import JobDetails
 from schema.job_schema import Job
 from schema.query_schema import QuerySchema
@@ -48,8 +46,7 @@ class AgentWorkflow:
             self.checkpointer = checkpointer
             
             logger.info("workflow - Agents are initialized")
-            self.build_workflow()
-            logger.info("Workflow build is completed")
+
 
         except Exception:
             logger.exception("Unexpected error in agent workflow")
@@ -140,6 +137,7 @@ class AgentWorkflow:
             logger.info(
                 "Workflow graph compiled successfully"
             )
+            logger.info("Workflow build is completed")
             
         except Exception:
             logger.exception("Unexpected error in build workflow")
@@ -764,7 +762,68 @@ class AgentWorkflow:
         
         return {
             "configurable": {
-                "thread_id": self.thread_id
+                "thread_id": str(self.thread_id)
             }
         }
+    
+    async def get_response(self, initial_state):
+        
+        try:
             
+            if self.workflow is None:
+                raise RuntimeError(
+                    "Workflow is not initialized"
+                )
+            
+            if self.topjob_client_server_Source is None:
+                raise RuntimeError(
+                    "Workflow dependencies are not initialized"
+                )
+            
+            response = await self.workflow.ainvoke(
+                input=initial_state,
+                config=self.config
+            )
+            logger.info(
+            "Workflow execution completed or interrupted"
+            )
+            return response
+        except Exception:
+            logger.exception(
+                "Unexpected error in  executing workflow"
+            )
+            raise
+        
+        
+    async def resume(
+        self,
+        resume_data:dict
+    ):
+        
+        
+        try:
+            
+            if self.workflow is None:
+                raise RuntimeError(
+                    "Workflow is not initialized"
+                )
+                
+            response = await self.workflow.ainvoke(
+                Command(
+                    resume=resume_data
+                ),
+                config=self.config
+            )
+            
+            logger.info(
+                "Workflow resumed successfully"
+            )
+
+            return response
+ 
+        except Exception:
+            logger.exception(
+            "Unexpected error while resuming workflow"
+            )
+
+            raise

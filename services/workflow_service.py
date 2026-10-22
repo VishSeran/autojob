@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from ai_backend.workflow.workflow import AgentWorkflow
 from configs.logger import get_logger
-from models.users import User
 from models.workflow import WorkflowRun
 from repositories.user_repository import UserRepository
 from repositories.workflow_repository import WorkflowRunRepository
@@ -15,23 +14,24 @@ logger = get_logger("workflow-service")
 
 class WorkflowService:
     
-    def __init__(self, db:Session):
+    def __init__(self, db:Session, checkpointer):
         
         self.db = db
+        self.checkpointer = checkpointer
         self.workflow_repository = WorkflowRunRepository(db)
         self.user_repository = UserRepository(db)
         
         logger.info("Repositories are initialized")
         
         
-    def create_workflow(self, user_id:uuid.UUID, checkpointer):
+    async def create_workflow(self, user_id:uuid.UUID):
         
         try:
             
             if not user_id:
                 raise ValueError("User ID is missing")
 
-            if not checkpointer:
+            if not self.checkpointer:
                 raise ValueError("Checkpointer is missing")
             
             workflow_run = WorkflowRun(
@@ -47,13 +47,15 @@ class WorkflowService:
                 self.db,
                 user_id,
                 new_workflow.thread_id,
-                checkpointer
+                self.checkpointer
             )
+            await workflow.initialize()
+            await workflow.build_workflow()
             
             self.db.commit()
             
             logger.info("Workflow is initialized")
-            return workflow
+            return workflow, new_workflow
             
         except Exception:
             logger.exception("Unexpected error in create workflow")
@@ -155,5 +157,45 @@ class WorkflowService:
         except Exception:
             logger.exception("Unexpected error in delete workflow by id")
             raise
+        
+        
+        
+    async def continue_workflow(self, user_id:uuid.UUID, workflow_id:uuid.UUID, initial_state:dict):
+        
+        try:
+            
+            if not initial_state:
+                raise ValueError("Initial state is missing")
+
+            current_workflow = self.get_workflow_by_id(
+                user_id,
+                workflow_id
+            )
+            
+            if current_workflow is None:
+                raise ValueError("Workflow not found")
+            
+            thread_id = current_workflow.thread_id
+            logger.info("Thread ID fetched")
+            
+            agent_service = AgentWorkflow(
+                self.db,
+                user_id,
+                thread_id,
+                self.checkpointer
+            )
+            
+            await agent_service.initialize()
+            await agent_service.build_workflow()
+            
+            response = agent_service.get_response(
+                initial_state
+            )
+            
+            return response
+            
+        except Exception:
+            logger.exception("Unexpected error in continue workflow")
+            raise        
         
     
