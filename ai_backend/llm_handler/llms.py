@@ -24,7 +24,6 @@ class LLMHandler:
             
             self.llm = ChatGroq (
                 model=GROQ_MODEL,
-                cache=True,
                 verbose=True,
                 api_key=SecretStr(groq_api),
                 temperature=temperature,

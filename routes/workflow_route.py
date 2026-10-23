@@ -57,8 +57,10 @@ async def continue_workflow(
     workflow_service = WorkflowService(db,checkpointer)
     
     initial_state = {
+        
+        "user": current_user,
         "query": data.query,
-        "current_resume": data.resume_path,
+        "current_resume_id": data.resume_path,
         "current_job_index": 0,
         "rejected_jobs": [],
         "user_decision": None,

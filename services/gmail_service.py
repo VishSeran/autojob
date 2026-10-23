@@ -22,10 +22,9 @@ class GmailService:
         logger.info("Gmail service has initialized")
         
         
-    def send_email(
+    async def send_email(
         self, 
         user_id:uuid.UUID,
-        reply_email:str,
         company_mail:str,
         subject:str,
         email_body:str
@@ -36,9 +35,6 @@ class GmailService:
             if user_id is None:
                 raise ValueError("User ID is missing")
             
-            if reply_email is None:
-                raise ValueError("Resend email is missing")
-            
             if company_mail is None:
                 raise ValueError("Company email is missing")
             
@@ -48,10 +44,11 @@ class GmailService:
             if email_body is None:
                 raise ValueError("Email body is missing")
             
+            user = self.user_repository.get_by_id(user_id)
             
             email_data = GmailModel(                    
                 user_id= user_id,
-                reply_email= reply_email,
+                reply_email= user.email,
                 company_mail= company_mail,
                 subject= subject,
                 email_body= email_body,
@@ -74,7 +71,7 @@ class GmailService:
             
             try:
             
-                send_email = resend.Emails.send(params)
+                send_email = await resend.Emails.send_async(params)
                 logger.info("Email sent successfully")
                 
             except ResendError:

@@ -20,8 +20,7 @@ gmail_router = APIRouter(
 
 
 @gmail_router.post("/send")
-def send_mail(request: GmailRequest, 
-              response:Response,
+async def send_mail(request: GmailRequest, 
               db:Session = Depends(get_db),
               current_user:User = Depends(get_current_user)):
     
@@ -31,9 +30,8 @@ def send_mail(request: GmailRequest,
     
     gmail_service = GmailService(db)
     
-    sent_mail = gmail_service.send_email(
+    sent_mail = await gmail_service.send_email(
         user_id= user_id,
-        reply_email= request.reply_email,
         company_mail= request.company_mail,
         subject= request.subject,
         email_body= request.email_body
@@ -47,7 +45,7 @@ def send_mail(request: GmailRequest,
     }
     
 @gmail_router.get("allmails")
-def view_all_mails(request:Request,
+def view_all_mails(
                    current_user:User = Depends(get_current_user),
                    db:Session = Depends(get_db)):
     

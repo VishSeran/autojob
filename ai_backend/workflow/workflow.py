@@ -14,9 +14,14 @@ from ai_backend.agents.query_extractor_agent import QueryHandlerAgent
 from ai_backend.client_server_sources.topjob_client_server import (
     TopJobClientServerSource,
 )
+from ai_backend.documents_handler.resume_handler import ResumeDocumentHandler
 from ai_backend.mcp_client.client import MCPClient
 from ai_backend.workflow.workflow_state import WorkflowState
-from configs.configurations import JOB_RELEVANCY_THRESHOLD, TOPJOB_SERVER_URL
+from configs.configurations import (
+    BUCKET_NAME,
+    JOB_RELEVANCY_THRESHOLD,
+    TOPJOB_SERVER_URL,
+)
 from configs.logger import get_logger
 from schema.job_image_schema import JobDetails
 from schema.job_schema import Job
@@ -29,7 +34,7 @@ logger = get_logger("agent-workflow")
 
 
 class AgentWorkflow:
-    def __init__(self, db:Session, user_id:uuid.UUID, thread_id, checkpointer):  # noqa: F821
+    def __init__(self, db:Session, user_id:uuid.UUID, thread_id:str, checkpointer):  # noqa: F821
 
         try:
             self.workflow = None
@@ -38,6 +43,7 @@ class AgentWorkflow:
             self.query_handler_agent = QueryHandlerAgent()
             self.image_handler_agent = ImageDataExtractorAgent()
             self.profile_extractor_agent = ProfileExtractorAgent()
+            self.resume_handler = ResumeDocumentHandler(db)
             self.job_relevancy_agent = JobRelevanceAgent()
             self.cover_letter_agent = CoverLetterAgent()
             self.gmail_service = GmailService(db)
@@ -270,7 +276,7 @@ class AgentWorkflow:
             logger.exception("Unexpected error in image data handler node")
             raise
 
-    async def get_full_job_summary_node(self, state: WorkflowState):
+    def get_full_job_summary_node(self, state: WorkflowState):
 
         try:
             source = state.get("source", "")
@@ -294,9 +300,9 @@ class AgentWorkflow:
                     job_summary = Job(
                         source= source,
                         job_url= topjob_image_urls[job_title],
-                        company_name= job.get("company_name", ""),
-                        company_email= image_data["company_email", ""],
-                        company_contact= image_data["company_contact", ""],
+                        company_name= job.get("company_name",""),
+                        company_email= image_data["company_email"],
+                        company_contact= image_data["company_contact"],
                         description= image_data["description"],
                         responsibilities= image_data["responsibilities"],
                         requirments= image_data["requirements"],
@@ -318,16 +324,61 @@ class AgentWorkflow:
             raise
 
     async def profile_extractor_node(self, state: WorkflowState):
-
+        
         try:
-            current_resume: list[Document] = state.get("current_resume", [])
+            
+            resume_data = state.get("current_resume")
 
-            resume_text = "\n".join(doc.page_content for doc in current_resume)
+            if not resume_data:
+                
+                user = state.get("user")
+                resume_path = state.get("current_resume_id")
 
-            response = await self.profile_extractor_agent.get_response(resume_text)
-            logger.info("workflow - Response is fetched")
+                if not user:
+                    
+                    raise ValueError(
+                        "User is missing from workflow state"
+                    )
+                
+                if not resume_path:
+                                    
+                    raise ValueError(
+                        "Resume path is missing from workflow state"
+                    )
 
-            return {"profile_data": response}
+                resume_data = self.resume_handler.load_from_storage(
+                    user.id,
+                    resume_path
+                )
+
+            if not resume_data:
+                raise ValueError("Resume data could not be loaded")
+
+            logger.info(
+                "Resume data type: %s",
+                type(resume_data).__name__
+            )
+
+            logger.info(
+                "First item type: %s",
+                type(resume_data[0]).__name__
+            )
+
+            logger.info("Number of pages: %s", len(resume_data))
+            logger.info(f"resume data: {resume_data}")
+
+            resume_text = "\n".join(
+                doc.page_content for doc in resume_data
+            )
+
+            response = await self.profile_extractor_agent.get_response(
+                resume_text
+            )
+
+            return {
+                "current_resume": resume_data,
+                "profile_data": response
+            }
 
         except Exception:
             logger.exception("Unexpected error in profile extractor")
@@ -406,7 +457,7 @@ class AgentWorkflow:
             raise
         
 
-    async def job_selection_node(self, state: WorkflowState):
+    def job_selection_node(self, state: WorkflowState):
 
         try:
             
@@ -443,7 +494,7 @@ class AgentWorkflow:
             raise
 
         
-    async def job_selection_route(self, state: WorkflowState):
+    def job_selection_route(self, state: WorkflowState):
         
         try:
             
@@ -474,7 +525,7 @@ class AgentWorkflow:
             raise
         
         
-    async def next_job_node(self, state:WorkflowState):
+    def next_job_node(self, state:WorkflowState):
         
         try:
             
@@ -566,7 +617,7 @@ class AgentWorkflow:
             raise
         
         
-    async def final_review_node(self, state: WorkflowState):
+    def final_review_node(self, state: WorkflowState):
         
         try:
             
@@ -601,7 +652,7 @@ class AgentWorkflow:
             raise
         
         
-    async def final_review_route(self, state:WorkflowState):
+    def final_review_route(self, state:WorkflowState):
         
         try: 
             
@@ -638,9 +689,8 @@ class AgentWorkflow:
             if not email_data:
                 raise ValueError("Email data is missing")
 
-            send_mail = self.gmail_service.send_email(
-                self.user.id,
-                self.user.email,
+            send_mail = await self.gmail_service.send_email(
+                self.user_id,
                 email_data.get("company_email"),
                 email_data.get("subject"),
                 email_data.get("cover_letter")
@@ -675,7 +725,7 @@ class AgentWorkflow:
             }
         
         
-    async def cancel_application_node(
+    def cancel_application_node(
         self,
         state: WorkflowState
     ):
@@ -716,7 +766,7 @@ class AgentWorkflow:
             raise
         
         
-    async def send_mail_route(self, state:WorkflowState):
+    def send_mail_route(self, state:WorkflowState):
         
         try:
             email_sent = state.get("email_sent", False)

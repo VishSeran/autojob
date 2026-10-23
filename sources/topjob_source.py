@@ -365,3 +365,7 @@ class TopJobSource(JobSource):
         except Exception:
             logger.exception("Error in get job details")
             raise
+        
+    async def get_job_details(self, job_url):
+            
+        pass
