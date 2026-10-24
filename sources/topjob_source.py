@@ -28,7 +28,7 @@ class TopJobSource(JobSource):
             
             topjob_url = "https://www.topjobs.lk/applicant/vacancybyfunctionalarea.jsp"
             
-            match category:
+            match category.category:
                 
                 case "IT-SWare/DB/QA/Web/Graphics/GIS":
                     params['FA'] = "SDQ"
