@@ -1,5 +1,7 @@
 from pydantic import BaseModel, Field
 
+from schema.topjob_category_schema import TopJobCategory
+
 
 class QuerySchema(BaseModel):
 
@@ -12,7 +14,7 @@ class QuerySchema(BaseModel):
         description="Preferred job location, such as a city, district, or country."
     )
 
-    field: str | None = Field(
+    field: TopJobCategory | None = Field(
         default=None,
         description="Industry or job category, such as IT, Finance, or Engineering."
     )

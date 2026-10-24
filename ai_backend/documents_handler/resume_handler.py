@@ -1,71 +1,112 @@
+import json
+import uuid
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 from langchain_community.document_loaders import Docx2txtLoader, PyPDFLoader
+from sqlalchemy.orm import Session
 
 from configs.configurations import STORAGE_DIR
 from configs.logger import get_logger
-from services.resume_storage_service import ResumeStorageService
+from services.resume_service import ResumeService
 
 STORAGE_DIR.mkdir(exist_ok=True, parents=True)
 logger = get_logger("resume-handler")
 
 class ResumeDocumentHandler:
     
-    def __init__(self):
+    def __init__(self, db:Session):
     
         self.current_resume_path = None
-        self.storage_service = ResumeStorageService()
+        self.storage_service = ResumeService(db)
         self.loader = None
         self.documents = None
+        logger.info("Resume handler is created")
         
         
-    def load_from_storage(self, bucket_name:str, file_path:str):
+    def load_from_storage(self, user_id:uuid.UUID, resume_id:uuid.UUID):
+        
+        temp_path = None
         
         try:
             
-            if not bucket_name:
-                raise ValueError(
-                    "Bucket name is missing"
-                )
 
-            if not file_path:
+            if not resume_id:
                 raise ValueError(
-                    "Resume file path is missing"
+                    "Resume file ID is missing"
                 )
                 
-            file_content = self.storage_service.download(file_path)
-            logger.info("File bytes downloaded successfully")
-            
-            extension = (
-                Path(
-                    file_path
-                ).suffix
-                .lower()
+            file_content = self.storage_service.download_resume(
+                user_id,
+                resume_id
             )
             
-            if extension not in [
-                ".pdf",
-            ]:
-                raise RuntimeError(
-                    "Uploaded document is not in supported format"
+            # logger.info("File bytes downloaded successfully")
+            
+            # if not isinstance(file_content, bytes):
+            #     raise TypeError(
+            #         f"Expected PDF bytes, got {type(file_content)}"
+            #     )
+            
+            # if extension != ".pdf":
+            #     raise RuntimeError(
+            #         "Only PDF resumes are currently supported"
+            #     )
+            
+            if not isinstance(file_content, bytes):
+                raise TypeError(
+                    f"Expected PDF bytes, got {type(file_content).__name__}"
                 )
-                
-            with NamedTemporaryFile(
-                suffix=extension,
-                delete=False
-            ) as temp_file:
-                
+
+            if not file_content.startswith(b"%PDF-"):
+                raise ValueError("Downloaded content is not a valid PDF file")
+            
+            logger.info(
+                "PDF downloaded successfully. Size: %s bytes",
+                len(file_content)
+            )
+            
+            with NamedTemporaryFile(suffix=".pdf", delete=False, ) as temp_file:
                 temp_file.write(file_content)
                 temp_path = temp_file.name
                 
-            return self.load(temp_path)
-        
+            loader = PyPDFLoader(temp_path)
+            documents = loader.load()
+            
+            logger.info(
+            "PDF loaded successfully. Pages: %s",
+            len(documents)
+            )
+
+            return documents
+                
         except Exception:
             logger.exception("Unexpected error in load from storage")
             raise
         
-    def load(self, resume_path: str | None = None):
+        finally:
+
+            if temp_path:
+
+                path = Path(temp_path)
+
+                if path.exists():
+
+                    try:
+                        path.unlink()
+
+                        logger.info(
+                            "Temporary resume file deleted"
+                        )
+
+                    except Exception:
+                        logger.warning(
+                            "Failed to delete temporary resume file: %s",
+                            temp_path
+                        )
+
+        
+    def load_docs(self, resume_path: str | None = None):
         
         try:
          

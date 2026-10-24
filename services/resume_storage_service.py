@@ -11,7 +11,7 @@ class ResumeStorageService:
     
     BUCKET_NAME = "resumes"
     
-    def __init__(self,client:Client):
+    def __init__(self, client:Client):
         
         self.client = client
         logger.info("Supabase client has connected")

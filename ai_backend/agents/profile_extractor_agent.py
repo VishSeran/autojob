@@ -14,8 +14,14 @@ class ProfileExtractorAgent:
         try:
             
             llm_handler = LLMHandler()
-            self.llm = llm_handler.get_llm().with_structured_output(ResumeSchema)
+            self.llm = llm_handler.get_llm().with_structured_output(
+                ResumeSchema,
+                strict=True,
+                method="json_schema"
+                
+            )
             
+            # self.llm = llm_handler.get_llm()
             self.prompt = ChatPromptTemplate.from_messages([
                 (
                     "system",

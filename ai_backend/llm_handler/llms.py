@@ -24,10 +24,10 @@ class LLMHandler:
             
             self.llm = ChatGroq (
                 model=GROQ_MODEL,
-                cache=True,
                 verbose=True,
                 api_key=SecretStr(groq_api),
                 temperature=temperature,
+                max_tokens=8000,
             )
             
             logger.info("LLM is initialized success")

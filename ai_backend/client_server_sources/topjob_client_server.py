@@ -1,5 +1,8 @@
+import json
+
 from ai_backend.mcp_client.client import MCPClient
 from configs.logger import get_logger
+from schema.topjob_category_schema import TopJobCategory
 from schema.topjob_summary_schema import TopJobSummary
 
 logger = get_logger("topjob-client-server-source")
@@ -9,11 +12,30 @@ class TopJobClientServerSource:
         
         self.mcp_client = mcp_client
         
+        
+    @staticmethod
+    def _extract_response(response):
+        
+        if not response.is_error:
+            for item in response.content:
+                if hasattr(item, "text"):
+                    try:
+                        
+                        return json.loads(item.text)
+                    
+                    except json.JSONDecodeError:
+                        return item.text
+                    
+        else:
+            raise RuntimeError(f"MCP tool returned an error: {response.content}")
+        
+        return response
+        
     async def search_jobs(
         self,
         keyword: str,
         location: str,
-        field: str,
+        field: TopJobCategory,
         limit: str
     ):
         
@@ -30,7 +52,7 @@ class TopJobClientServerSource:
                 }
             )
             
-            return response
+            return self._extract_response(response)
             
         except Exception:
             logger.exception("Unexpected error in search jobs")

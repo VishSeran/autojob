@@ -50,7 +50,7 @@ class WorkflowService:
                 self.checkpointer
             )
             await workflow.initialize()
-            await workflow.build_workflow()
+            workflow.build_workflow()
             
             self.db.commit()
             
@@ -186,9 +186,9 @@ class WorkflowService:
             )
             
             await agent_service.initialize()
-            await agent_service.build_workflow()
+            agent_service.build_workflow()
             
-            response = agent_service.get_response(
+            response = await agent_service.get_response(
                 initial_state
             )
             

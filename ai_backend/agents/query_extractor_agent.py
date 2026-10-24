@@ -12,7 +12,11 @@ class QueryHandlerAgent:
         
         try:
             self.llm_handler = LLMHandler()
-            self.llm = self.llm_handler.get_llm().with_structured_output(QuerySchema)
+            self.llm = self.llm_handler.get_llm().with_structured_output(
+                QuerySchema,
+                method="json_schema",
+                strict=True
+            )
             
             logger.info("LLM is initialized")
             
