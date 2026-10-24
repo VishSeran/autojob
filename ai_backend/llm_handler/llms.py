@@ -27,6 +27,7 @@ class LLMHandler:
                 verbose=True,
                 api_key=SecretStr(groq_api),
                 temperature=temperature,
+                max_tokens=8000,
             )
             
             logger.info("LLM is initialized success")

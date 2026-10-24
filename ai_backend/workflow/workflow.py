@@ -365,15 +365,17 @@ class AgentWorkflow:
             )
 
             logger.info("Number of pages: %s", len(resume_data))
-            logger.info(f"resume data: {resume_data}")
-
+            
             resume_text = "\n".join(
                 doc.page_content for doc in resume_data
             )
+            logger.info(f"resume data: {resume_text}")
 
             response = await self.profile_extractor_agent.get_response(
                 resume_text
             )
+            
+            logger.info(f"response: {response}")
 
             return {
                 "current_resume": resume_data,
