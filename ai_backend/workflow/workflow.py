@@ -198,6 +198,8 @@ class AgentWorkflow:
                     "topjob_summary": [],
                     "topjob_images_urls": {},
                 }
+                
+            logger.info("Job list if fetched")
 
             relavant_job_images = (
                 await self.topjob_client_server_Source.get_jobs_details(job_list)

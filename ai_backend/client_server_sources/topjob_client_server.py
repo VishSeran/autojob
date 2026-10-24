@@ -16,15 +16,26 @@ class TopJobClientServerSource:
     @staticmethod
     def _extract_response(response):
         
+        if response.is_error:
+            raise RuntimeError(
+                f"MCP tool returned an error: {response.content}"
+            )
+
+    # Preferred: structured MCP response
+        if response.structured_content is not None:
+            return response.structured_content
+        
         if not response.is_error:
-            for item in response.content:
-                if hasattr(item, "text"):
-                    try:
+            # for item in response.content:
+            #     if hasattr(item, "text"):
+            #         try:
                         
-                        return json.loads(item.text)
+            #             return json.loads(item.text)
                     
-                    except json.JSONDecodeError:
-                        return item.text
+            #         except json.JSONDecodeError:
+            #             return item.text
+            
+            return response.content
                     
         else:
             raise RuntimeError(f"MCP tool returned an error: {response.content}")
@@ -51,7 +62,7 @@ class TopJobClientServerSource:
                     "limit": limit
                 }
             )
-            
+            logger.info("search jobs result id fetched")
             return self._extract_response(response)
             
         except Exception:
@@ -67,12 +78,14 @@ class TopJobClientServerSource:
             
             response = await self.mcp_client.call_tool(
                 "get_job_details",
+                
                 {
                     "jobs": jobs
                 }
             )
             
-            return response
+            logger.info("get jobs details results fetched")
+            return self._extract_response(response)
             
         
         except Exception:
