@@ -62,8 +62,8 @@ class TopJobMcpServer:
             @self.topjob_server.tool()
             async def search_jobs(ctx:Context,
                                   keyword:str, 
-                                  category:TopJobCategory, 
-                                  location = None, 
+                                  category:TopJobCategory | None = None, 
+                                  location:str | None = None, 
                                   limit:int | None = 10):
                 
                 """
@@ -75,6 +75,12 @@ class TopJobMcpServer:
                 """
                 
                 try:
+                    
+                    if category is None:
+                        category = TopJobCategory(
+                            category="All_Vacancies"
+                        )
+
                 
                     response = await self.topjob_source.search_job(
                         keyword,

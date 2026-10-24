@@ -40,13 +40,12 @@ class TopJobClientServerSource:
         else:
             raise RuntimeError(f"MCP tool returned an error: {response.content}")
         
-        return response
         
     async def search_jobs(
         self,
         keyword: str,
         location: str,
-        field: TopJobCategory,
+        category: TopJobCategory | None,
         limit: str
     ):
         
@@ -57,12 +56,19 @@ class TopJobClientServerSource:
                 "search_jobs",
                 {
                     "keyword": keyword,
-                    "category": field,
+                    "category": (
+                        
+                        category.model_dump()
+                        if category is not None
+                        else None),
+                    
                     "location": location,
                     "limit": limit
                 }
             )
-            logger.info("search jobs result id fetched")
+            
+            
+            logger.info(f"search jobs result id fetched: {response}")
             return self._extract_response(response)
             
         except Exception:
@@ -80,11 +86,14 @@ class TopJobClientServerSource:
                 "get_job_details",
                 
                 {
-                    "jobs": jobs
+                    "jobs": [
+                        job.model_dump()
+                        for job in jobs
+                    ]
                 }
             )
             
-            logger.info("get jobs details results fetched")
+            logger.info(f"get jobs details results fetched:{response}")
             return self._extract_response(response)
             
         

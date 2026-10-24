@@ -161,12 +161,12 @@ class AgentWorkflow:
 
             response: QuerySchema = await self.query_handler_agent.get_response(query)
             logger.info("workflow - query response is fetched")
-            logger.info(f"response: {response}")
+            logger.info(f"response= \nkeyword: {response.keyword}\nlocation:{response.location}\ncategory:{response.category}\nno of jobs: {response.number_of_jobs}")
 
             return {
                 "keyword": response.keyword,
                 "location": response.location,
-                "job_field": response.field,
+                "job_field": response.category,
                 "no_of_jobs": response.number_of_jobs,
             }
 

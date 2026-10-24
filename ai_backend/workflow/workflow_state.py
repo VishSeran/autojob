@@ -16,9 +16,9 @@ class WorkflowState(TypedDict):
     
     source: str
     keyword: str
-    location: str
-    job_field: str
-    no_of_jobs: int
+    location: str | None
+    job_field: str | None
+    no_of_jobs: int 
     
     current_resume_id: str
     current_resume: list[Document]
