@@ -2,6 +2,7 @@ import json
 
 from ai_backend.mcp_client.client import MCPClient
 from configs.logger import get_logger
+from schema.topjob_category_schema import TopJobCategory
 from schema.topjob_summary_schema import TopJobSummary
 
 logger = get_logger("topjob-client-server-source")
@@ -15,7 +16,7 @@ class TopJobClientServerSource:
     @staticmethod
     def _extract_response(response):
         
-        if not response.isError:
+        if not response.is_error:
             for item in response.content:
                 if hasattr(item, "text"):
                     try:
@@ -34,7 +35,7 @@ class TopJobClientServerSource:
         self,
         keyword: str,
         location: str,
-        field: str,
+        field: TopJobCategory,
         limit: str
     ):
         
