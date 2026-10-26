@@ -334,14 +334,14 @@ class AgentWorkflow:
         try:
             
             resume_data = state.get("current_resume")
-            user_id = state.get("user_id")
+            
 
             if not resume_data:
                 
-                user = state.get("user")
+                user_id = state.get("user_id")
                 resume_path = state.get("current_resume_id")
 
-                if not user:
+                if not user_id:
                     
                     raise ValueError(
                         "User is missing from workflow state"
@@ -353,7 +353,7 @@ class AgentWorkflow:
                         "Resume path is missing from workflow state"
                     )
 
-                user_data = self.user_service.get_user_by_id(self.user_id)
+                user_data = self.user_service.get_user_by_id(user_id)
                 resume_data = self.resume_handler.load_from_storage(
                     user_data.id,
                     resume_path
