@@ -48,7 +48,7 @@ class AgentWorkflow:
             self.cover_letter_agent = CoverLetterAgent()
             self.gmail_service = GmailService(db)
             self.user_id = user_id
-            self.thread_id = thread_id
+            self.thread_id = str(thread_id)
             self.checkpointer = checkpointer
             
             logger.info("workflow - Agents are initialized")
@@ -818,7 +818,7 @@ class AgentWorkflow:
         
         return {
             "configurable": {
-                "thread_id": self.thread_id
+                "thread_id": str(self.thread_id)
             }
         }
     
@@ -887,26 +887,37 @@ class AgentWorkflow:
             
             
     async def get_latest_save_state(self):
-        
+
         try:
-            
-            snapshot = await self.workflow.aget_state(self.config)
-            
-            logger.info(f"Saved state: {snapshot}")
-            
-            results = {
-                "saved_state": snapshot.values,
-                "next_nodes": snapshot.next,
-                "tasks": snapshot.tasks
-            }
-            
-            return results
-            
-            
+            config = self.config
+
+            checkpoint = await self.checkpointer.aget_tuple(config)
+
+            if checkpoint is None:
+                logger.warning(
+                    "No PostgreSQL checkpoint found for thread: %s",
+                    self.thread_id
+                )
+
+                return None
+
+            snapshot = await self.workflow.aget_state(config)
+
+            logger.info(
+                "Checkpoint found: %s",
+                checkpoint.config
+            )
+
+            logger.info("Saved state: %s", snapshot.values)
+            logger.info("Next nodes: %s", snapshot.next)
+            logger.info("Tasks: %s", snapshot.tasks)
+
+            return snapshot
+
         except Exception:
-            logger.exception("Unexpected error in get latest saved state")
+            logger.exception("Failed to retrieve workflow checkpoint")
             raise
-        
+            
         
     async def resume(
         self,
