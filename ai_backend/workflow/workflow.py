@@ -844,6 +844,7 @@ class AgentWorkflow:
             "Workflow execution completed or interrupted"
             )
             return response
+        
         except Exception:
             logger.exception(
                 "Unexpected error in  executing workflow"
@@ -863,6 +864,9 @@ class AgentWorkflow:
                     raise RuntimeError(
                         "Workflow dependencies are not initialized"
                     )
+                    
+                saved_state = await self.get_latest_save_state()
+                logger.info(f"Saved state data: {saved_state}")
                 
                 response = await self.workflow.ainvoke(
                     input=None,
@@ -872,7 +876,9 @@ class AgentWorkflow:
                 logger.info(
                 "Workflow execution completed or interrupted"
                 )
+            
                 return response
+            
             except Exception:
                 logger.exception(
                     "Unexpected error in  executing workflow"
@@ -888,11 +894,13 @@ class AgentWorkflow:
             
             logger.info(f"Saved state: {snapshot}")
             
-            return {
+            results = {
                 "saved_state": snapshot.values,
                 "next_nodes": snapshot.next,
                 "tasks": snapshot.tasks
             }
+            
+            return results
             
             
         except Exception:

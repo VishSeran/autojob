@@ -7,11 +7,11 @@
                     starting_date: Fri Oct 23 2026
                     closing_date: Fri Nov 06 2026
                     location: Colombo
-                    rid: 37
+                    rid: 35
                     ac: 0000000375
                     jc: 0001563432
                     ec: 0000000492
-                    token: N7K2v8DyYU7O-acTlRJZvTBH
+                    token: qLYv+KWmV9w3rwiYIBbvpXAy
                 
                     job_title: Senior Software Engineer HTML5 (1)
                     company_name: DirectFN
@@ -19,11 +19,11 @@
                     starting_date: Mon Oct 19 2026
                     closing_date: Mon Nov 02 2026
                     location: Not Mentioned
-                    rid: 92
+                    rid: 90
                     ac: 0000000492
                     jc: 0001561153
                     ec: 0000000661
-                    token: N7K2v8DyYU7O-acTlRJZvTBH
+                    token: qLYv+KWmV9w3rwiYIBbvpXAy
                 
                     job_title: Software Engineer HTML5 (1)
                     company_name: DirectFN
@@ -31,11 +31,11 @@
                     starting_date: Mon Oct 19 2026
                     closing_date: Mon Nov 02 2026
                     location: Not Mentioned
-                    rid: 93
+                    rid: 91
                     ac: 0000000492
                     jc: 0001561151
                     ec: 0000000661
-                    token: N7K2v8DyYU7O-acTlRJZvTBH
+                    token: qLYv+KWmV9w3rwiYIBbvpXAy
                 
                     job_title: Senior Software Engineer.Net (1)
                     company_name: Jobfactory
@@ -43,11 +43,11 @@
                     starting_date: Mon Oct 19 2026
                     closing_date: Mon Nov 02 2026
                     location: Colombo
-                    rid: 94
+                    rid: 92
                     ac: 0000000375
                     jc: 0001561137
                     ec: 0000000492
-                    token: N7K2v8DyYU7O-acTlRJZvTBH
+                    token: qLYv+KWmV9w3rwiYIBbvpXAy
                 
                     job_title: Intern & Associate - Software Engineer
                     company_name: Muve Mobility (Pvt) Ltd
@@ -55,11 +55,11 @@
                     starting_date: Fri Oct 16 2026
                     closing_date: Fri Oct 30 2026
                     location: Kandy
-                    rid: 107
+                    rid: 105
                     ac: DEFZZZ
                     jc: 0001560708
                     ec: DEFZZZ
-                    token: N7K2v8DyYU7O-acTlRJZvTBH
+                    token: qLYv+KWmV9w3rwiYIBbvpXAy
                 
                     job_title: Software Engineer - Python
                     company_name: InSync Technologies (Pvt) Ltd
@@ -67,11 +67,11 @@
                     starting_date: Fri Oct 16 2026
                     closing_date: Fri Oct 30 2026
                     location: Malabe
-                    rid: 110
+                    rid: 108
                     ac: DEFZZZ
                     jc: 0001560653
                     ec: DEFZZZ
-                    token: N7K2v8DyYU7O-acTlRJZvTBH
+                    token: qLYv+KWmV9w3rwiYIBbvpXAy
                 
                     job_title: Lead Software Engineer
                     company_name: WealthTrust Securities PLC (WTS)
@@ -79,11 +79,11 @@
                     starting_date: Thu Oct 15 2026
                     closing_date: Thu Oct 29 2026
                     location: Colombo 8
-                    rid: 126
+                    rid: 124
                     ac: DEFZZZ
                     jc: 0001559947
                     ec: DEFZZZ
-                    token: N7K2v8DyYU7O-acTlRJZvTBH
+                    token: qLYv+KWmV9w3rwiYIBbvpXAy
                 
                     job_title: Backend Software Engineer
                     company_name: Hexacorp SL (Private) Limited
@@ -91,11 +91,11 @@
                     starting_date: Wed Oct 14 2026
                     closing_date: Wed Oct 28 2026
                     location: All island
-                    rid: 130
+                    rid: 128
                     ac: DEFZZZ
                     jc: 0001559723
                     ec: DEFZZZ
-                    token: N7K2v8DyYU7O-acTlRJZvTBH
+                    token: qLYv+KWmV9w3rwiYIBbvpXAy
                 
                     job_title: C# .NET - Senior Software Engineer
                     company_name: Britanext (Pvt) Ltd
@@ -103,11 +103,11 @@
                     starting_date: Tue Oct 13 2026
                     closing_date: Tue Oct 27 2026
                     location: All island
-                    rid: 148
+                    rid: 146
                     ac: DEFZZZ
                     jc: 0001559090
                     ec: DEFZZZ
-                    token: N7K2v8DyYU7O-acTlRJZvTBH
+                    token: qLYv+KWmV9w3rwiYIBbvpXAy
                 
                     job_title: Senior Software Engineer (SSE) | Technical Lead (TL)
                     company_name: Cilk Software Solutions (Pvt) Ltd
@@ -115,9 +115,9 @@
                     starting_date: Mon Oct 12 2026
                     closing_date: Mon Oct 26 2026
                     location: Kandana
-                    rid: 156
+                    rid: 154
                     ac: DEFZZZ
                     jc: 0001558736
                     ec: DEFZZZ
-                    token: N7K2v8DyYU7O-acTlRJZvTBH
+                    token: qLYv+KWmV9w3rwiYIBbvpXAy
                 

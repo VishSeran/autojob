@@ -24,7 +24,7 @@ class WorkflowService:
         logger.info("Repositories are initialized")
         
         
-    async def create_workflow(self, user_id:uuid.UUID):
+    async def create_workflow(self, user_id:uuid.UUID, initial_state:dict):
         
         try:
             
@@ -54,8 +54,12 @@ class WorkflowService:
             
             self.db.commit()
             
+            response = await workflow.get_response(
+                initial_state
+            )
+            
             logger.info("Workflow is initialized")
-            return workflow, new_workflow
+            return response, new_workflow
             
         except Exception:
             logger.exception("Unexpected error in create workflow")
@@ -160,12 +164,9 @@ class WorkflowService:
         
         
         
-    async def continue_workflow(self, user_id:uuid.UUID, workflow_id:uuid.UUID, initial_state:dict):
+    async def continue_workflow(self, user_id:uuid.UUID, workflow_id:uuid.UUID):
         
         try:
-            
-            if not initial_state:
-                raise ValueError("Initial state is missing")
 
             current_workflow = self.get_workflow_by_id(
                 user_id,
@@ -188,10 +189,7 @@ class WorkflowService:
             await agent_service.initialize()
             agent_service.build_workflow()
             
-            response = await agent_service.get_response(
-                initial_state
-            )
-            
+            response = await agent_service.get_response_from_existing_workflow()
             return response
             
         except Exception:
