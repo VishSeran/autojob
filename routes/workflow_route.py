@@ -34,7 +34,7 @@ async def create_workflow(
     
     initial_state = {
         
-        "user": current_user,
+        "user_id": user_id,
         "query": data.query,
         "current_resume_id": data.resume_path,
         "current_job_index": 0,

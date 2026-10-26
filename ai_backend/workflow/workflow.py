@@ -28,13 +28,14 @@ from schema.job_schema import Job
 from schema.query_schema import QuerySchema
 from schema.resume_schema import ResumeSchema
 from services.gmail_service import GmailService
+from services.user_service import UserService
 
 logger = get_logger("agent-workflow")
 
 
 
 class AgentWorkflow:
-    def __init__(self, db:Session, user_id:uuid.UUID, thread_id:str, checkpointer):  # noqa: F821
+    def __init__(self, db:Session, user_id:uuid.UUID, thread_id:str, checkpointer):  
 
         try:
             self.workflow = None
@@ -47,6 +48,7 @@ class AgentWorkflow:
             self.job_relevancy_agent = JobRelevanceAgent()
             self.cover_letter_agent = CoverLetterAgent()
             self.gmail_service = GmailService(db)
+            self.user_service = UserService(db)
             self.user_id = user_id
             self.thread_id = str(thread_id)
             self.checkpointer = checkpointer
@@ -332,6 +334,7 @@ class AgentWorkflow:
         try:
             
             resume_data = state.get("current_resume")
+            user_id = state.get("user_id")
 
             if not resume_data:
                 
@@ -350,8 +353,9 @@ class AgentWorkflow:
                         "Resume path is missing from workflow state"
                     )
 
+                user_data = self.user_service.get_user_by_id(self.user_id)
                 resume_data = self.resume_handler.load_from_storage(
-                    user.id,
+                    user_data.id,
                     resume_path
                 )
 
@@ -838,7 +842,8 @@ class AgentWorkflow:
             
             response = await self.workflow.ainvoke(
                 input=initial_state,
-                config=self.config
+                config=self.config,
+                durability="sync"
             )
             logger.info(
             "Workflow execution completed or interrupted"
