@@ -23,8 +23,8 @@ class VisionLLmHandler:
             self.vision_llm = ChatGroq(
                 model=vision_model,
                 temperature=0.2,
-                cache=True,
                 api_key=groq_api_key,
+                max_tokens=8000,
                 verbose=True
             )
             

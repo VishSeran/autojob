@@ -6,10 +6,10 @@ class Job(BaseModel):
     
     source: str
     job_url: list[str]
-    title: str
-    company_name: str
-    company_email: str
-    company_contact: str
+    title: str | None = None
+    company_name: str | None = None
+    company_email: str | None = None
+    company_contact: str | None = None
     
     description: str | None = None
     responsibilities: str | None = None

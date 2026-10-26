@@ -14,7 +14,7 @@ class WorkflowState(TypedDict):
     query: str
     user: User
     
-    source: str
+    source: str = "topjob"
     keyword: str
     location: str | None
     job_field: str | None

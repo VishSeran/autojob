@@ -12,33 +12,34 @@ class TopJobClientServerSource:
         
         self.mcp_client = mcp_client
         
-        
+
+
     @staticmethod
     def _extract_response(response):
-        
+
         if response.is_error:
             raise RuntimeError(
                 f"MCP tool returned an error: {response.content}"
             )
 
-    # Preferred: structured MCP response
         if response.structured_content is not None:
             return response.structured_content
-        
-        if not response.is_error:
-            # for item in response.content:
-            #     if hasattr(item, "text"):
-            #         try:
-                        
-            #             return json.loads(item.text)
-                    
-            #         except json.JSONDecodeError:
-            #             return item.text
-            
-            return response.content
-                    
-        else:
-            raise RuntimeError(f"MCP tool returned an error: {response.content}")
+
+        if response.content:
+
+            for item in response.content:
+
+                if hasattr(item, "text"):
+
+                    try:
+                        return json.loads(item.text)
+
+                    except json.JSONDecodeError:
+                        return item.text
+
+        raise RuntimeError(
+            "MCP tool returned no usable content"
+        )
         
         
     async def search_jobs(
@@ -67,9 +68,17 @@ class TopJobClientServerSource:
                 }
             )
             
+            raw_jobs = self._extract_response(response)
+            logger.info(f"search jobs raw results: {raw_jobs}")
             
-            logger.info(f"search jobs result id fetched: {response}")
-            return self._extract_response(response)
+            jobs = [
+                TopJobSummary.model_validate(job)
+                for job in raw_jobs
+            ]
+            
+            
+            logger.info(f"search jobs result id fetched: {jobs}")
+            return jobs
             
         except Exception:
             logger.exception("Unexpected error in search jobs")

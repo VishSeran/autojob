@@ -286,7 +286,7 @@ class AgentWorkflow:
             complete_job_details = []
 
             if source == "topjob":
-                job_list = state.get("topjob_summary")
+                job_list = state.get("topjob_summary") or []
                 topjob_image_details = state.get("topjob_images_details", {})
                 topjob_image_urls = state.get("topjob_images_urls", {})
 
@@ -294,7 +294,7 @@ class AgentWorkflow:
                     job = job.model_dump()
                     job_title = job.get("job_title")
 
-                    image_data = topjob_image_details.get(job_title)
+                    image_data:dict = topjob_image_details.get(job_title)
 
                     if not image_data:
                         logger.warning(f"No image details found for job: {job_title}")
@@ -303,14 +303,15 @@ class AgentWorkflow:
                     job_summary = Job(
                         source= source,
                         job_url= topjob_image_urls[job_title],
+                        title =  image_data["job_titile"] or job_title,
                         company_name= job.get("company_name",""),
-                        company_email= image_data["company_email"],
-                        company_contact= image_data["company_contact"],
-                        description= image_data["description"],
-                        responsibilities= image_data["responsibilities"],
-                        requirments= image_data["requirements"],
+                        company_email= image_data.get("company_email"),
+                        company_contact= image_data.get("company_contact"),
+                        description= image_data.get("description"),
+                        responsibilities= image_data.get("responsibilities"),
+                        requirments= image_data.get("requirments"),
                         location= job.get("location", ""),
-                        salary= image_data["salary"],
+                        salary= image_data.get("salary"),
                         starting_date= job.get("starting_date", ""),
                         closing_date= job.get("closing_date", ""),
                     )
@@ -817,7 +818,7 @@ class AgentWorkflow:
         
         return {
             "configurable": {
-                "thread_id": str(self.thread_id)
+                "thread_id": self.thread_id
             }
         }
     
@@ -847,6 +848,45 @@ class AgentWorkflow:
             logger.exception(
                 "Unexpected error in  executing workflow"
             )
+            raise
+        
+    async def get_response_from_existing_workflow(self):
+            
+            try:
+                
+                if self.workflow is None:
+                    raise RuntimeError(
+                        "Workflow is not initialized"
+                    )
+                
+                if self.topjob_client_server_Source is None:
+                    raise RuntimeError(
+                        "Workflow dependencies are not initialized"
+                    )
+                
+                response = await self.workflow.ainvoke(
+                    input=None,
+                    config=self.config
+                )
+                
+                logger.info(
+                "Workflow execution completed or interrupted"
+                )
+                return response
+            except Exception:
+                logger.exception(
+                    "Unexpected error in  executing workflow"
+                )
+                raise
+            
+            
+    async def get_latest_save_state(self):
+        
+        try:
+            
+            
+        except Exception:
+            logger.exception("Unexpected error in get latest saved state")
             raise
         
         
