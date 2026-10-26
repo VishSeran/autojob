@@ -884,6 +884,16 @@ class AgentWorkflow:
         
         try:
             
+            snapshot = await self.workflow.aget_state(self.config)
+            
+            logger.info(f"Saved state: {snapshot}")
+            
+            return {
+                "saved_state": snapshot.values,
+                "next_nodes": snapshot.next,
+                "tasks": snapshot.tasks
+            }
+            
             
         except Exception:
             logger.exception("Unexpected error in get latest saved state")
