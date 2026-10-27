@@ -31,7 +31,8 @@ class WorkflowState(TypedDict):
     topjob_complete_job_details: dict
     
     complete_job_details: list[Job]
- 
+    
+    rejectedjobs_lits: list[dict]
     relevant_jobs_list: list[dict]
     current_job_index: int 
     current_job: dict | None

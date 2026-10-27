@@ -18,7 +18,6 @@ from ai_backend.documents_handler.resume_handler import ResumeDocumentHandler
 from ai_backend.mcp_client.client import MCPClient
 from ai_backend.workflow.workflow_state import WorkflowState
 from configs.configurations import (
-    BUCKET_NAME,
     JOB_RELEVANCY_THRESHOLD,
     TOPJOB_SERVER_URL,
 )
@@ -401,6 +400,7 @@ class AgentWorkflow:
             jobs = state.get("complete_job_details", [])
 
             job_relevancy = []
+            job_rejected = []
             is_relevant = False
 
             profile_data = profile.model_dump()
@@ -437,11 +437,24 @@ class AgentWorkflow:
 
                 logger.info("workflow - Relevancy response is fetched")
 
-                relevance_score = relevancy_response.relevancy_score
+                relevance_score = relevancy_response.relevance_score
 
                 is_relevant = relevance_score >= JOB_RELEVANCY_THRESHOLD
                 
                 if not is_relevant:
+                    per_job_relevancy_summary = {
+                        "job_title": job.get("title", ""),
+                        "company_name": job.get("company_name", ""),
+                        "relevance_score": relevance_score,
+                        "is_relevant": is_relevant,
+                        "relevancy_details": relevancy_response,
+                        "job": job_object
+                    }
+                    
+                    job_rejected.append(per_job_relevancy_summary)
+                    logger.info(
+                        f"workflow - rejected results of {job.get('title', '')} is added"
+                    )
                     continue
 
                 per_job_relevancy_summary = {
@@ -460,7 +473,11 @@ class AgentWorkflow:
 
             logger.info("workflow - Final job relevancy results have fetched")
 
-            return {"relevant_jobs_list": job_relevancy}
+            return {
+                
+                "relevant_jobs_list": job_relevancy,
+                "rejectedjobs_lits": job_rejected
+            }
 
         except Exception:
             logger.exception("Unexpected error in relevancy node")
@@ -469,39 +486,37 @@ class AgentWorkflow:
 
     def job_selection_node(self, state: WorkflowState):
 
-        try:
+        
             
-            relevant_jobs_list = state.get("relevant_jobs_list", [])
-            current_job_index = state.get("current_job_index", 0)
-            
-            if current_job_index >= len(relevant_jobs_list):
-                logger.info(
-                    "No more relevant jobs available"
-                )
+        relevant_jobs_list = state.get("relevant_jobs_list", [])
+        current_job_index = state.get("current_job_index", 0)
+        
+        if current_job_index >= len(relevant_jobs_list):
+            logger.info(
+                "No more relevant jobs available"
+            )
 
-                return {
-                    "current_job": None
-                }
-                
-            current_job = relevant_jobs_list[current_job_index]
-            
-            decision = interrupt({
-                
-                "type": "job_review",
-                "job": current_job,
-                "message": "review the job for approve or reject"
-                
-            })
-            
             return {
-                
-                "current_job": current_job,
-                "user_decision": decision
+                "current_job": None
             }
+            
+        current_job = relevant_jobs_list[current_job_index]
+        
+        decision = interrupt({
+            
+            "type": "job_review",
+            "job": current_job,
+            "message": "review the job for approve or reject"
+            
+        })
+        
+        return {
+            
+            "current_job": current_job,
+            "user_decision": decision
+        }
 
-        except Exception:
-            logger.exception("Unexpected error in ats analyze node")
-            raise
+        
 
         
     def job_selection_route(self, state: WorkflowState):
@@ -938,6 +953,7 @@ class AgentWorkflow:
                 )
                 
             response = await self.workflow.ainvoke(
+                
                 Command(
                     resume=resume_data
                 ),

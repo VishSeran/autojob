@@ -2,12 +2,13 @@
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
+from langgraph.graph.
 
 from configs.logger import get_logger
 from database.session import get_db
 from dependencies.auth import get_current_user
 from models.users import User
-from schema.workflow_schema import WorkflowResumeRequset, WorkflowStartRequset
+from schema.workflow_schema import WorkflowResumeRequset, WorkflowStartRequset, JobSelectionInterrupt
 from services.workflow_service import WorkflowService
 
 logger = get_logger("workflow-router")
@@ -73,6 +74,7 @@ async def continue_workflow(
     logger.info("checkpointer fetched")
     
     workflow_service = WorkflowService(db,checkpointer)
+    workflow = workflow_service.get_workflow_by_id(user_id, data.workflow_id)
     
     # initial_state = {
         
@@ -96,10 +98,50 @@ async def continue_workflow(
     
     logger.info("Response has received successfully")
     
+    interrupts = response.get("__interrupt__", [])
+    
+    if interrupts:
+        logger.info("Interrupt detected")
+        interrupt_data = interrupts[0]
+        
+        return {
+            "status": "interrupt",
+            "thread_id": workflow.thread_id,
+            "interrupt": interrupt_data
+        }
+        
+        
     return {
         "workflow_id": str(data.workflow_id),
         "response": response
     }
+    
+    
+async def job_selection_interrupt_resume(
+    data: JobSelectionInterrupt,
+    request:Request,
+    current_user: User = Depends(get_current_user),
+    db:Session = Depends(get_db)
+):
+    
+    user_id = current_user.id
+    checkpointer = Request.app.state.langgraph_checkpointer
+    
+    workflow_service = WorkflowService(
+        db,
+        checkpointer
+    )
+    
+    user_response = data.decision
+    logger.info(f"User decision is fetched: {user_response}")
+    
+    
+    command = 
+    
+    workflow = workflow_service.get_workflow_by_id(
+        user_id,
+        data.workflow_id
+    )
     
     
     
