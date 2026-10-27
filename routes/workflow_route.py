@@ -2,13 +2,16 @@
 
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
-from langgraph.graph.
 
 from configs.logger import get_logger
 from database.session import get_db
 from dependencies.auth import get_current_user
 from models.users import User
-from schema.workflow_schema import WorkflowResumeRequset, WorkflowStartRequset, JobSelectionInterrupt
+from schema.workflow_schema import (
+    JobSelectionInterrupt,
+    WorkflowResumeRequset,
+    WorkflowStartRequset,
+)
 from services.workflow_service import WorkflowService
 
 logger = get_logger("workflow-router")
@@ -112,12 +115,13 @@ async def continue_workflow(
         
         
     return {
+        
         "workflow_id": str(data.workflow_id),
         "response": response
     }
     
-    
-async def job_selection_interrupt_resume(
+@workflow_router.post("/continue/resume")   
+async def interrupt_resume(
     data: JobSelectionInterrupt,
     request:Request,
     current_user: User = Depends(get_current_user),
@@ -125,23 +129,38 @@ async def job_selection_interrupt_resume(
 ):
     
     user_id = current_user.id
-    checkpointer = Request.app.state.langgraph_checkpointer
+    checkpointer = request.app.state.langgraph_checkpointer
     
     workflow_service = WorkflowService(
         db,
         checkpointer
     )
     
-    user_response = data.decision
-    logger.info(f"User decision is fetched: {user_response}")
+    resume_data = {
+        "decision": data.decision
+    }
     
+    logger.info(f"User decision is fetched: {resume_data}")
     
-    command = 
-    
-    workflow = workflow_service.get_workflow_by_id(
+    response = await workflow_service.resume_workflow(
         user_id,
-        data.workflow_id
+        data.workflow_id,
+        resume_data
     )
+    
+    return {
+        
+        "workflow_id": str(data.workflow_id),
+        "response": response
+    }
+    
+@workflow_router.post("/continue/finalize")
+async def final_response_interrupt(
+    request: Request,
+    data:
+)
+    
+    
     
     
     

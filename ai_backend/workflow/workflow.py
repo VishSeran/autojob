@@ -422,6 +422,7 @@ class AgentWorkflow:
                 
                 Job title: {job.get("title", "")}
                 company_name: {job.get("company_name", "")}
+                company_email: {job.get("company_email", "")}
                 description: {job.get("description", "")}
                 responsibilities: {job.get("responsibilities", "")}
                 requirments: {job.get("requirments", "")}
@@ -445,10 +446,11 @@ class AgentWorkflow:
                     per_job_relevancy_summary = {
                         "job_title": job.get("title", ""),
                         "company_name": job.get("company_name", ""),
+                        "company_email": job.get("company_email", ""),
                         "relevance_score": relevance_score,
                         "is_relevant": is_relevant,
                         "relevancy_details": relevancy_response,
-                        "job": job_object
+                        "job": job_object.model_dump()
                     }
                     
                     job_rejected.append(per_job_relevancy_summary)
@@ -460,10 +462,11 @@ class AgentWorkflow:
                 per_job_relevancy_summary = {
                     "job_title": job.get("title", ""),
                     "company_name": job.get("company_name", ""),
+                    "company_email": job.get("company_email", ""),
                     "relevance_score": relevance_score,
                     "is_relevant": is_relevant,
                     "relevancy_details": relevancy_response,
-                    "job": job_object
+                    "job": job_object.model_dump()
                 }
 
                 job_relevancy.append(per_job_relevancy_summary)
@@ -602,14 +605,14 @@ class AgentWorkflow:
             if not current_job:
                 raise ValueError("Current job is missing")
             
-            job_details = current_job['job'].model_dump()
+            job_details = current_job['job']
             
             candidate_details = candidate_profile.model_dump()
             
             if not job_details:
                 raise ValueError("Job details are missing from current job")
             
-            company_email = job_details.get("company_email")
+            company_email = job_details
             
             if not company_email:
                 raise ValueError("Company email is missing from job details")

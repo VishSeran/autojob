@@ -40,7 +40,7 @@ class WorkflowState(TypedDict):
     user_decision: dict
     
     approved_jobs: list[Job]
-    rejected_jobs: list[Job]
+    rejected_jobs: list[dict]
     
     updated_resume: ResumeSchema
     email_details: dict 
