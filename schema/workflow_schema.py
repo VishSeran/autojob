@@ -21,3 +21,16 @@ class JobSelectionInterrupt(BaseModel):
     "approve",
     "reject"
     ]
+    
+class SendMailInterrupt(BaseModel):
+    
+    workflow_id: uuid.UUID
+    decision: Literal[
+        "send",
+        "cancel"
+        ]
+    company_email: str
+    subject: str
+    cover_letter: str
+    
+    

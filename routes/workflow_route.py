@@ -11,6 +11,7 @@ from schema.workflow_schema import (
     JobSelectionInterrupt,
     WorkflowResumeRequset,
     WorkflowStartRequset,
+    SendMailInterrupt
 )
 from services.workflow_service import WorkflowService
 
@@ -157,8 +158,43 @@ async def interrupt_resume(
 @workflow_router.post("/continue/finalize")
 async def final_response_interrupt(
     request: Request,
-    data:
-)
+    data: SendMailInterrupt,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    
+    
+    user_id = current_user.id
+    checkpointer = request.app.state.langgraph_checkpointer
+    
+    workflow_service = WorkflowService(
+        db,
+        checkpointer
+        
+    )
+    
+    resume_data = {
+        
+        "decision": data.decision,
+        "company_email": data.company_email,
+        "subject": data.subject,
+        "cover_letter": data.cover_letter
+    }
+    
+    logger.info(f"Resume data fetched: {resume_data}")
+    
+    response = await workflow_service.resume_workflow(
+        user_id,
+        data.workflow_id,
+        resume_data
+    )
+    
+    return {
+            
+        "workflow_id": str(data.workflow_id),
+        "response": response
+    }
+    
     
     
     
