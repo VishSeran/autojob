@@ -669,9 +669,17 @@ class AgentWorkflow:
             #     "cover_letter": "Edited cover letter..."
             #}
             
+            email_details = {
+                            
+                "company_email": decision["company_email"],
+                "subject": decision['subject'],
+                "cover_letter": decision['cover_letter']
+            }
+            
             return {
 
                 "email_review_response": decision,
+                "email_details": email_details
                 
             }
             
