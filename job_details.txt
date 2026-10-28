@@ -1,15 +1,2 @@
 
 
-
-                    job_title: Senior Software Engineer - . NET  (1)
-                    company_name: Jobfactory
-                    image_number: 1564840
-                    starting_date: Wed Oct 28 2026
-                    closing_date: Wed Nov 04 2026
-                    location: Colombo
-                    rid: 9
-                    ac: 0000000375
-                    jc: 0001564840
-                    ec: 0000000492
-                    token: 6vZk1V+-jnyzFUuZW7LeCPD3
-                
