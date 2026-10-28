@@ -1,3 +1,4 @@
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 
 from ai_backend.llm_handler.vision_llm import VisionLLmHandler
@@ -18,39 +19,59 @@ class ImageDataExtractorAgent:
                 JobDetails
             )
             
-            self.prompt = ChatPromptTemplate.from_messages(
-                [
-                    (
-                        "system",
-                         """
-                        You are a job advertisement image extraction agent.
+            # self.prompt = ChatPromptTemplate.from_messages(
+            #     [
+            #         (
+            #             "system",
+            #              """
+            #             You are a job advertisement image extraction agent.
 
-                        The provided images contain information from a job vacancy
-                        advertisement.
+            #             The provided images contain information from a job vacancy
+            #             advertisement.
 
-                        Extract only information that is visibly available in the
-                        provided images.
+            #             Extract only information that is visibly available in the
+            #             provided images.
 
-                        Extract:
-                        - description: Job description or overview
-                        - responsibilities: Duties and responsibilities
-                        - requirements: Qualifications, skills, experience, education,
-                        and other candidate requirements
+            #             Extract:
+            #             - description: Job description or overview
+            #             - responsibilities: Duties and responsibilities
+            #             - requirements: Qualifications, skills, experience, education,
+            #             and other candidate requirements
 
-                        Do not invent, infer, or fabricate information that is not
-                        visible in the images.
+            #             Do not invent, infer, or fabricate information that is not
+            #             visible in the images.
 
-                        If a particular category is not available, return null.
-                    """
-                    ),
-                    (
-                        "human",
-                        "{images}"
-                    )
-                ]
-            )
+            #             If a particular category is not available, return null.
+            #         """
+            #         ),
+            #         (
+            #             "human",
+            #             "{images}"
+            #         )
+            #     ]
+            # )
             
-            self.chain = self.prompt | self.vision_llm
+            self.system_prompt = """
+                You are a job advertisement image extraction agent.
+
+                Analyze all provided job advertisement images.
+
+                Extract only information visibly present in the images.
+
+                Extract:
+                - job_title
+                - company_email
+                - company_contact
+                - description
+                - responsibilities
+                - requirements
+                - salary
+
+                Do not invent or infer missing information.
+
+                If a field is unavailable, return null.
+                """
+            
             logger.info("Image data ectractor agent is created")
             
         except Exception:
@@ -62,10 +83,31 @@ class ImageDataExtractorAgent:
         
         try:
             
-            response = await self.chain.ainvoke({
-                "images": images
-            })
-            logger.info("Vision response is fetched")
+            if not images:
+                logger.warning("Job urls are empty")
+                
+            message = [
+                SystemMessage(
+                    content=self.system_prompt
+                ),
+                HumanMessage(
+                    content= [
+                        {
+                            "type": "text",
+                            "text": (
+                                "Extract the job advertisement "
+                                "details from these images."
+                            )
+                        },
+                        *images
+                    ]
+                )
+            ]
+            
+            response = await self.vision_llm.ainvoke(
+                message
+            )
+            logger.info(f"Vision response is fetched: \n{response}")
             
             return response
         

@@ -627,9 +627,9 @@ class AgentWorkflow:
  
             email_details = {
                 
-                "company_email": company_email,
-                "subject": results['subject'],
-                "cover_letter": results['cover_letter']
+                "company_email": company_email if company_email else "no mail",
+                "subject": results['subject'] if results['subject'] else "no subject",
+                "cover_letter": results['cover_letter'] if results['cover_letter'] else "no cover letter"
             }
             
             return {
