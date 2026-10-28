@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TopJobSummary(BaseModel):
@@ -7,9 +7,9 @@ class TopJobSummary(BaseModel):
     company_name: str
     image_number: int
     
-    starting_date: str | None
-    closing_date: str | None
-    location: str | None
+    starting_date: str | None = None
+    closing_date: str | None = None
+    location: str | None = None
     rid: int 
     ac: str
     jc: str

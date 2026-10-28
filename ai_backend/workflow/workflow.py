@@ -18,7 +18,6 @@ from ai_backend.documents_handler.resume_handler import ResumeDocumentHandler
 from ai_backend.mcp_client.client import MCPClient
 from ai_backend.workflow.workflow_state import WorkflowState
 from configs.configurations import (
-    BUCKET_NAME,
     JOB_RELEVANCY_THRESHOLD,
     TOPJOB_SERVER_URL,
 )
@@ -28,13 +27,14 @@ from schema.job_schema import Job
 from schema.query_schema import QuerySchema
 from schema.resume_schema import ResumeSchema
 from services.gmail_service import GmailService
+from services.user_service import UserService
 
 logger = get_logger("agent-workflow")
 
 
 
 class AgentWorkflow:
-    def __init__(self, db:Session, user_id:uuid.UUID, thread_id:str, checkpointer):  # noqa: F821
+    def __init__(self, db:Session, user_id:uuid.UUID, thread_id:str, checkpointer):  
 
         try:
             self.workflow = None
@@ -47,8 +47,9 @@ class AgentWorkflow:
             self.job_relevancy_agent = JobRelevanceAgent()
             self.cover_letter_agent = CoverLetterAgent()
             self.gmail_service = GmailService(db)
+            self.user_service = UserService(db)
             self.user_id = user_id
-            self.thread_id = thread_id
+            self.thread_id = str(thread_id)
             self.checkpointer = checkpointer
             
             logger.info("workflow - Agents are initialized")
@@ -161,12 +162,12 @@ class AgentWorkflow:
 
             response: QuerySchema = await self.query_handler_agent.get_response(query)
             logger.info("workflow - query response is fetched")
-            logger.info(f"response: {response}")
+            logger.info(f"response= \nkeyword: {response.keyword}\nlocation:{response.location}\ncategory:{response.category}\nno of jobs: {response.number_of_jobs}")
 
             return {
                 "keyword": response.keyword,
                 "location": response.location,
-                "job_field": response.field,
+                "job_field": response.category,
                 "no_of_jobs": response.number_of_jobs,
             }
 
@@ -286,7 +287,7 @@ class AgentWorkflow:
             complete_job_details = []
 
             if source == "topjob":
-                job_list = state.get("topjob_summary")
+                job_list = state.get("topjob_summary") or []
                 topjob_image_details = state.get("topjob_images_details", {})
                 topjob_image_urls = state.get("topjob_images_urls", {})
 
@@ -294,7 +295,7 @@ class AgentWorkflow:
                     job = job.model_dump()
                     job_title = job.get("job_title")
 
-                    image_data = topjob_image_details.get(job_title)
+                    image_data:dict = topjob_image_details.get(job_title)
 
                     if not image_data:
                         logger.warning(f"No image details found for job: {job_title}")
@@ -303,14 +304,15 @@ class AgentWorkflow:
                     job_summary = Job(
                         source= source,
                         job_url= topjob_image_urls[job_title],
+                        title =  image_data["job_titile"] or job_title,
                         company_name= job.get("company_name",""),
-                        company_email= image_data["company_email"],
-                        company_contact= image_data["company_contact"],
-                        description= image_data["description"],
-                        responsibilities= image_data["responsibilities"],
-                        requirments= image_data["requirements"],
+                        company_email= image_data.get("company_email"),
+                        company_contact= image_data.get("company_contact"),
+                        description= image_data.get("description"),
+                        responsibilities= image_data.get("responsibilities"),
+                        requirments= image_data.get("requirments"),
                         location= job.get("location", ""),
-                        salary= image_data["salary"],
+                        salary= image_data.get("salary"),
                         starting_date= job.get("starting_date", ""),
                         closing_date= job.get("closing_date", ""),
                     )
@@ -331,13 +333,14 @@ class AgentWorkflow:
         try:
             
             resume_data = state.get("current_resume")
+            
 
             if not resume_data:
                 
-                user = state.get("user")
+                user_id = state.get("user_id")
                 resume_path = state.get("current_resume_id")
 
-                if not user:
+                if not user_id:
                     
                     raise ValueError(
                         "User is missing from workflow state"
@@ -349,8 +352,9 @@ class AgentWorkflow:
                         "Resume path is missing from workflow state"
                     )
 
+                user_data = self.user_service.get_user_by_id(user_id)
                 resume_data = self.resume_handler.load_from_storage(
-                    user.id,
+                    user_data.id,
                     resume_path
                 )
 
@@ -396,6 +400,7 @@ class AgentWorkflow:
             jobs = state.get("complete_job_details", [])
 
             job_relevancy = []
+            job_rejected = []
             is_relevant = False
 
             profile_data = profile.model_dump()
@@ -417,6 +422,7 @@ class AgentWorkflow:
                 
                 Job title: {job.get("title", "")}
                 company_name: {job.get("company_name", "")}
+                company_email: {job.get("company_email", "")}
                 description: {job.get("description", "")}
                 responsibilities: {job.get("responsibilities", "")}
                 requirments: {job.get("requirments", "")}
@@ -432,20 +438,35 @@ class AgentWorkflow:
 
                 logger.info("workflow - Relevancy response is fetched")
 
-                relevance_score = relevancy_response.relevancy_score
+                relevance_score = relevancy_response.relevance_score
 
                 is_relevant = relevance_score >= JOB_RELEVANCY_THRESHOLD
                 
                 if not is_relevant:
+                    per_job_relevancy_summary = {
+                        "job_title": job.get("title", ""),
+                        "company_name": job.get("company_name", ""),
+                        "company_email": job.get("company_email", ""),
+                        "relevance_score": relevance_score,
+                        "is_relevant": is_relevant,
+                        "relevancy_details": relevancy_response,
+                        "job": job_object.model_dump()
+                    }
+                    
+                    job_rejected.append(per_job_relevancy_summary)
+                    logger.info(
+                        f"workflow - rejected results of {job.get('title', '')} is added"
+                    )
                     continue
 
                 per_job_relevancy_summary = {
                     "job_title": job.get("title", ""),
                     "company_name": job.get("company_name", ""),
+                    "company_email": job.get("company_email", ""),
                     "relevance_score": relevance_score,
                     "is_relevant": is_relevant,
                     "relevancy_details": relevancy_response,
-                    "job": job_object
+                    "job": job_object.model_dump()
                 }
 
                 job_relevancy.append(per_job_relevancy_summary)
@@ -455,7 +476,11 @@ class AgentWorkflow:
 
             logger.info("workflow - Final job relevancy results have fetched")
 
-            return {"relevant_jobs_list": job_relevancy}
+            return {
+                
+                "relevant_jobs_list": job_relevancy,
+                "rejectedjobs_lits": job_rejected
+            }
 
         except Exception:
             logger.exception("Unexpected error in relevancy node")
@@ -464,39 +489,37 @@ class AgentWorkflow:
 
     def job_selection_node(self, state: WorkflowState):
 
-        try:
+        
             
-            relevant_jobs_list = state.get("relevant_jobs_list", [])
-            current_job_index = state.get("current_job_index", 0)
-            
-            if current_job_index >= len(relevant_jobs_list):
-                logger.info(
-                    "No more relevant jobs available"
-                )
+        relevant_jobs_list = state.get("relevant_jobs_list", [])
+        current_job_index = state.get("current_job_index", 0)
+        
+        if current_job_index >= len(relevant_jobs_list):
+            logger.info(
+                "No more relevant jobs available"
+            )
 
-                return {
-                    "current_job": None
-                }
-                
-            current_job = relevant_jobs_list[current_job_index]
-            
-            decision = interrupt({
-                
-                "type": "job_review",
-                "job": current_job,
-                "message": "review the job for approve or reject"
-                
-            })
-            
             return {
-                
-                "current_job": current_job,
-                "user_decision": decision
+                "current_job": None
             }
+            
+        current_job = relevant_jobs_list[current_job_index]
+        
+        decision = interrupt({
+            
+            "type": "job_review",
+            "job": current_job,
+            "message": "review the job for approve or reject"
+            
+        })
+        
+        return {
+            
+            "current_job": current_job,
+            "user_decision": decision
+        }
 
-        except Exception:
-            logger.exception("Unexpected error in ats analyze node")
-            raise
+        
 
         
     def job_selection_route(self, state: WorkflowState):
@@ -582,14 +605,14 @@ class AgentWorkflow:
             if not current_job:
                 raise ValueError("Current job is missing")
             
-            job_details = current_job['job'].model_dump()
+            job_details = current_job['job']
             
             candidate_details = candidate_profile.model_dump()
             
             if not job_details:
                 raise ValueError("Job details are missing from current job")
             
-            company_email = job_details.get("company_email")
+            company_email = job_details
             
             if not company_email:
                 raise ValueError("Company email is missing from job details")
@@ -646,9 +669,17 @@ class AgentWorkflow:
             #     "cover_letter": "Edited cover letter..."
             #}
             
+            email_details = {
+                            
+                "company_email": decision["company_email"],
+                "subject": decision['subject'],
+                "cover_letter": decision['cover_letter']
+            }
+            
             return {
 
                 "email_review_response": decision,
+                "email_details": email_details
                 
             }
             
@@ -837,18 +868,87 @@ class AgentWorkflow:
             
             response = await self.workflow.ainvoke(
                 input=initial_state,
-                config=self.config
+                config=self.config,
+                durability="sync"
             )
             logger.info(
             "Workflow execution completed or interrupted"
             )
             return response
+        
         except Exception:
             logger.exception(
                 "Unexpected error in  executing workflow"
             )
             raise
         
+    async def get_response_from_existing_workflow(self):
+            
+            try:
+                
+                if self.workflow is None:
+                    raise RuntimeError(
+                        "Workflow is not initialized"
+                    )
+                
+                if self.topjob_client_server_Source is None:
+                    raise RuntimeError(
+                        "Workflow dependencies are not initialized"
+                    )
+                    
+                saved_state = await self.get_latest_save_state()
+                logger.info(f"Saved state data: {saved_state}")
+                
+                response = await self.workflow.ainvoke(
+                    input=None,
+                    config=self.config
+                )
+                
+                logger.info(
+                "Workflow execution completed or interrupted"
+                )
+            
+                return response
+            
+            except Exception:
+                logger.exception(
+                    "Unexpected error in  executing workflow"
+                )
+                raise
+            
+            
+    async def get_latest_save_state(self):
+
+        try:
+            config = self.config
+
+            checkpoint = await self.checkpointer.aget_tuple(config)
+
+            if checkpoint is None:
+                logger.warning(
+                    "No PostgreSQL checkpoint found for thread: %s",
+                    self.thread_id
+                )
+
+                return None
+
+            snapshot = await self.workflow.aget_state(config)
+
+            logger.info(
+                "Checkpoint found: %s",
+                checkpoint.config
+            )
+
+            logger.info("Saved state: %s", snapshot.values)
+            logger.info("Next nodes: %s", snapshot.next)
+            logger.info("Tasks: %s", snapshot.tasks)
+
+            return snapshot
+
+        except Exception:
+            logger.exception("Failed to retrieve workflow checkpoint")
+            raise
+            
         
     async def resume(
         self,
@@ -864,6 +964,7 @@ class AgentWorkflow:
                 )
                 
             response = await self.workflow.ainvoke(
+                
                 Command(
                     resume=resume_data
                 ),

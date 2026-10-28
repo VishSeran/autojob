@@ -12,41 +12,41 @@ class TopJobClientServerSource:
         
         self.mcp_client = mcp_client
         
-        
+
+
     @staticmethod
     def _extract_response(response):
-        
+
         if response.is_error:
             raise RuntimeError(
                 f"MCP tool returned an error: {response.content}"
             )
 
-    # Preferred: structured MCP response
         if response.structured_content is not None:
             return response.structured_content
+
+        if response.content:
+
+            for item in response.content:
+
+                if hasattr(item, "text"):
+
+                    try:
+                        return json.loads(item.text)
+
+                    except json.JSONDecodeError:
+                        return item.text
+
+        raise RuntimeError(
+            "MCP tool returned no usable content"
+        )
         
-        if not response.is_error:
-            # for item in response.content:
-            #     if hasattr(item, "text"):
-            #         try:
-                        
-            #             return json.loads(item.text)
-                    
-            #         except json.JSONDecodeError:
-            #             return item.text
-            
-            return response.content
-                    
-        else:
-            raise RuntimeError(f"MCP tool returned an error: {response.content}")
-        
-        return response
         
     async def search_jobs(
         self,
         keyword: str,
         location: str,
-        field: TopJobCategory,
+        category: TopJobCategory | None,
         limit: str
     ):
         
@@ -57,13 +57,28 @@ class TopJobClientServerSource:
                 "search_jobs",
                 {
                     "keyword": keyword,
-                    "category": field,
+                    "category": (
+                        
+                        category.model_dump()
+                        if category is not None
+                        else None),
+                    
                     "location": location,
                     "limit": limit
                 }
             )
-            logger.info("search jobs result id fetched")
-            return self._extract_response(response)
+            
+            raw_jobs = self._extract_response(response)
+            logger.info(f"search jobs raw results: {raw_jobs}")
+            
+            jobs = [
+                TopJobSummary.model_validate(job)
+                for job in raw_jobs
+            ]
+            
+            
+            logger.info(f"search jobs result id fetched: {jobs}")
+            return jobs
             
         except Exception:
             logger.exception("Unexpected error in search jobs")
@@ -80,11 +95,14 @@ class TopJobClientServerSource:
                 "get_job_details",
                 
                 {
-                    "jobs": jobs
+                    "jobs": [
+                        job.model_dump()
+                        for job in jobs
+                    ]
                 }
             )
             
-            logger.info("get jobs details results fetched")
+            logger.info(f"get jobs details results fetched:{response}")
             return self._extract_response(response)
             
         

@@ -24,7 +24,7 @@ class WorkflowService:
         logger.info("Repositories are initialized")
         
         
-    async def create_workflow(self, user_id:uuid.UUID):
+    async def create_workflow(self, user_id:uuid.UUID, initial_state:dict):
         
         try:
             
@@ -39,6 +39,7 @@ class WorkflowService:
             )
             
             new_workflow = self.workflow_repository.create(workflow_run)
+            self.workflow = new_workflow
             
             logger.info("Workflow is added to database successfully")
             
@@ -54,8 +55,12 @@ class WorkflowService:
             
             self.db.commit()
             
+            response = await workflow.get_response(
+                initial_state
+            )
+            
             logger.info("Workflow is initialized")
-            return workflow, new_workflow
+            return response, new_workflow
             
         except Exception:
             logger.exception("Unexpected error in create workflow")
@@ -160,12 +165,9 @@ class WorkflowService:
         
         
         
-    async def continue_workflow(self, user_id:uuid.UUID, workflow_id:uuid.UUID, initial_state:dict):
+    async def continue_workflow(self, user_id:uuid.UUID, workflow_id:uuid.UUID):
         
         try:
-            
-            if not initial_state:
-                raise ValueError("Initial state is missing")
 
             current_workflow = self.get_workflow_by_id(
                 user_id,
@@ -188,14 +190,48 @@ class WorkflowService:
             await agent_service.initialize()
             agent_service.build_workflow()
             
-            response = await agent_service.get_response(
-                initial_state
-            )
-            
+            response = await agent_service.get_response_from_existing_workflow()
             return response
             
         except Exception:
             logger.exception("Unexpected error in continue workflow")
-            raise        
+            raise    
+        
+        
+    async def resume_workflow(self, user_id:uuid.UUID, workflow_id: uuid.UUID, resume_data:dict):
+        
+        try:
+            
+            current_workflow = self.get_workflow_by_id(
+                user_id,
+                workflow_id
+            )
+            
+            if current_workflow is None:
+                raise ValueError("Workflow not found")
+            
+            thread_id = current_workflow.thread_id
+            logger.info("Thread ID fetched")
+            
+            agent_service = AgentWorkflow(
+                self.db,
+                user_id,
+                thread_id,
+                self.checkpointer
+            )
+            
+            await agent_service.initialize()
+            agent_service.build_workflow()
+            
+            response = await agent_service.resume(
+                resume_data
+            )
+            
+            logger.info("response is fetched")
+            return response
+
+        except Exception:
+            logger.exception("Unexpected error in resume workflow")
+            raise    
         
     

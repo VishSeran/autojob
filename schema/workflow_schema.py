@@ -1,10 +1,36 @@
 import uuid
+from typing import Literal
 
 from pydantic import BaseModel
 
 
+class WorkflowStartRequset(BaseModel):
+    
+    query: str
+    resume_path: str
 class WorkflowResumeRequset(BaseModel):
     
     workflow_id: uuid.UUID
-    query: str
-    resume_path: str
+    # query: str
+    # resume_path: str
+    
+class JobSelectionInterrupt(BaseModel):
+    
+    workflow_id: uuid.UUID
+    decision: Literal[
+    "approve",
+    "reject"
+    ]
+    
+class SendMailInterrupt(BaseModel):
+    
+    workflow_id: uuid.UUID
+    decision: Literal[
+        "send",
+        "cancel"
+        ]
+    company_email: str
+    subject: str
+    cover_letter: str
+    
+    

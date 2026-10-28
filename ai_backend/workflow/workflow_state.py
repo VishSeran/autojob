@@ -1,5 +1,6 @@
 
 from typing import Literal, TypedDict
+import uuid
 
 from langchain_core.documents import Document
 
@@ -12,13 +13,13 @@ from schema.topjob_summary_schema import TopJobSummary
 class WorkflowState(TypedDict):
     
     query: str
-    user: User
+    user_id: uuid.UUID
     
-    source: str
+    source: str = ""
     keyword: str
-    location: str
-    job_field: str
-    no_of_jobs: int
+    location: str | None
+    job_field: str | None
+    no_of_jobs: int 
     
     current_resume_id: str
     current_resume: list[Document]
@@ -30,7 +31,8 @@ class WorkflowState(TypedDict):
     topjob_complete_job_details: dict
     
     complete_job_details: list[Job]
- 
+    
+    rejectedjobs_lits: list[dict]
     relevant_jobs_list: list[dict]
     current_job_index: int 
     current_job: dict | None
@@ -38,7 +40,7 @@ class WorkflowState(TypedDict):
     user_decision: dict
     
     approved_jobs: list[Job]
-    rejected_jobs: list[Job]
+    rejected_jobs: list[dict]
     
     updated_resume: ResumeSchema
     email_details: dict 

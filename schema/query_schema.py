@@ -14,7 +14,7 @@ class QuerySchema(BaseModel):
         description="Preferred job location, such as a city, district, or country."
     )
 
-    field: TopJobCategory | None = Field(
+    category: TopJobCategory | None = Field(
         default=None,
         description="Industry or job category, such as IT, Finance, or Engineering."
     )
