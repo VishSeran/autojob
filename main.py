@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 import dotenv
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -37,6 +38,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
 dotenv.load_dotenv()
 session_secret = os.getenv("Session_Secret")
 
@@ -44,7 +50,15 @@ session_secret = os.getenv("Session_Secret")
 #need session to temporary remember OAuth state
 app.add_middleware(
     SessionMiddleware,
-    secret_key=session_secret
+    secret_key=session_secret,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(

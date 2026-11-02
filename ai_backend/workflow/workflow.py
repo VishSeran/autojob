@@ -240,7 +240,12 @@ class AgentWorkflow:
                             return job_title, JobDetails().model_dump()
 
                         images = [
-                            {"type": "image_url", "image_url": {"url": img_url}}
+                            {
+                                "type": "image_url", 
+                                "image_url": {
+                                    "url": img_url
+                                    }
+                            }
                             for img_url in image_urls
                         ]
                         
@@ -627,9 +632,9 @@ class AgentWorkflow:
  
             email_details = {
                 
-                "company_email": company_email,
-                "subject": results['subject'],
-                "cover_letter": results['cover_letter']
+                "company_email": company_email if company_email else "no mail",
+                "subject": results['subject'] if results['subject'] else "no subject",
+                "cover_letter": results['cover_letter'] if results['cover_letter'] else "no cover letter"
             }
             
             return {

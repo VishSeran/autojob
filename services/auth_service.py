@@ -127,11 +127,12 @@ class AuthService:
             token_hash = hash_refresh_token(token)
             logger.info("Got the token hashed")
             session = self.session_repository.get_by_hash_refresh_token(token_hash)
-            logger.info(f"Got the session: {session.id}")
             
             if session is None:
                 logger.warning("User session not found")
                 return
+            
+            logger.info(f"Got the session: {session.id}")
             
             self.session_repository.revoke_session(session)
             logger.info(f"User session of {session.id} is revoked")
@@ -192,6 +193,7 @@ class AuthService:
             return new_access_token
 
         except ValueError:
-            raise logger.exception("Unexpected value error")
+            logger.exception("Refresh token validation failed")
+            raise
 
         

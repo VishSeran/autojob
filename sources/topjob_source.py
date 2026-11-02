@@ -305,7 +305,7 @@ class TopJobSource(JobSource):
             for job in jobs:
                 job_obj = job.model_dump()
                 
-                image_url = "https://www.topjobs.lk/employer/JobAdvertismentServlet?rid=7&ac=DEFZZZ&jc=0001549007&ec=DEFZZZ&pg=applicant/vacancybyfunctionalarea.jsp"        
+                image_url = "https://www.topjobs.lk/employer/JobAdvertismentServlet"        
 
                 rid_param: int = job_obj.get("rid", 0)
                 ac_param: str = job_obj.get("ac", "")
@@ -316,10 +316,12 @@ class TopJobSource(JobSource):
                     continue
                 
                 params_x = {
+                    
                     "rid": rid_param,
                     "ac": ac_param,
                     "jc": jc_param,
-                    "ec": ec_param
+                    "ec": ec_param,
+                    "pg": "applicant/vacancybyfunctionalarea.jsp"
                 }
                 
                 async with AsyncClient(
