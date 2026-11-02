@@ -86,26 +86,22 @@ class ImageDataExtractorAgent:
             if not images:
                 logger.warning("Job urls are empty")
                 
-            message = [
-                SystemMessage(
-                    content=self.system_prompt
-                ),
-                HumanMessage(
-                    content= [
-                        {
-                            "type": "text",
-                            "text": (
-                                "Extract the job advertisement "
-                                "details from these images."
-                            )
-                        },
-                        *images
-                    ]
-                )
-            ]
+            message = HumanMessage(
+                content=[
+                    {
+                        "type": "text",
+                        "text": (
+                            "Describe exactly what you can see "
+                            "in this image. Transcribe all readable "
+                            "text. Do not invent information."
+                        ),
+                    },
+                    *images
+                ]
+            )
             
             response = await self.vision_llm.ainvoke(
-                message
+                [message]
             )
             logger.info(f"Vision response is fetched: \n{response}")
             

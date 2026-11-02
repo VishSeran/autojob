@@ -24,7 +24,8 @@ def get_current_user(request:Request, db:Session = Depends(get_db)):
                 status_code=401,
                 detail="Not authenticated"
             )
-            
+        logger.info("access token fetched")
+        
         try:
         
             payload = validate_access_token(access_token)
@@ -36,6 +37,7 @@ def get_current_user(request:Request, db:Session = Depends(get_db)):
             )
             
         user_id_string = payload.get("sub")
+        logger.info("user id fetched")
         
         if user_id_string is None:
             raise HTTPException(

@@ -67,9 +67,10 @@ def login(data:LogInRequest, response:Response, db:Session = Depends(get_db)):
                 key="access_token",
                 value=access_token,
                 httponly=True,
-                secure=False,
-                samesite="lax",
-                max_age=30*60
+                secure=True,
+                samesite="none",
+                max_age=30*60,
+                path="/"
             )
             
             logger.info("Access token has set to cookies")
@@ -78,9 +79,10 @@ def login(data:LogInRequest, response:Response, db:Session = Depends(get_db)):
                 key="refresh_token",
                 value=refresh_token,
                 httponly=True,
-                secure=False,
-                samesite="lax",
-                max_age= 30*24*60*60
+                secure=True,
+                samesite="none",
+                max_age= 30*24*60*60,
+                path="/"
             )
             
             logger.info("Refresh token has set to cookies")
@@ -136,10 +138,10 @@ def logout(request:Request, response: Response, db:Session = Depends(get_db)):
         raise HTTPException(
             status_code=401,
             detail=str(error)
-        )
+        )   
         
         
-@auth_router.get("/refresh")
+@auth_router.post("/refresh")
 def refresh(request:Request, response:Response, db:Session = Depends(get_db)):
     
         auth_service = AuthService(db)
@@ -163,12 +165,13 @@ def refresh(request:Request, response:Response, db:Session = Depends(get_db)):
             logger.info("New access token has created")
             
             response.set_cookie(
-                "access_token",
-                new_access_token,
+                key="access_token",
+                value=new_access_token,
                 httponly=True,
-                secure=False,
-                samesite="lax",
-                max_age= 30 * 60
+                secure=True,
+                samesite="none",
+                max_age= 30 * 60,
+                path="/"
             )
             logger.info('Cookies has updated')
             

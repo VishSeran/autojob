@@ -240,7 +240,12 @@ class AgentWorkflow:
                             return job_title, JobDetails().model_dump()
 
                         images = [
-                            {"type": "image_url", "image_url": {"url": img_url}}
+                            {
+                                "type": "image_url", 
+                                "image_url": {
+                                    "url": img_url
+                                    }
+                            }
                             for img_url in image_urls
                         ]
                         
