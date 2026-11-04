@@ -95,7 +95,7 @@ def make_default(resume_id:uuid.UUID ,
     
     resume_service = ResumeService(db)
     
-    selected_resume = resume_service.select_default(
+    message, selected_resume = resume_service.select_default(
         user_id,
         resume_id
     )
@@ -104,8 +104,8 @@ def make_default(resume_id:uuid.UUID ,
     
     return {
         
-        "message": "Resume set to default successfully",
-        "resume_id": str(selected_resume.id)
+        "message": message,
+        "resume": selected_resume,
     }
     
 @resume_router.get("/all")

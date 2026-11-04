@@ -123,12 +123,15 @@ class ResumeService:
             if selected_resume.user_id != user_id:
                 raise ValueError("Resume does not belong to user")
             
+            if selected_resume.is_default:
+                return "Resume is already set to default", None
+            
             self.resume_repository.make_default(
                 selected_resume
             )
             
             logger.info(f"{selected_resume.id} is set to default successfully")
-            return selected_resume
+            return "Resume is set to default successfully", selected_resume
         
         except Exception:
             logger.exception("Unexpected error in select default")
