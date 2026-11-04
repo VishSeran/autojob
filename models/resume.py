@@ -30,6 +30,12 @@ class Resume(Base):
         nullable=False
     )
     
+    filename: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        
+    )
+    
     storage_path: Mapped[str] = mapped_column (
         
         String(255),

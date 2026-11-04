@@ -17,14 +17,14 @@ class ResumeStorageService:
         logger.info("Supabase client has connected")
         
         
-    def upload(self, user_id:uuid.UUID, file_content:bytes):
+    def upload(self, user_id:uuid.UUID, file_content:bytes, filename:str):
         
         try:
             
             if user_id is None:
                 raise ValueError("User ID is missing")
             
-            storage_path = f"{user_id}/{uuid.uuid4()}.pdf"
+            storage_path = f"{user_id}/{uuid.uuid4()}/{filename}.pdf"
             
             self.client.storage.from_(
                 self.BUCKET_NAME

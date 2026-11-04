@@ -25,7 +25,7 @@ class ResumeService:
         logger.info("Resume service has initialized")
         
         
-    def upload_resume(self,content:bytes, user_id:uuid.UUID) -> Resume:
+    def upload_resume(self, content:bytes, filename:str,  user_id:uuid.UUID) -> Resume:
         
         try:
             
@@ -39,7 +39,8 @@ class ResumeService:
             
             storage_path = self.storage_service.upload(
                 user_id,
-                content
+                content,
+                filename
             )
             
             if not storage_path:
@@ -48,7 +49,8 @@ class ResumeService:
             new_resume = Resume(
                 
                 user_id = user_id,
-                storage_path = storage_path
+                storage_path = storage_path,
+                filename = filename
             )
 
             self.resume_repository.add_resume(new_resume)

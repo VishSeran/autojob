@@ -32,6 +32,16 @@ async def upload_resume(file:UploadFile, db:Session = Depends(get_db),
         
     
     content = await file.read(MAX_FILE_SIZE + 1)
+    file_name = file.filename
+    
+    
+    if not file_name:
+        raise HTTPException(
+                    status_code=413,
+                    detail="Resume must have a filename"
+                )
+                
+    file_name = file_name.removesuffix(".pdf")
     
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(
@@ -57,6 +67,7 @@ async def upload_resume(file:UploadFile, db:Session = Depends(get_db),
         
         new_resume = resume_service.upload_resume(
             content,
+            file_name,
             user_id
         )
         
