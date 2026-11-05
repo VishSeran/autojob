@@ -136,6 +136,13 @@ def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_curre
     resume_service = ResumeService(db)
     logger.info('Resume service initialized')
     
+    resume = resume_service.get_resume(
+        user_id,
+        resume_id
+    )
+    
+    filename = resume.filename
+    
     file_content = resume_service.download_resume(
         user_id,
         resume_id
@@ -147,7 +154,7 @@ def download_resume(resume_id: uuid.UUID, current_user: User = Depends(get_curre
         content=file_content,
         media_type="application/pdf",
         headers={
-            "Content-Disposition": 'attachment; filename="resume.pdf"'
+            "Content-Disposition": f'attachment; filename="{filename}"'
         }
     )
     
