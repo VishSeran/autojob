@@ -1,7 +1,7 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, File
 from sqlalchemy.orm import Session
 
 from configs.logger import get_logger
@@ -21,7 +21,7 @@ resume_router = APIRouter(
 
 
 @resume_router.post("/upload")
-async def upload_resume(file:UploadFile, db:Session = Depends(get_db), 
+async def upload_resume(file:UploadFile = File(...), db:Session = Depends(get_db), 
                   current_user:User = Depends(get_current_user)):
     
     if file.content_type != "application/pdf":
@@ -29,7 +29,7 @@ async def upload_resume(file:UploadFile, db:Session = Depends(get_db),
             status_code=415,
             detail="Only PDF files are allowed"
         )
-        
+
     
     content = await file.read(MAX_FILE_SIZE + 1)
     file_name = file.filename
