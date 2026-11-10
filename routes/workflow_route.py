@@ -38,6 +38,13 @@ async def get_all_workflows(
         checkpointer
     )
     
+    workflows = await workflow_service.get_workflows(user_id)
+    logger.info("Workflows listed successfully")
+    
+    return {
+        "messsage": "Workflows listed successfully",
+        "workflows": workflows
+    }
 
 @workflow_router.post("/create")
 async def create_workflow(
