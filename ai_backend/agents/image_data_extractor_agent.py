@@ -1,7 +1,7 @@
-import httpx
 import base64
+
+import httpx
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.prompts import ChatPromptTemplate
 
 from ai_backend.llm_handler.vision_llm import VisionLLmHandler
 from configs.logger import get_logger
