@@ -85,7 +85,37 @@ class ImageDataExtractorAgent:
         
         try:
             
+            async with httpx.AsyncClient(
+                timeout=10.0,
+                follow_redirects=True
+            ) as client:
+                
+                response = await client.get(
+                    img_url,
+                    headers= {
+                        "User-Agent": "Mozilla/5.0"
+                    }
+                ) 
             
+                if response.status_code != 200:
+                    logger.Warning(
+                        f"Invalid image URL: {img_url} "
+                        f"(status={response.status_code})"     
+                    )
+                    return False
+                
+                content_type = response.headers.get(
+                    "content-type", ""
+                )
+                
+                if not content_type.startswith("image/"):
+                    logger.warning(
+                        f"URL does not return an image: {img_url} "
+                        f"(content-type={content_type})"
+                    )
+                    return False
+                
+                
             
         except Exception:
             logger.exception("Unexpected error in validate image url")
