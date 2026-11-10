@@ -135,6 +135,24 @@ class ImageDataExtractorAgent:
             if not images:
                 logger.warning("Job urls are empty")
                 
+            validate_images = []
+            
+            for image in images:
+                
+                if not isinstance(image, dict):
+                    logger.warning(
+                        f"Invalid image object: {image}"
+                    )
+                    continue
+                
+                img_url = image['img_url']['url']
+                
+                if not img_url:
+                    logger.warning(
+                        "Image object does not contain image_url"
+                    )
+                    continue
+                
             message = HumanMessage(
                 content=[
                     {
