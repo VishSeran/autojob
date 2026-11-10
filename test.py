@@ -3,7 +3,6 @@ import logging
 
 from ai_backend.agents.image_data_extractor_agent import ImageDataExtractorAgent
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
