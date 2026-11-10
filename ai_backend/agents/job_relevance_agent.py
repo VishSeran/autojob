@@ -159,6 +159,7 @@ class JobRelevanceAgent:
             })
             
             logger.info("Response has fetched")
+            logger.info(f"Response:\n{response}")
             return response
             
         except ValueError:

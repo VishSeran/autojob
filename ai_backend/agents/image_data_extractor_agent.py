@@ -186,7 +186,7 @@ class ImageDataExtractorAgent:
                         content
                     ).decode("utf-8")
                 
-                
+                    
                 validate_images.append({
                     "type": "image_url",
                     "image_url": {
@@ -194,22 +194,27 @@ class ImageDataExtractorAgent:
                     }
                 })
                 
-            message = HumanMessage(
-                content=[
-                    {
-                        "type": "text",
-                        "text": (
-                            "Describe exactly what you can see "
-                            "in this image. Transcribe all readable "
-                            "text. Do not invent information."
-                        ),
-                    },
-                    *validate_images
-                ]
-            )
+            message = [
+                SystemMessage(
+                    content=self.system_prompt
+                ),
+                HumanMessage(
+                     content=[
+                        {
+                            "type": "text",
+                            "text": (
+                                "Analyze the provided job advertisement image(s). "
+                                "Read all visible text carefully and extract the "
+                                "job information according to the system instructions."
+                            ),
+                        },
+                        *validate_images
+                    ]
+                )
+            ]
             
             response = await self.vision_llm.ainvoke(
-                [message]
+                message
             )
             logger.info(f"Vision response is fetched: \n{response}")
             

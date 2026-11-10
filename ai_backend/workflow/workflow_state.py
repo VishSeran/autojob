@@ -15,7 +15,7 @@ class WorkflowState(TypedDict):
     query: str
     user_id: uuid.UUID
     
-    source: str = ""
+    source: str
     keyword: str
     location: str | None
     job_field: str | None

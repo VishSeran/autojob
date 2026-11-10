@@ -1,15 +1,15 @@
 
 
 
-                    job_title: Assistant Accountant /Accountant - Ghana  (1)
-                    company_name: Jobfactory
-                    image_number: 1569616
+                    job_title: Assistant Accountant
+                    company_name: ACE Healthcare (Pvt) Ltd
+                    image_number: 1569689
                     starting_date: Tue Nov 10 2026
-                    closing_date: Tue Nov 17 2026
-                    location: Not Mentioned
-                    rid: 2
-                    ac: 0000000375
-                    jc: 0001569616
-                    ec: 0000000492
-                    token: +jqdGHxMYlfFmLLuKBsR89dE
+                    closing_date: Tue Nov 24 2026
+                    location: Horana
+                    rid: 1
+                    ac: DEFZZZ
+                    jc: 0001569689
+                    ec: DEFZZZ
+                    token: Nr9cmX-k86mqAdUAlu9lj4ks
                 
