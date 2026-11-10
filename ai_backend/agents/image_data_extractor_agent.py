@@ -115,7 +115,13 @@ class ImageDataExtractorAgent:
                     )
                     return False
                 
-                
+            return True
+        
+        except httpx.RequestError as e:
+            logger.warning(
+                f"Failed to download image: {img_url} - {e}"
+            )
+            return False
             
         except Exception:
             logger.exception("Unexpected error in validate image url")
