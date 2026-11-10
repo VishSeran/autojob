@@ -1,3 +1,5 @@
+import httpx
+
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -79,12 +81,88 @@ class ImageDataExtractorAgent:
             raise
         
         
+    async def validate_image_url(self, img_url:str) -> bool:
+        
+        try:
+            
+            async with httpx.AsyncClient(
+                timeout=10.0,
+                follow_redirects=True
+            ) as client:
+                
+                response = await client.get(
+                    img_url,
+                    headers= {
+                        "User-Agent": "Mozilla/5.0"
+                    }
+                ) 
+            
+                if response.status_code != 200:
+                    logger.Warning(
+                        f"Invalid image URL: {img_url} "
+                        f"(status={response.status_code})"     
+                    )
+                    return False
+                
+                content_type = response.headers.get(
+                    "content-type", ""
+                )
+                
+                if not content_type.startswith("image/"):
+                    logger.warning(
+                        f"URL does not return an image: {img_url} "
+                        f"(content-type={content_type})"
+                    )
+                    return False
+                
+            return True
+        
+        except httpx.RequestError as e:
+            logger.warning(
+                f"Failed to download image: {img_url} - {e}"
+            )
+            return False
+            
+        except Exception:
+            logger.exception("Unexpected error in validate image url")
+            return False
+        
+        
     async def get_vision_response(self, images):
         
         try:
             
             if not images:
                 logger.warning("Job urls are empty")
+                
+            validate_images = []
+            
+            for image in images:
+                
+                if not isinstance(image, dict):
+                    logger.warning(
+                        f"Invalid image object: {image}"
+                    )
+                    continue
+                
+                img_url = image['img_url']['url']
+                
+                if not img_url:
+                    logger.warning(
+                        "Image object does not contain image_url"
+                    )
+                    continue
+                
+                is_valid = await self.validate_image_url(img_url)
+                
+                if not is_valid:
+                    logger.warning(
+                        f"Skipping invalid image: {img_url}"
+                    )
+                    continue
+                
+                
+                validate_images.append(image)
                 
             message = HumanMessage(
                 content=[
@@ -96,7 +174,7 @@ class ImageDataExtractorAgent:
                             "text. Do not invent information."
                         ),
                     },
-                    *images
+                    *validate_images
                 ]
             )
             
