@@ -1,27 +1,15 @@
 
 
 
-                    job_title: Software Engineer JAVA (1)
-                    company_name: DirectFN
-                    image_number: 1569511
+                    job_title: Assistant Accountant /Accountant - Ghana  (1)
+                    company_name: Jobfactory
+                    image_number: 1569616
                     starting_date: Tue Nov 10 2026
                     closing_date: Tue Nov 17 2026
                     location: Not Mentioned
-                    rid: 1
-                    ac: 0000000492
-                    jc: 0001569511
-                    ec: 0000000661
-                    token: dULDuzuA1L62R+3RjipM4JC3
-                
-                    job_title: Backend Software Engineer
-                    company_name: Hexacorp SL (Private) Limited
-                    image_number: 1565563
-                    starting_date: Tue Nov 10 2026
-                    closing_date: Thu Nov 12 2026
-                    location: Colombo 3
-                    rid: 15
-                    ac: DEFZZZ
-                    jc: 0001565563
-                    ec: DEFZZZ
-                    token: dULDuzuA1L62R+3RjipM4JC3
+                    rid: 2
+                    ac: 0000000375
+                    jc: 0001569616
+                    ec: 0000000492
+                    token: +jqdGHxMYlfFmLLuKBsR89dE
                 

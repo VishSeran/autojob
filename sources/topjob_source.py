@@ -357,7 +357,7 @@ class TopJobSource(JobSource):
                 
                 for img in images:
 
-                    img_base_url = "https://www.topjobs.lk"
+                    img_base_url = "https://www.topjobs.lk/"
                     img_url = img_base_url + img.get("src", "")
                     
                     job_imge_urls.append(img_url)

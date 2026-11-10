@@ -1,5 +1,5 @@
 import httpx
-
+import base64
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -104,9 +104,12 @@ class ImageDataExtractorAgent:
                     )
                     return False
                 
+                
                 content_type = response.headers.get(
                     "content-type", ""
                 )
+                
+                
                 
                 if not content_type.startswith("image/"):
                     logger.warning(
@@ -145,7 +148,7 @@ class ImageDataExtractorAgent:
                     )
                     continue
                 
-                img_url = image['img_url']['url']
+                img_url = image['image_url']['url']
                 
                 if not img_url:
                     logger.warning(
@@ -161,8 +164,35 @@ class ImageDataExtractorAgent:
                     )
                     continue
                 
+                async with httpx.AsyncClient(
+                    timeout=10.0,
+                    follow_redirects=True
+                ) as client:
+                    
+                    data = await client.get(
+                        img_url,
+                        headers= {
+                            "User-Agent": "Mozilla/5.0"
+                        }
+                    )
+                    
+                    content = data.content
+                    content_type = data.headers.get(
+                        "content-type",
+                        ""
+                    ).lower()
+                    
+                    encoded_img = base64.b64encode(
+                        content
+                    ).decode("utf-8")
                 
-                validate_images.append(image)
+                
+                validate_images.append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:{content_type};base64,{encoded_img}"
+                    }
+                })
                 
             message = HumanMessage(
                 content=[
