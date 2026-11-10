@@ -9,9 +9,9 @@ from dependencies.auth import get_current_user
 from models.users import User
 from schema.workflow_schema import (
     JobSelectionInterrupt,
+    SendMailInterrupt,
     WorkflowResumeRequset,
     WorkflowStartRequset,
-    SendMailInterrupt
 )
 from services.workflow_service import WorkflowService
 

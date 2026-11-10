@@ -1,3 +1,5 @@
+import httpx
+
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -77,6 +79,17 @@ class ImageDataExtractorAgent:
         except Exception:
             logger.exception("Unexpected error in init")
             raise
+        
+        
+    async def validate_image_url(self, img_url:str) -> bool:
+        
+        try:
+            
+            
+            
+        except Exception:
+            logger.exception("Unexpected error in validate image url")
+            return False
         
         
     async def get_vision_response(self, images):
