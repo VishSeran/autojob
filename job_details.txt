@@ -1,27 +1,15 @@
 
 
 
-                    job_title: Software Engineer JAVA (1)
-                    company_name: DirectFN
-                    image_number: 1569511
+                    job_title: Assistant Accountant
+                    company_name: ACE Healthcare (Pvt) Ltd
+                    image_number: 1569689
                     starting_date: Tue Nov 10 2026
-                    closing_date: Tue Nov 17 2026
-                    location: Not Mentioned
+                    closing_date: Tue Nov 24 2026
+                    location: Horana
                     rid: 1
-                    ac: 0000000492
-                    jc: 0001569511
-                    ec: 0000000661
-                    token: dULDuzuA1L62R+3RjipM4JC3
-                
-                    job_title: Backend Software Engineer
-                    company_name: Hexacorp SL (Private) Limited
-                    image_number: 1565563
-                    starting_date: Tue Nov 10 2026
-                    closing_date: Thu Nov 12 2026
-                    location: Colombo 3
-                    rid: 15
                     ac: DEFZZZ
-                    jc: 0001565563
+                    jc: 0001569689
                     ec: DEFZZZ
-                    token: dULDuzuA1L62R+3RjipM4JC3
+                    token: Nr9cmX-k86mqAdUAlu9lj4ks
                 

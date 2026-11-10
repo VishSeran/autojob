@@ -1,7 +1,7 @@
-import httpx
+import base64
 
+import httpx
 from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.prompts import ChatPromptTemplate
 
 from ai_backend.llm_handler.vision_llm import VisionLLmHandler
 from configs.logger import get_logger
@@ -104,9 +104,12 @@ class ImageDataExtractorAgent:
                     )
                     return False
                 
+                
                 content_type = response.headers.get(
                     "content-type", ""
                 )
+                
+                
                 
                 if not content_type.startswith("image/"):
                     logger.warning(
@@ -145,7 +148,7 @@ class ImageDataExtractorAgent:
                     )
                     continue
                 
-                img_url = image['img_url']['url']
+                img_url = image['image_url']['url']
                 
                 if not img_url:
                     logger.warning(
@@ -161,25 +164,57 @@ class ImageDataExtractorAgent:
                     )
                     continue
                 
+                async with httpx.AsyncClient(
+                    timeout=10.0,
+                    follow_redirects=True
+                ) as client:
+                    
+                    data = await client.get(
+                        img_url,
+                        headers= {
+                            "User-Agent": "Mozilla/5.0"
+                        }
+                    )
+                    
+                    content = data.content
+                    content_type = data.headers.get(
+                        "content-type",
+                        ""
+                    ).lower()
+                    
+                    encoded_img = base64.b64encode(
+                        content
+                    ).decode("utf-8")
                 
-                validate_images.append(image)
+                    
+                validate_images.append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:{content_type};base64,{encoded_img}"
+                    }
+                })
                 
-            message = HumanMessage(
-                content=[
-                    {
-                        "type": "text",
-                        "text": (
-                            "Describe exactly what you can see "
-                            "in this image. Transcribe all readable "
-                            "text. Do not invent information."
-                        ),
-                    },
-                    *validate_images
-                ]
-            )
+            message = [
+                SystemMessage(
+                    content=self.system_prompt
+                ),
+                HumanMessage(
+                     content=[
+                        {
+                            "type": "text",
+                            "text": (
+                                "Analyze the provided job advertisement image(s). "
+                                "Read all visible text carefully and extract the "
+                                "job information according to the system instructions."
+                            ),
+                        },
+                        *validate_images
+                    ]
+                )
+            ]
             
             response = await self.vision_llm.ainvoke(
-                [message]
+                message
             )
             logger.info(f"Vision response is fetched: \n{response}")
             

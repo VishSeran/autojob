@@ -1,7 +1,6 @@
 import asyncio
 import uuid
 
-from langchain_core.documents import Document
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
 from sqlalchemy.orm import Session
@@ -223,61 +222,59 @@ class AgentWorkflow:
         try:
             source = state.get("source", "")
             results = {}
+   
+            job_images_urls = state.get("topjob_images_urls", {})
+            
+            # Maximum number of vision requests running simultaneously
+            semaphore = asyncio.Semaphore(3)
 
-            if source == "topjob":
-                
-                job_images_urls = state.get("topjob_images_urls", {})
-                
-                # Maximum number of vision requests running simultaneously
-                semaphore = asyncio.Semaphore(3)
+            async def process_job(job_title, image_urls):
 
-                async def process_job(job_title, image_urls):
-    
-                    try:
-                        logger.info(f"Extracting {job_title}...")
-                        
-                        if not image_urls:
-                            return job_title, JobDetails().model_dump()
-
-                        images = [
-                            {
-                                "type": "image_url", 
-                                "image_url": {
-                                    "url": img_url
-                                    }
-                            }
-                            for img_url in image_urls
-                        ]
-                        
-                        async with semaphore:
-                            response = await self.image_handler_agent.get_vision_response(
-                                images
-                            )
-                            
-                        logger.info("Image data response is fetched")
-
-                        return job_title, response.model_dump()
-
-                    except Exception:
-                        logger.exception(
-                            "Failed to extract image data for job: %s", job_title
-                        )
+                try:
+                    logger.info(f"Extracting {job_title}...")
+                    
+                    if not image_urls:
                         return job_title, JobDetails().model_dump()
 
-                # Create concurrent tasks
-                tasks = [
-                    asyncio.create_task(
-                        process_job(job_title, image_urls)
-                    )
-                    for job_title, image_urls in job_images_urls.items()
-                ]
-                
-                # Wait for all jobs
-                job_results = await asyncio.gather(*tasks)
-                
-                results = dict(job_results)
+                    images = [
+                        {
+                            "type": "image_url", 
+                            "image_url": {
+                                "url": img_url
+                                }
+                        }
+                        for img_url in image_urls
+                    ]
+                    
+                    async with semaphore:
+                        response = await self.image_handler_agent.get_vision_response(
+                            images
+                        )
+                        
+                    logger.info("Image data response is fetched")
 
-                logger.info("workflow - TopJob job images final details are fetched")
+                    return job_title, response.model_dump()
+
+                except Exception:
+                    logger.exception(
+                        "Failed to extract image data for job: %s", job_title
+                    )
+                    return job_title, JobDetails().model_dump()
+
+            # Create concurrent tasks
+            tasks = [
+                asyncio.create_task(
+                    process_job(job_title, image_urls)
+                )
+                for job_title, image_urls in job_images_urls.items()
+            ]
+            
+            # Wait for all jobs
+            job_results = await asyncio.gather(*tasks)
+            
+            results = dict(job_results)
+
+            logger.info("workflow - TopJob job images final details are fetched")
 
             return {"topjob_images_details": results}
 
@@ -324,6 +321,7 @@ class AgentWorkflow:
 
                     complete_job_details.append(job_summary)
                     logger.info(f"Topjob job is listed: {job_title}")
+                    logger.info(f"Topjob job is listed:\n {complete_job_details}")
 
                 logger.info("workflow - Topjob- job listing is finished")
 

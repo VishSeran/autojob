@@ -1,7 +1,7 @@
 from langchain_core.prompts import ChatPromptTemplate
 
-from configs.logger import get_logger
 from ai_backend.llm_handler.llms import LLMHandler
+from configs.logger import get_logger
 from schema.relavance_schema import RelevanceSchema
 
 logger = get_logger("job-relavance-agent")
@@ -159,6 +159,7 @@ class JobRelevanceAgent:
             })
             
             logger.info("Response has fetched")
+            logger.info(f"Response:\n{response}")
             return response
             
         except ValueError:

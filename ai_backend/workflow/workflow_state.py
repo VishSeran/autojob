@@ -1,10 +1,9 @@
 
-from typing import Literal, TypedDict
 import uuid
+from typing import TypedDict
 
 from langchain_core.documents import Document
 
-from models.users import User
 from schema.job_schema import Job
 from schema.resume_schema import ResumeSchema
 from schema.topjob_summary_schema import TopJobSummary
@@ -15,7 +14,7 @@ class WorkflowState(TypedDict):
     query: str
     user_id: uuid.UUID
     
-    source: str = ""
+    source: str
     keyword: str
     location: str | None
     job_field: str | None
