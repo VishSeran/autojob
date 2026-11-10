@@ -153,6 +153,17 @@ class ImageDataExtractorAgent:
                     )
                     continue
                 
+                is_valid = await self.validate_image_url(img_url)
+                
+                if not is_valid:
+                    logger.warning(
+                        f"Skipping invalid image: {img_url}"
+                    )
+                    continue
+                
+                
+                validate_images.append(image)
+                
             message = HumanMessage(
                 content=[
                     {
@@ -163,7 +174,7 @@ class ImageDataExtractorAgent:
                             "text. Do not invent information."
                         ),
                     },
-                    *images
+                    *validate_images
                 ]
             )
             
