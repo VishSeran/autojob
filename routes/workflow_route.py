@@ -23,6 +23,29 @@ workflow_router = APIRouter(
 )
 
 
+@workflow_router.get("/all")
+async def get_all_workflows(
+    request:Request,
+    current_user:User = Depends(get_current_user),
+    db:Session = Depends(get_db)
+):
+    
+    user_id = current_user.id
+    checkpointer = request.app.state.langgraph_checkpointer
+    
+    workflow_service = WorkflowService(
+        db,
+        checkpointer
+    )
+    
+    workflows = await workflow_service.get_workflows(user_id)
+    logger.info("Workflows listed successfully")
+    
+    return {
+        "messsage": "Workflows listed successfully",
+        "workflows": workflows
+    }
+
 @workflow_router.post("/create")
 async def create_workflow(
     data: WorkflowStartRequset,
