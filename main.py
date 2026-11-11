@@ -16,7 +16,6 @@ from routes.google_auth_routes import google_auth_router
 from routes.resume_route import resume_router
 from routes.user_route import user_router
 from routes.workflow_route import workflow_router
-from sources.topjob_source import TopJobSource
 
 
 @asynccontextmanager
@@ -85,15 +84,3 @@ app.include_router(
 )
 
 
-async def main():
-    
-    topjob = TopJobSource()
-    response = await topjob.search_job("software","IT-SWare/DB/QA/Web/Graphics/GIS")
-    await topjob.get_job_details(response)
-    
-   
-        
-    
-if __name__ == "__main__":
-    
-    asyncio.run(main())

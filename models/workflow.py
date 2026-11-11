@@ -52,6 +52,11 @@ class WorkflowRun(Base):
         nullable=False,
         index=True,
     )
+    
+    query: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False
+    )
 
     thread_id: Mapped[uuid.UUID] = mapped_column(
         

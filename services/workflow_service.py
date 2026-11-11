@@ -36,6 +36,7 @@ class WorkflowService:
             
             workflow_run = WorkflowRun(
                 user_id = user_id,
+                query = initial_state.get("query", "")
             )
             
             new_workflow = self.workflow_repository.create(workflow_run)
