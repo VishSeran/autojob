@@ -17,6 +17,13 @@ class IntentRouteAgent:
         logger.info("Intent agent has initialized")
         
     
+    async def get_intent_response(self, query, messages):
         
+        try:
+            
+            
+        except Exception:
+            logger.exception("Unexpected error in intent agent response")
+            raise
         
         
