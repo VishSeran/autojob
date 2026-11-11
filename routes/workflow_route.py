@@ -38,11 +38,11 @@ async def get_all_workflows(
         checkpointer
     )
     
-    workflows = await workflow_service.get_workflows(user_id)
+    workflows = workflow_service.get_workflows(user_id)
     logger.info("Workflows listed successfully")
     
     return {
-        "messsage": "Workflows listed successfully",
+        "message": "Workflows listed successfully",
         "workflows": workflows
     }
 
