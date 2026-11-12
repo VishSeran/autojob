@@ -2,6 +2,7 @@ import asyncio
 import uuid
 
 from langgraph.graph import END, START, StateGraph
+from langchain_core.messages import AIMessage
 from langgraph.types import Command, interrupt
 from sqlalchemy.orm import Session
 
@@ -157,13 +158,27 @@ class AgentWorkflow:
             if not query:
                 final_answer = "It seems like you have no questions my friend."
 
-                return {"final_response": final_answer}
+                return {
+                    "messages": [AIMessage(content=final_answer)],
+                    "final_response": final_answer
+                }
 
             response: QuerySchema = await self.query_handler_agent.get_response(query)
             logger.info("workflow - query response is fetched")
             logger.info(f"response= \nkeyword: {response.keyword}\nlocation:{response.location}\ncategory:{response.category}\nno of jobs: {response.number_of_jobs}")
 
             return {
+                
+                "messages": [
+                  AIMessage(
+                      content= f"""Based on your query, I am looking for {response.keyword} based on following conditions. 
+                      Location - {response.location if response.location else "Anywhere"}
+                      job_field: {response.category}
+                      no_of_jobs: {response.number_of_jobs}
+                      
+                    """
+                  )  
+                ],
                 "keyword": response.keyword,
                 "location": response.location,
                 "job_field": response.category,
