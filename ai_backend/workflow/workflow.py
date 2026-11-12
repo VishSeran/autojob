@@ -170,14 +170,12 @@ class AgentWorkflow:
             return {
                 
                 "messages": [
-                  AIMessage(
-                      content= f"""Based on your query, I am looking for {response.keyword} based on following conditions. 
-                      Location - {response.location if response.location else "Anywhere"}
-                      job_field: {response.category}
-                      no_of_jobs: {response.number_of_jobs}
-                      
-                    """
-                  )  
+                    AIMessage(
+                        content=(
+                            f"I'll look for {response.keyword} positions "
+                            f"in {response.location or 'any location'}."
+                        )
+                    )
                 ],
                 "keyword": response.keyword,
                 "location": response.location,
@@ -223,6 +221,11 @@ class AgentWorkflow:
             logger.info("workflow - Relavant jobs extracted")
 
             return {
+                "messages": [
+                  AIMessage(
+                      content=f"""I found {len(job_list)} jobs for your interesting position"""
+                  )  
+                ],
                 "source": "topjob",
                 "topjob_summary": job_list,
                 "topjob_images_urls": relavant_job_images,
@@ -235,7 +238,7 @@ class AgentWorkflow:
     async def image_data_handler_node(self, state: WorkflowState):
 
         try:
-            source = state.get("source", "")
+            
             results = {}
    
             job_images_urls = state.get("topjob_images_urls", {})
@@ -340,7 +343,8 @@ class AgentWorkflow:
 
                 logger.info("workflow - Topjob- job listing is finished")
 
-            return {"complete_job_details": complete_job_details}
+            return {
+                "complete_job_details": complete_job_details}
 
         except Exception:
             logger.exception("Unexpected error in get full job summary")
