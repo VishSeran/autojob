@@ -49,9 +49,11 @@ class GmailService:
             if not user:
                 raise ValueError("User not found")
             
+            reply_mail = user.email
+            
             email_data = GmailModel(                    
                 user_id= user_id,
-                reply_email= user.email,
+                reply_email= reply_mail,
                 company_mail= company_mail,
                 subject= subject,
                 email_body= email_body,
@@ -65,8 +67,8 @@ class GmailService:
             params:resend.Emails.SendParams = {
                 
                 "from": "Acme <onboarding@resend.dev>",
-                "to": [company_mail, reply_email],
-                "reply_to":reply_email,
+                "to": [company_mail, reply_mail],
+                "reply_to":reply_mail,
                 "subject":subject,
                 "text":email_body
                 
