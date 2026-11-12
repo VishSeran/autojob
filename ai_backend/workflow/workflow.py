@@ -115,7 +115,15 @@ class AgentWorkflow:
                                         })
             
             graph.add_edge("next_job_node", "job_selection_node")
-            graph.add_edge("cover_letter_node", "email_review_node")
+            
+            graph.add_conditional_edges(
+                "cover_letter_node",
+                self.cover_letter_route,
+                {
+                    "next_job": "next_job_node",
+                    "final_review": "email_review_node"
+                }
+            )
             
             graph.add_conditional_edges(
                 "email_review_node",
