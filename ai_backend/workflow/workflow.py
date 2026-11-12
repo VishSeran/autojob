@@ -727,7 +727,16 @@ class AgentWorkflow:
             }
             
             return {
-
+                
+                "messages": [
+                    AIMessage(
+                        content=(
+                            "The email has been approved and will be sent."
+                            if decision.get("decision") == "send"
+                            else "The application has been rejected."
+                        )
+                    )
+                ],
                 "email_review_response": decision,
                 "email_details": email_details
                 
@@ -783,9 +792,15 @@ class AgentWorkflow:
             )
 
             logger.info(f"Email sent successfully: {send_mail.id}")
+            final_response = (
+                "Your application email has been sent successfully."
+            )
 
             return {
                 
+                "messages": [
+                    AIMessage(content= final_response)
+                ],
                 "email_sent": True,
                 "final_response": f"Email sent successfully: {send_mail.id}",
                 "current_job_index": current_job_index + 1,
@@ -823,6 +838,12 @@ class AgentWorkflow:
             )
 
             return {
+                
+                "messages": [
+                    AIMessage(
+                        content="Application cancelled by user."
+                    )
+                ],
                 "final_response":
                     "Application cancelled by user.",
 
