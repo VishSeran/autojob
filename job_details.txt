@@ -2,14 +2,14 @@
 
 
                     job_title: Accountant
-                    company_name: MBD International (Pvt) Ltd
-                    image_number: 1569955
+                    company_name: RTA Sri Lanka
+                    image_number: 1570503
                     starting_date: Thu Nov 12 2026
-                    closing_date: Wed Nov 25 2026
-                    location: Colombo
-                    rid: 3
+                    closing_date: Thu Nov 26 2026
+                    location: Colombo 8
+                    rid: 2
                     ac: DEFZZZ
-                    jc: 0001569955
+                    jc: 0001570503
                     ec: DEFZZZ
-                    token: hOxIrhRAkTM7TcGTz0LY25t0
+                    token: bRctg2BL7zgLIM5vwbVMpI6Y
                 

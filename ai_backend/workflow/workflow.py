@@ -656,9 +656,21 @@ class AgentWorkflow:
                 raise ValueError("Job details are missing from current job")
             
             company_email = current_job['company_email']
+            email_details = None
             
             if not company_email:
-                raise ValueError("Company email is missing from job details")
+                logger.warning("Company email is missing from job details")
+                
+                return {
+                    "messages": [
+                        AIMessage(
+                            content="Company Email is not found"
+                        )  
+                    ],
+                    
+                    "email_details": email_details
+                    
+                }
             
             response = await self.cover_letter_agent.get_llm_response(
                 candidate_profile=candidate_details,
@@ -954,38 +966,48 @@ class AgentWorkflow:
             raise
         
     async def get_response_from_existing_workflow(self):
-            
-            try:
-                
-                if self.workflow is None:
-                    raise RuntimeError(
-                        "Workflow is not initialized"
-                    )
-                
-                if self.topjob_client_server_Source is None:
-                    raise RuntimeError(
-                        "Workflow dependencies are not initialized"
-                    )
-                    
-                saved_state = await self.get_latest_save_state()
-                logger.info(f"Saved state data: {saved_state}")
-                
-                response = await self.workflow.ainvoke(
-                    input=None,
-                    config=self.config
+
+        try:
+
+            if self.workflow is None:
+                raise RuntimeError(
+                    "Workflow is not initialized"
                 )
-                
-                logger.info(
-                "Workflow execution completed or interrupted"
+
+            if self.topjob_client_server_Source is None:
+                raise RuntimeError(
+                    "Workflow dependencies are not initialized"
                 )
-            
-                return response
-            
-            except Exception:
-                logger.exception(
-                    "Unexpected error in  executing workflow"
+
+            saved_state = await self.get_latest_save_state()
+
+            if saved_state is None:
+                raise RuntimeError(
+                    f"No existing workflow found for thread: {self.thread_id}"
                 )
-                raise
+
+            logger.info(
+                "Existing workflow found for thread %s. Next nodes: %s",
+                self.thread_id,
+                saved_state.next
+            )
+
+            response = await self.workflow.ainvoke(
+                input=None,
+                config=self.config
+            )
+
+            logger.info(
+                "Existing workflow execution completed or interrupted"
+            )
+
+            return response
+
+        except Exception:
+            logger.exception(
+                "Unexpected error in executing existing workflow"
+            )
+            raise
             
             
     async def get_latest_save_state(self):
