@@ -67,7 +67,7 @@ class GmailService:
             params:resend.Emails.SendParams = {
                 
                 "from": "Acme <onboarding@resend.dev>",
-                "to": [company_mail, reply_mail],
+                "to": [company_mail],
                 "reply_to":reply_mail,
                 "subject":subject,
                 "text":email_body

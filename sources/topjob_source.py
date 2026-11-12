@@ -3,7 +3,7 @@ import re
 
 import aiofiles
 from bs4 import BeautifulSoup
-from httpx import AsyncClient
+from httpx import AsyncClient, Timeout
 
 from configs.helper_functions import normalize_text
 from configs.logger import get_logger
@@ -323,10 +323,15 @@ class TopJobSource(JobSource):
                     "ec": ec_param,
                     "pg": "applicant/vacancybyfunctionalarea.jsp"
                 }
-                
+                timeout = Timeout(
+                    connect=20.0,
+                    read=30.0,
+                    write=30.0,
+                    pool=30.0
+                )
                 async with AsyncClient(
                     follow_redirects=True,
-                    timeout=20
+                    timeout=timeout
                 ) as client:
                     
                     response = await client.get(

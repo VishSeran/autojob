@@ -1,15 +1,15 @@
 
 
 
-                    job_title: Graphic Designer
-                    company_name: Econopack Industries (Pvt) Limited
-                    image_number: 1569656
+                    job_title: Accountant
+                    company_name: Herath Enterprises (Pvt) Ltd
+                    image_number: 1570844
                     starting_date: Thu Nov 12 2026
-                    closing_date: Tue Nov 24 2026
-                    location: Bandaragama
-                    rid: 8
+                    closing_date: Thu Nov 26 2026
+                    location: Delkada, Nugegoda
+                    rid: 7
                     ac: DEFZZZ
-                    jc: 0001569656
+                    jc: 0001570844
                     ec: DEFZZZ
-                    token: tw7zVK8+54tkRMWjfZ1YG8QE
+                    token: LD28mQ4opAfbwptgrMzo-Otb
                 
