@@ -9,7 +9,7 @@ VISION_MODEL = "qwen/qwen3.8-27b"
 BASE_CACHE = ((Path.cwd()).resolve() / "cache").resolve()
 BASE_DIR = (Path.cwd()).resolve()
 STORAGE_DIR =  (Path.cwd() / "storage" / "resumes").resolve()
-JOB_RELEVANCY_THRESHOLD = 60
+JOB_RELEVANCY_THRESHOLD = 40
 BUCKET_NAME = "resumes"
 
 TOPJOB_MCP_SERVER_HOST = "127.0.0.1"

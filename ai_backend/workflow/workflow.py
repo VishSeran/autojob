@@ -115,7 +115,15 @@ class AgentWorkflow:
                                         })
             
             graph.add_edge("next_job_node", "job_selection_node")
-            graph.add_edge("cover_letter_node", "email_review_node")
+            
+            graph.add_conditional_edges(
+                "cover_letter_node",
+                self.cover_letter_route,
+                {
+                    "next_job": "next_job_node",
+                    "final_review": "email_review_node"
+                }
+            )
             
             graph.add_conditional_edges(
                 "email_review_node",
@@ -706,6 +714,22 @@ class AgentWorkflow:
             logger.exception("Unexpected error in cover letter node")
             raise
         
+    
+    def cover_letter_route(self, state:WorkflowState):
+        
+        try:
+            
+            email_details = state.get("email_details")
+            
+            if email_details is None:
+                return "next_job"
+            
+            else:
+                return "final_review"
+            
+        except Exception:
+            logger.exception("Unexpected error in cover letter routing")
+            raise
         
     def final_review_node(self, state: WorkflowState):
         

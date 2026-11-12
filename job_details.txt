@@ -1,15 +1,15 @@
 
 
 
-                    job_title: Accountant
-                    company_name: RTA Sri Lanka
-                    image_number: 1570503
+                    job_title: Graphic Designer
+                    company_name: Econopack Industries (Pvt) Limited
+                    image_number: 1569656
                     starting_date: Thu Nov 12 2026
-                    closing_date: Thu Nov 26 2026
-                    location: Colombo 8
-                    rid: 2
+                    closing_date: Tue Nov 24 2026
+                    location: Bandaragama
+                    rid: 8
                     ac: DEFZZZ
-                    jc: 0001570503
+                    jc: 0001569656
                     ec: DEFZZZ
-                    token: bRctg2BL7zgLIM5vwbVMpI6Y
+                    token: tw7zVK8+54tkRMWjfZ1YG8QE
                 

@@ -46,6 +46,9 @@ class GmailService:
             
             user = self.user_repository.get_by_id(user_id)
             
+            if not user:
+                raise ValueError("User not found")
+            
             email_data = GmailModel(                    
                 user_id= user_id,
                 reply_email= user.email,
