@@ -207,6 +207,11 @@ class AgentWorkflow:
                 logger.info("No relevant jobs found")
 
                 return {
+                    "messages": [
+                        AIMessage(
+                            content= "unfortunetly I didn't find any job related to your position"
+                        )  
+                    ],
                     "source": "topjob",
                     "topjob_summary": [],
                     "topjob_images_urls": {},
@@ -344,6 +349,11 @@ class AgentWorkflow:
                 logger.info("workflow - Topjob- job listing is finished")
 
             return {
+                "messages": [
+                    AIMessage(
+                        content= "Processing completed. Got the complete details of job vacancies"
+                    )  
+                ],
                 "complete_job_details": complete_job_details}
 
         except Exception:
@@ -407,6 +417,11 @@ class AgentWorkflow:
             logger.info(f"response: {response}")
 
             return {
+                "messages": [
+                    AIMessage(
+                        content= "Your resume analyzed successfully"
+                    )  
+                ],
                 "current_resume": resume_data,
                 "profile_data": response
             }
@@ -499,7 +514,11 @@ class AgentWorkflow:
             logger.info("workflow - Final job relevancy results have fetched")
 
             return {
-                
+                "messages": [
+                    AIMessage(
+                        content=f"""Relevant jobs founded successfully. Your relevancy threshold value is {JOB_RELEVANCY_THRESHOLD}"""
+                    )  
+                ],
                 "relevant_jobs_list": job_relevancy,
                 "rejectedjobs_lits": job_rejected
             }
@@ -511,8 +530,6 @@ class AgentWorkflow:
 
     def job_selection_node(self, state: WorkflowState):
 
-        
-            
         relevant_jobs_list = state.get("relevant_jobs_list", [])
         current_job_index = state.get("current_job_index", 0)
         
@@ -597,7 +614,11 @@ class AgentWorkflow:
                 ]
             
             return {
-                
+                "messages": [
+                    AIMessage(
+                        content= "Returning to select your next job"
+                    )  
+                ],
                 "rejected_jobs": rejected_jobs,
                 "current_job_index": current_job_index + 1,
                 "user_decision": None,
@@ -634,7 +655,7 @@ class AgentWorkflow:
             if not job_details:
                 raise ValueError("Job details are missing from current job")
             
-            company_email = job_details
+            company_email = current_job['company_email']
             
             if not company_email:
                 raise ValueError("Company email is missing from job details")
@@ -655,6 +676,13 @@ class AgentWorkflow:
             }
             
             return {
+                "messages": [
+                    AIMessage(
+                        content=f"""
+                        Your cover letter for {job_details.get("title", "")} position:
+                        \n\n {email_details}"""
+                    )  
+                ],
                 "email_details": email_details
             }
         
