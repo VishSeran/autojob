@@ -1,8 +1,10 @@
 
 import uuid
-from typing import TypedDict
+from typing import Annotated, TypedDict
 
 from langchain_core.documents import Document
+from langchain_core.messages import AnyMessage
+from langgraph.graph.message import add_messages
 
 from schema.job_schema import Job
 from schema.resume_schema import ResumeSchema
@@ -11,9 +13,11 @@ from schema.topjob_summary_schema import TopJobSummary
 
 class WorkflowState(TypedDict):
     
+    messages: Annotated[list[AnyMessage], add_messages]
+    
     query: str
     user_id: uuid.UUID
-    
+     
     source: str
     keyword: str
     location: str | None

@@ -2,6 +2,7 @@ import asyncio
 import uuid
 
 from langgraph.graph import END, START, StateGraph
+from langchain_core.messages import AIMessage
 from langgraph.types import Command, interrupt
 from sqlalchemy.orm import Session
 
@@ -157,13 +158,25 @@ class AgentWorkflow:
             if not query:
                 final_answer = "It seems like you have no questions my friend."
 
-                return {"final_response": final_answer}
+                return {
+                    "messages": [AIMessage(content=final_answer)],
+                    "final_response": final_answer
+                }
 
             response: QuerySchema = await self.query_handler_agent.get_response(query)
             logger.info("workflow - query response is fetched")
             logger.info(f"response= \nkeyword: {response.keyword}\nlocation:{response.location}\ncategory:{response.category}\nno of jobs: {response.number_of_jobs}")
 
             return {
+                
+                "messages": [
+                    AIMessage(
+                        content=(
+                            f"I'll look for {response.keyword} positions "
+                            f"in {response.location or 'any location'}."
+                        )
+                    )
+                ],
                 "keyword": response.keyword,
                 "location": response.location,
                 "job_field": response.category,
@@ -194,6 +207,11 @@ class AgentWorkflow:
                 logger.info("No relevant jobs found")
 
                 return {
+                    "messages": [
+                        AIMessage(
+                            content= "unfortunetly I didn't find any job related to your position"
+                        )  
+                    ],
                     "source": "topjob",
                     "topjob_summary": [],
                     "topjob_images_urls": {},
@@ -208,6 +226,11 @@ class AgentWorkflow:
             logger.info("workflow - Relavant jobs extracted")
 
             return {
+                "messages": [
+                  AIMessage(
+                      content=f"""I found {len(job_list)} jobs for your interesting position"""
+                  )  
+                ],
                 "source": "topjob",
                 "topjob_summary": job_list,
                 "topjob_images_urls": relavant_job_images,
@@ -220,7 +243,7 @@ class AgentWorkflow:
     async def image_data_handler_node(self, state: WorkflowState):
 
         try:
-            source = state.get("source", "")
+            
             results = {}
    
             job_images_urls = state.get("topjob_images_urls", {})
@@ -325,7 +348,13 @@ class AgentWorkflow:
 
                 logger.info("workflow - Topjob- job listing is finished")
 
-            return {"complete_job_details": complete_job_details}
+            return {
+                "messages": [
+                    AIMessage(
+                        content= "Processing completed. Got the complete details of job vacancies"
+                    )  
+                ],
+                "complete_job_details": complete_job_details}
 
         except Exception:
             logger.exception("Unexpected error in get full job summary")
@@ -388,6 +417,11 @@ class AgentWorkflow:
             logger.info(f"response: {response}")
 
             return {
+                "messages": [
+                    AIMessage(
+                        content= "Your resume analyzed successfully"
+                    )  
+                ],
                 "current_resume": resume_data,
                 "profile_data": response
             }
@@ -480,7 +514,11 @@ class AgentWorkflow:
             logger.info("workflow - Final job relevancy results have fetched")
 
             return {
-                
+                "messages": [
+                    AIMessage(
+                        content=f"""Relevant jobs founded successfully. Your relevancy threshold value is {JOB_RELEVANCY_THRESHOLD}"""
+                    )  
+                ],
                 "relevant_jobs_list": job_relevancy,
                 "rejectedjobs_lits": job_rejected
             }
@@ -492,8 +530,6 @@ class AgentWorkflow:
 
     def job_selection_node(self, state: WorkflowState):
 
-        
-            
         relevant_jobs_list = state.get("relevant_jobs_list", [])
         current_job_index = state.get("current_job_index", 0)
         
@@ -578,7 +614,11 @@ class AgentWorkflow:
                 ]
             
             return {
-                
+                "messages": [
+                    AIMessage(
+                        content= "Returning to select your next job"
+                    )  
+                ],
                 "rejected_jobs": rejected_jobs,
                 "current_job_index": current_job_index + 1,
                 "user_decision": None,
@@ -615,10 +655,22 @@ class AgentWorkflow:
             if not job_details:
                 raise ValueError("Job details are missing from current job")
             
-            company_email = job_details
+            company_email = current_job['company_email']
+            email_details = None
             
             if not company_email:
-                raise ValueError("Company email is missing from job details")
+                logger.warning("Company email is missing from job details")
+                
+                return {
+                    "messages": [
+                        AIMessage(
+                            content="Company Email is not found"
+                        )  
+                    ],
+                    
+                    "email_details": email_details
+                    
+                }
             
             response = await self.cover_letter_agent.get_llm_response(
                 candidate_profile=candidate_details,
@@ -636,6 +688,13 @@ class AgentWorkflow:
             }
             
             return {
+                "messages": [
+                    AIMessage(
+                        content=f"""
+                        Your cover letter for {job_details.get("title", "")} position:
+                        \n\n {email_details}"""
+                    )  
+                ],
                 "email_details": email_details
             }
         
@@ -680,7 +739,16 @@ class AgentWorkflow:
             }
             
             return {
-
+                
+                "messages": [
+                    AIMessage(
+                        content=(
+                            "The email has been approved and will be sent."
+                            if decision.get("decision") == "send"
+                            else "The application has been rejected."
+                        )
+                    )
+                ],
                 "email_review_response": decision,
                 "email_details": email_details
                 
@@ -736,9 +804,15 @@ class AgentWorkflow:
             )
 
             logger.info(f"Email sent successfully: {send_mail.id}")
+            final_response = (
+                "Your application email has been sent successfully."
+            )
 
             return {
                 
+                "messages": [
+                    AIMessage(content= final_response)
+                ],
                 "email_sent": True,
                 "final_response": f"Email sent successfully: {send_mail.id}",
                 "current_job_index": current_job_index + 1,
@@ -776,6 +850,12 @@ class AgentWorkflow:
             )
 
             return {
+                
+                "messages": [
+                    AIMessage(
+                        content="Application cancelled by user."
+                    )
+                ],
                 "final_response":
                     "Application cancelled by user.",
 
@@ -886,38 +966,48 @@ class AgentWorkflow:
             raise
         
     async def get_response_from_existing_workflow(self):
-            
-            try:
-                
-                if self.workflow is None:
-                    raise RuntimeError(
-                        "Workflow is not initialized"
-                    )
-                
-                if self.topjob_client_server_Source is None:
-                    raise RuntimeError(
-                        "Workflow dependencies are not initialized"
-                    )
-                    
-                saved_state = await self.get_latest_save_state()
-                logger.info(f"Saved state data: {saved_state}")
-                
-                response = await self.workflow.ainvoke(
-                    input=None,
-                    config=self.config
+
+        try:
+
+            if self.workflow is None:
+                raise RuntimeError(
+                    "Workflow is not initialized"
                 )
-                
-                logger.info(
-                "Workflow execution completed or interrupted"
+
+            if self.topjob_client_server_Source is None:
+                raise RuntimeError(
+                    "Workflow dependencies are not initialized"
                 )
-            
-                return response
-            
-            except Exception:
-                logger.exception(
-                    "Unexpected error in  executing workflow"
+
+            saved_state = await self.get_latest_save_state()
+
+            if saved_state is None:
+                raise RuntimeError(
+                    f"No existing workflow found for thread: {self.thread_id}"
                 )
-                raise
+
+            logger.info(
+                "Existing workflow found for thread %s. Next nodes: %s",
+                self.thread_id,
+                saved_state.next
+            )
+
+            response = await self.workflow.ainvoke(
+                input=None,
+                config=self.config
+            )
+
+            logger.info(
+                "Existing workflow execution completed or interrupted"
+            )
+
+            return response
+
+        except Exception:
+            logger.exception(
+                "Unexpected error in executing existing workflow"
+            )
+            raise
             
             
     async def get_latest_save_state(self):

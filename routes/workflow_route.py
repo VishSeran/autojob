@@ -144,7 +144,7 @@ async def continue_workflow(
         "response": response
     }
     
-@workflow_router.post("/continue/resume")   
+@workflow_router.post("/jobselect/resume")   
 async def interrupt_resume(
     data: JobSelectionInterrupt,
     request:Request,
@@ -178,7 +178,7 @@ async def interrupt_resume(
         "response": response
     }
     
-@workflow_router.post("/continue/finalize")
+@workflow_router.post("/sendmail/resume")
 async def final_response_interrupt(
     request: Request,
     data: SendMailInterrupt,
