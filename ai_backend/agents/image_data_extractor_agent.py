@@ -56,11 +56,11 @@ class ImageDataExtractorAgent:
             self.system_prompt = """
                 You are a job advertisement image extraction agent.
 
-                Analyze all provided job advertisement images.
+                Analyze all provided job advertisement images and extract ONLY information
+                that is visibly present in the images.
 
-                Extract only information visibly present in the images.
+                Extract the following fields:
 
-                Extract:
                 - job_title
                 - company_email
                 - company_contact
@@ -69,7 +69,52 @@ class ImageDataExtractorAgent:
                 - requirements
                 - salary
 
-                Do not invent or infer missing information.
+                IMPORTANT DEFINITION OF company_email:
+
+                "company_email" does NOT mean any general company email address.
+
+                For this task, "company_email" specifically means the email address that
+                the employer instructs candidates to use for submitting their CV/resume
+                or applying for the advertised job.
+
+                For example, if the advertisement says:
+
+                    "Send your CV to careers@abc.com"
+
+                then:
+                    company_email = "careers@abc.com"
+
+                If it says:
+
+                    "Interested candidates should email their CV to hr@abc.com"
+
+                then:
+                    company_email = "hr@abc.com"
+
+                If it says:
+
+                    "Please send your resume to jobs@abc.com"
+
+                then:
+                    company_email = "jobs@abc.com"
+
+                DO NOT use a general company email address such as:
+                - info@company.com
+                - contact@company.com
+                - support@company.com
+
+                unless the advertisement explicitly instructs candidates to send their
+                CV/resume or job application to that address.
+
+                If multiple email addresses are visible, select the email address that is
+                specifically associated with submitting the CV/resume or job application.
+
+                If an email address is present but its purpose is unclear, do not assume
+                that it is the application email. Return null.
+
+                Do not invent, infer, or construct an email address.
+
+                Extract only information visibly present in the advertisement images.
 
                 If a field is unavailable, return null.
                 """
