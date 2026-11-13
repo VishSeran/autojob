@@ -1,15 +1,27 @@
 
 
 
-                    job_title: Accountant
-                    company_name: Herath Enterprises (Pvt) Ltd
-                    image_number: 1570844
-                    starting_date: Thu Nov 12 2026
-                    closing_date: Thu Nov 26 2026
-                    location: Delkada, Nugegoda
-                    rid: 7
+                    job_title: AI Engineer (Application Development Focus)
+                    company_name: Asiawise Lanka (Pvt) Ltd
+                    image_number: 1567934
+                    starting_date: Thu Nov 05 2026
+                    closing_date: Sat Dec 05 2026
+                    location: All island
+                    rid: 108
                     ac: DEFZZZ
-                    jc: 0001570844
+                    jc: 0001567934
                     ec: DEFZZZ
-                    token: LD28mQ4opAfbwptgrMzo-Otb
+                    token: wOf3LMbsqIAHEUByGqYuymN9
+                
+                    job_title: Executive - BI & AI Engineer
+                    company_name: Dart Global Logistics
+                    image_number: 1567720
+                    starting_date: Wed Nov 04 2026
+                    closing_date: Wed Nov 18 2026
+                    location: Colombo
+                    rid: 114
+                    ac: DEFZZZ
+                    jc: 0001567720
+                    ec: DEFZZZ
+                    token: wOf3LMbsqIAHEUByGqYuymN9
                 

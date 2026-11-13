@@ -2,7 +2,7 @@
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy import DateTime, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -57,7 +57,7 @@ class GmailModel(Base):
     
     email_body: Mapped [str] = mapped_column (
         
-        String(255),
+        Text,
         nullable=False
     )
     

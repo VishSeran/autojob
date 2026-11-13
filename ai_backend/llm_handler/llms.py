@@ -26,7 +26,7 @@ class LLMHandler:
             
             self.llm = ChatOpenAI(
                 model=model,
-                api_key=openai_api,
+                api_key=SecretStr(openai_api),
                 reasoning_effort=reasoning_effort
             )
             
