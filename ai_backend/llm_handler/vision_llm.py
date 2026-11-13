@@ -1,7 +1,10 @@
 import os
 
 import dotenv
-from langchain_groq import ChatGroq
+from configs.settings import settings
+from langchain_openai import ChatOpenAI
+
+from pydantic import SecretStr
 
 from configs.configurations import VISION_MODEL
 from configs.logger import get_logger
@@ -10,22 +13,20 @@ dotenv.load_dotenv()
 logger = get_logger("vision-llm-handler")
 class VisionLLmHandler:
     
-    def __init__(self, vision_model = VISION_MODEL):
+    def __init__(self, model="gpt-5.4-mini", reasoning_effort: str = "medium"):
         
         
         try:
             
-            groq_api_key = os.getenv("GROQ_API")
+            openai_api = settings.OPENAI_API
+                        
+            if not openai_api:
+                raise ValueError("Groq api key is missing")
             
-            if not groq_api_key:
-                raise ValueError("Api key is missing")
-            
-            self.vision_llm = ChatGroq(
-                model=vision_model,
-                temperature=0.2,
-                api_key=groq_api_key,
-                max_tokens=8000,
-                verbose=True
+            self.vision_llm = ChatOpenAI(
+                model=model,
+                api_key=SecretStr(openai_api),
+                reasoning_effort=reasoning_effort
             )
             
             logger.info("vision model has initialized")

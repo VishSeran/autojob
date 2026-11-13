@@ -7,6 +7,7 @@ class Settings(BaseSettings):
 
     DATABASE_URL:str = Field(validation_alias="DATABASE_URL")
     groq_api: str
+    OPENAI_API: str
     session_secret: str
     TOKEN_ENCRYPTION_KEY:str
     CLIENT_SECRET:str

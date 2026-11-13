@@ -2,6 +2,8 @@ import os
 
 import dotenv
 from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
+from configs.settings import settings
 from pydantic import SecretStr
 
 from configs.configurations import GROQ_MODEL
@@ -13,21 +15,19 @@ dotenv.load_dotenv()
 
 class LLMHandler:
     
-    def __init__(self, temperature:float = 0.2):
+    def __init__(self, model="gpt-5.4-mini", reasoning_effort: str = "medium"):
         
         try:
             
-            groq_api = os.getenv("GROQ_API")
+            openai_api = settings.OPENAI_API
             
-            if not groq_api:
+            if not openai_api:
                 raise ValueError("Groq api key is missing")
             
-            self.llm = ChatGroq (
-                model=GROQ_MODEL,
-                verbose=True,
-                api_key=SecretStr(groq_api),
-                temperature=temperature,
-                max_tokens=8000,
+            self.llm = ChatOpenAI(
+                model=model,
+                api_key=SecretStr(openai_api),
+                reasoning_effort=reasoning_effort
             )
             
             logger.info("LLM is initialized success")
